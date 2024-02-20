@@ -1,0 +1,297 @@
+id,path,name,dataset,diagnosis,quality,sr,channels,length,bits,label_1
+0,..\data\human\test\a0001.wav,a0001,test,MVP,1,2000,1,71332,16,1
+1,..\data\human\test\a0002.wav,a0002,test,MVP,1,2000,1,41657,16,1
+2,..\data\human\test\a0003.wav,a0003,test,MVP,1,2000,1,61440,16,1
+3,..\data\human\test\a0004.wav,a0004,test,Benign,1,2000,1,71193,16,1
+4,..\data\human\test\a0005.wav,a0005,test,Benign,1,2000,1,71332,16,1
+5,..\data\human\test\a0006.wav,a0006,test,AD,0,2000,1,41518,16,1
+6,..\data\human\test\a0007.wav,a0007,test,Normal ,1,2000,1,71332,16,0
+7,..\data\human\test\a0008.wav,a0008,test,MVP,0,2000,1,71611,16,1
+8,..\data\human\test\a0009.wav,a0009,test,Normal ,1,2000,1,71611,16,0
+9,..\data\human\test\a0010.wav,a0010,test,Benign,1,2000,1,71472,16,1
+10,..\data\human\test\a0011.wav,a0011,test,Normal ,1,2000,1,71193,16,0
+11,..\data\human\test\a0012.wav,a0012,test,Normal ,1,2000,1,61719,16,0
+12,..\data\human\test\a0013.wav,a0013,test,MVP,1,2000,1,71332,16,1
+13,..\data\human\test\a0014.wav,a0014,test,MVP,1,2000,1,71472,16,1
+14,..\data\human\test\a0015.wav,a0015,test,Benign,1,2000,1,71472,16,1
+15,..\data\human\test\a0016.wav,a0016,test,Normal ,1,2000,1,61580,16,0
+16,..\data\human\test\a0017.wav,a0017,test,Benign,1,2000,1,71332,16,1
+17,..\data\human\test\a0018.wav,a0018,test,Benign,1,2000,1,41796,16,1
+18,..\data\human\test\a0019.wav,a0019,test,Normal ,1,2000,1,61719,16,0
+19,..\data\human\test\a0020.wav,a0020,test,MVP,1,2000,1,71332,16,1
+20,..\data\human\test\a0021.wav,a0021,test,MVP,1,2000,1,71193,16,1
+21,..\data\human\test\a0022.wav,a0022,test,MVP,1,2000,1,72307,16,1
+22,..\data\human\test\a0023.wav,a0023,test,MVP,1,2000,1,61162,16,1
+23,..\data\human\test\a0024.wav,a0024,test,MVP,1,2000,1,41378,16,1
+24,..\data\human\test\a0025.wav,a0025,test,Normal ,1,2000,1,62276,16,0
+25,..\data\human\test\a0026.wav,a0026,test,Benign,1,2000,1,71193,16,1
+26,..\data\human\test\a0027.wav,a0027,test,Normal ,1,2000,1,62276,16,0
+27,..\data\human\test\a0028.wav,a0028,test,Normal ,1,2000,1,61719,16,0
+28,..\data\human\test\a0029.wav,a0029,test,Normal ,1,2000,1,61440,16,0
+29,..\data\human\test\a0030.wav,a0030,test,MVP,1,2000,1,72447,16,1
+30,..\data\human\test\a0031.wav,a0031,test,MVP,1,2000,1,71193,16,1
+31,..\data\human\test\a0032.wav,a0032,test,Normal ,1,2000,1,71332,16,0
+32,..\data\human\test\a0033.wav,a0033,test,MVP,1,2000,1,71332,16,1
+33,..\data\human\test\a0034.wav,a0034,test,Benign,1,2000,1,61162,16,1
+34,..\data\human\test\a0035.wav,a0035,test,Normal ,1,2000,1,57965,16,0
+35,..\data\human\test\a0036.wav,a0036,test,MVP,1,2000,1,71889,16,1
+36,..\data\human\test\a0037.wav,a0037,test,MPC,1,2000,1,71472,16,1
+37,..\data\human\test\a0038.wav,a0038,test,Normal ,1,2000,1,69260,16,0
+38,..\data\human\test\a0039.wav,a0039,test,Benign,1,2000,1,61440,16,1
+39,..\data\human\test\a0040.wav,a0040,test,MVP,1,2000,1,71332,16,1
+40,..\data\human\test\a0041.wav,a0041,test,MVP,1,2000,1,70218,16,1
+41,..\data\human\test\a0042.wav,a0042,test,MPC,1,2000,1,72307,16,1
+42,..\data\human\test\a0043.wav,a0043,test,Benign,1,2000,1,71193,16,1
+43,..\data\human\test\a0044.wav,a0044,test,AD,1,2000,1,61301,16,1
+44,..\data\human\test\a0045.wav,a0045,test,MVP,1,2000,1,71750,16,1
+45,..\data\human\test\a0046.wav,a0046,test,Benign,1,2000,1,71472,16,1
+46,..\data\human\test\a0047.wav,a0047,test,MVP,1,2000,1,71193,16,1
+47,..\data\human\test\a0048.wav,a0048,test,MPC,1,2000,1,72447,16,1
+48,..\data\human\test\a0049.wav,a0049,test,Normal ,1,2000,1,61719,16,0
+49,..\data\human\test\a0050.wav,a0050,test,Normal ,1,2000,1,61301,16,0
+50,..\data\human\test\a0051.wav,a0051,test,MVP,0,2000,1,71193,16,1
+51,..\data\human\test\a0052.wav,a0052,test,Benign,1,2000,1,71472,16,1
+52,..\data\human\test\a0053.wav,a0053,test,Normal ,1,2000,1,71750,16,0
+53,..\data\human\test\a0054.wav,a0054,test,Benign,1,2000,1,71332,16,1
+54,..\data\human\test\a0055.wav,a0055,test,Normal ,1,2000,1,71332,16,0
+55,..\data\human\test\a0056.wav,a0056,test,Benign,1,2000,1,61580,16,1
+56,..\data\human\test\a0057.wav,a0057,test,MPC,1,2000,1,71889,16,1
+57,..\data\human\test\a0068.wav,a0068,test,Normal ,1,2000,1,71472,16,0
+58,..\data\human\test\a0069.wav,a0069,test,Normal ,1,2000,1,61998,16,0
+59,..\data\human\test\a0070.wav,a0070,test,Normal ,1,2000,1,61580,16,0
+60,..\data\human\test\a0071.wav,a0071,test,Normal ,1,2000,1,59259,16,0
+61,..\data\human\test\a0080.wav,a0080,test,Normal ,1,2000,1,61998,16,0
+62,..\data\human\test\a0081.wav,a0081,test,Normal ,1,2000,1,71332,16,0
+63,..\data\human\test\a0085.wav,a0085,test,Normal ,1,2000,1,61719,16,0
+64,..\data\human\test\a0086.wav,a0086,test,Normal ,1,2000,1,72447,16,0
+65,..\data\human\test\a0088.wav,a0088,test,Normal ,1,2000,1,72029,16,0
+66,..\data\human\test\a0091.wav,a0091,test,Normal ,1,2000,1,61301,16,0
+67,..\data\human\test\a0093.wav,a0093,test,Normal ,1,2000,1,61440,16,0
+68,..\data\human\test\a0094.wav,a0094,test,Normal ,1,2000,1,71332,16,0
+69,..\data\human\test\a0102.wav,a0102,test,Normal ,1,2000,1,71193,16,0
+70,..\data\human\test\a0105.wav,a0105,test,Normal ,1,2000,1,70485,16,0
+71,..\data\human\test\a0106.wav,a0106,test,Normal ,1,2000,1,71332,16,0
+72,..\data\human\test\a0108.wav,a0108,test,Normal ,1,2000,1,64969,16,0
+73,..\data\human\test\a0109.wav,a0109,test,Normal ,1,2000,1,61301,16,0
+74,..\data\human\test\a0118.wav,a0118,test,Normal ,1,2000,1,61719,16,0
+75,..\data\human\test\a0125.wav,a0125,test,Normal ,1,2000,1,71332,16,0
+76,..\data\human\test\a0127.wav,a0127,test,Normal ,1,2000,1,71193,16,0
+77,..\data\human\test\a0129.wav,a0129,test,Normal ,1,2000,1,72586,16,0
+78,..\data\human\test\a0136.wav,a0136,test,Normal ,1,2000,1,61580,16,0
+79,..\data\human\test\a0139.wav,a0139,test,Normal ,1,2000,1,62276,16,0
+80,..\data\human\test\b0001.wav,b0001,test,Normal,1,2000,1,16000,16,0
+81,..\data\human\test\b0002.wav,b0002,test,Normal,1,2000,1,16000,16,0
+82,..\data\human\test\b0003.wav,b0003,test,Normal,1,2000,1,16000,16,0
+83,..\data\human\test\b0004.wav,b0004,test,Normal,1,2000,1,16000,16,0
+84,..\data\human\test\b0005.wav,b0005,test,Normal,1,2000,1,16000,16,0
+85,..\data\human\test\b0006.wav,b0006,test,Normal,1,2000,1,16000,16,0
+86,..\data\human\test\b0007.wav,b0007,test,Normal,0,2000,1,16000,16,0
+87,..\data\human\test\b0008.wav,b0008,test,CAD,1,2000,1,16000,16,1
+88,..\data\human\test\b0009.wav,b0009,test,Normal,1,2000,1,16000,16,0
+89,..\data\human\test\b0010.wav,b0010,test,Normal,1,2000,1,16000,16,0
+90,..\data\human\test\b0011.wav,b0011,test,Normal,1,2000,1,16000,16,0
+91,..\data\human\test\b0012.wav,b0012,test,Normal,1,2000,1,16000,16,0
+92,..\data\human\test\b0013.wav,b0013,test,CAD,1,2000,1,16000,16,1
+93,..\data\human\test\b0014.wav,b0014,test,Normal,1,2000,1,16000,16,0
+94,..\data\human\test\b0015.wav,b0015,test,Normal,1,2000,1,16000,16,0
+95,..\data\human\test\b0016.wav,b0016,test,CAD,1,2000,1,16000,16,1
+96,..\data\human\test\b0017.wav,b0017,test,Normal,1,2000,1,16000,16,0
+97,..\data\human\test\b0018.wav,b0018,test,CAD,1,2000,1,16000,16,1
+98,..\data\human\test\b0019.wav,b0019,test,Normal,1,2000,1,16000,16,0
+99,..\data\human\test\b0020.wav,b0020,test,Normal,1,2000,1,16000,16,0
+100,..\data\human\test\b0021.wav,b0021,test,Normal,1,2000,1,16000,16,0
+101,..\data\human\test\b0022.wav,b0022,test,CAD,0,2000,1,16000,16,1
+102,..\data\human\test\b0023.wav,b0023,test,CAD,1,2000,1,16000,16,1
+103,..\data\human\test\b0024.wav,b0024,test,Normal,1,2000,1,16000,16,0
+104,..\data\human\test\b0025.wav,b0025,test,Normal,1,2000,1,16000,16,0
+105,..\data\human\test\b0026.wav,b0026,test,Normal,1,2000,1,16000,16,0
+106,..\data\human\test\b0027.wav,b0027,test,Normal,1,2000,1,16000,16,0
+107,..\data\human\test\b0028.wav,b0028,test,Normal,1,2000,1,16000,16,0
+108,..\data\human\test\b0029.wav,b0029,test,Normal,1,2000,1,16000,16,0
+109,..\data\human\test\b0030.wav,b0030,test,CAD,1,2000,1,16000,16,1
+110,..\data\human\test\b0032.wav,b0032,test,CAD,0,2000,1,16000,16,1
+111,..\data\human\test\b0034.wav,b0034,test,Normal,0,2000,1,16000,16,0
+112,..\data\human\test\b0035.wav,b0035,test,Normal,1,2000,1,16000,16,0
+113,..\data\human\test\b0036.wav,b0036,test,Normal,1,2000,1,16000,16,0
+114,..\data\human\test\b0038.wav,b0038,test,Normal,1,2000,1,16000,16,0
+115,..\data\human\test\b0039.wav,b0039,test,Normal,1,2000,1,16000,16,0
+116,..\data\human\test\b0040.wav,b0040,test,CAD,1,2000,1,16000,16,1
+117,..\data\human\test\b0041.wav,b0041,test,CAD,1,2000,1,16000,16,1
+118,..\data\human\test\b0042.wav,b0042,test,Normal,1,2000,1,16000,16,0
+119,..\data\human\test\b0043.wav,b0043,test,CAD,1,2000,1,16000,16,1
+120,..\data\human\test\b0044.wav,b0044,test,Normal,1,2000,1,16000,16,0
+121,..\data\human\test\b0045.wav,b0045,test,Normal,0,2000,1,16000,16,0
+122,..\data\human\test\b0046.wav,b0046,test,CAD,1,2000,1,16000,16,1
+123,..\data\human\test\b0047.wav,b0047,test,Normal,1,2000,1,16000,16,0
+124,..\data\human\test\b0048.wav,b0048,test,CAD,1,2000,1,16000,16,1
+125,..\data\human\test\b0049.wav,b0049,test,Normal,1,2000,1,16000,16,0
+126,..\data\human\test\b0050.wav,b0050,test,Normal,0,2000,1,16000,16,0
+127,..\data\human\test\b0051.wav,b0051,test,Normal,1,2000,1,16000,16,0
+128,..\data\human\test\b0052.wav,b0052,test,Normal,1,2000,1,16000,16,0
+129,..\data\human\test\b0053.wav,b0053,test,Normal,1,2000,1,16000,16,0
+130,..\data\human\test\b0054.wav,b0054,test,CAD,1,2000,1,16000,16,1
+131,..\data\human\test\b0055.wav,b0055,test,Normal,1,2000,1,16000,16,0
+132,..\data\human\test\b0056.wav,b0056,test,Normal,1,2000,1,16000,16,0
+133,..\data\human\test\b0057.wav,b0057,test,CAD,0,2000,1,16000,16,1
+134,..\data\human\test\b0058.wav,b0058,test,Normal,1,2000,1,16000,16,0
+135,..\data\human\test\b0059.wav,b0059,test,Normal,1,2000,1,16000,16,0
+136,..\data\human\test\b0060.wav,b0060,test,Normal,1,2000,1,16000,16,0
+137,..\data\human\test\b0061.wav,b0061,test,Normal,1,2000,1,16000,16,0
+138,..\data\human\test\b0062.wav,b0062,test,Normal,0,2000,1,16000,16,0
+139,..\data\human\test\b0063.wav,b0063,test,CAD,1,2000,1,16000,16,1
+140,..\data\human\test\b0064.wav,b0064,test,Normal,1,2000,1,16000,16,0
+141,..\data\human\test\b0065.wav,b0065,test,Normal,1,2000,1,16000,16,0
+142,..\data\human\test\b0066.wav,b0066,test,Normal,1,2000,1,16000,16,0
+143,..\data\human\test\b0067.wav,b0067,test,Normal,1,2000,1,16000,16,0
+144,..\data\human\test\b0068.wav,b0068,test,CAD,0,2000,1,16000,16,1
+145,..\data\human\test\b0077.wav,b0077,test,CAD,0,2000,1,16000,16,1
+146,..\data\human\test\b0081.wav,b0081,test,CAD,1,2000,1,16000,16,1
+147,..\data\human\test\b0086.wav,b0086,test,CAD,1,2000,1,16000,16,1
+148,..\data\human\test\b0096.wav,b0096,test,CAD,1,2000,1,16000,16,1
+149,..\data\human\test\b0106.wav,b0106,test,CAD,1,2000,1,16000,16,1
+150,..\data\human\test\b0117.wav,b0117,test,CAD,1,2000,1,16000,16,1
+151,..\data\human\test\b0120.wav,b0120,test,CAD,0,2000,1,16000,16,1
+152,..\data\human\test\b0130.wav,b0130,test,CAD,0,2000,1,16000,16,1
+153,..\data\human\test\b0136.wav,b0136,test,CAD,1,2000,1,16000,16,1
+154,..\data\human\test\b0137.wav,b0137,test,CAD,1,2000,1,16000,16,1
+155,..\data\human\test\b0140.wav,b0140,test,CAD,1,2000,1,16000,16,1
+156,..\data\human\test\b0148.wav,b0148,test,CAD,0,2000,1,16000,16,1
+157,..\data\human\test\b0155.wav,b0155,test,CAD,0,2000,1,16000,16,1
+158,..\data\human\test\b0159.wav,b0159,test,CAD,0,2000,1,16000,16,1
+159,..\data\human\test\b0164.wav,b0164,test,CAD,1,2000,1,16000,16,1
+160,..\data\human\test\b0171.wav,b0171,test,CAD,1,2000,1,16000,16,1
+161,..\data\human\test\b0176.wav,b0176,test,CAD,0,2000,1,16000,16,1
+162,..\data\human\test\b0190.wav,b0190,test,CAD,1,2000,1,16000,16,1
+163,..\data\human\test\b0197.wav,b0197,test,CAD,1,2000,1,16000,16,1
+164,..\data\human\test\b0208.wav,b0208,test,CAD,1,2000,1,16000,16,1
+165,..\data\human\test\b0221.wav,b0221,test,CAD,1,2000,1,16000,16,1
+166,..\data\human\test\b0224.wav,b0224,test,CAD,0,2000,1,16000,16,1
+167,..\data\human\test\b0232.wav,b0232,test,CAD,0,2000,1,16000,16,1
+168,..\data\human\test\b0233.wav,b0233,test,CAD,1,2000,1,16000,16,1
+169,..\data\human\test\b0235.wav,b0235,test,CAD,1,2000,1,16000,16,1
+170,..\data\human\test\b0238.wav,b0238,test,CAD,1,2000,1,16000,16,1
+171,..\data\human\test\b0239.wav,b0239,test,CAD,1,2000,1,16000,16,1
+172,..\data\human\test\b0242.wav,b0242,test,CAD,1,2000,1,16000,16,1
+173,..\data\human\test\b0243.wav,b0243,test,CAD,1,2000,1,16000,16,1
+174,..\data\human\test\b0248.wav,b0248,test,CAD,1,2000,1,16000,16,1
+175,..\data\human\test\c0001.wav,c0001,test,MR,1,2000,1,45446,16,1
+176,..\data\human\test\c0002.wav,c0002,test,MR,1,2000,1,23153,16,1
+177,..\data\human\test\c0003.wav,c0003,test,Controls,1,2000,1,65295,16,0
+178,..\data\human\test\c0004.wav,c0004,test,MR,1,2000,1,114945,16,1
+179,..\data\human\test\c0006.wav,c0006,test,Controls,1,2000,1,58361,16,0
+180,..\data\human\test\c0007.wav,c0007,test,Controls,1,2000,1,63310,16,0
+181,..\data\human\test\c0031.wav,c0031,test,MR,1,2000,1,243997,16,1
+182,..\data\human\test\d0002.wav,d0002,test,Pathologic,1,2000,1,21693,16,1
+183,..\data\human\test\d0003.wav,d0003,test,Pathologic,1,2000,1,22080,16,1
+184,..\data\human\test\d0004.wav,d0004,test,Pathologic,1,2000,1,19028,16,1
+185,..\data\human\test\d0005.wav,d0005,test,Normal: MARS500,1,2000,1,18835,16,0
+186,..\data\human\test\d0007.wav,d0007,test,Normal: NHC,1,2000,1,25560,16,0
+187,..\data\human\test\d0008.wav,d0008,test,Pathologic,1,2000,1,59580,16,1
+188,..\data\human\test\d0009.wav,d0009,test,Pathologic,1,2000,1,24811,16,1
+189,..\data\human\test\d0013.wav,d0013,test,Normal: NHC,1,2000,1,18442,16,0
+190,..\data\human\test\e00001.wav,e00001,test,Normal,0,2000,1,41838,16,0
+191,..\data\human\test\e00002.wav,e00002,test,Normal,1,2000,1,48354,16,0
+192,..\data\human\test\e00003.wav,e00003,test,Normal,1,2000,1,42346,16,0
+193,..\data\human\test\e00004.wav,e00004,test,Normal,1,2000,1,39510,16,0
+194,..\data\human\test\e00005.wav,e00005,test,Normal,1,2000,1,68218,16,0
+195,..\data\human\test\e00006.wav,e00006,test,Normal,1,2000,1,44916,16,0
+196,..\data\human\test\e00007.wav,e00007,test,Normal,1,2000,1,54770,16,0
+197,..\data\human\test\e00008.wav,e00008,test,Normal,1,2000,1,30500,16,0
+198,..\data\human\test\e00009.wav,e00009,test,Normal,1,2000,1,28824,16,0
+199,..\data\human\test\e00010.wav,e00010,test,Normal,1,2000,1,39436,16,0
+200,..\data\human\test\e00011.wav,e00011,test,Normal,1,2000,1,38276,16,0
+201,..\data\human\test\e00012.wav,e00012,test,Normal,1,2000,1,32134,16,0
+202,..\data\human\test\e00013.wav,e00013,test,Normal,1,2000,1,41876,16,0
+203,..\data\human\test\e00014.wav,e00014,test,Normal,1,2000,1,21128,16,0
+204,..\data\human\test\e00015.wav,e00015,test,Normal,1,2000,1,59114,16,0
+205,..\data\human\test\e00016.wav,e00016,test,Normal,1,2000,1,54696,16,0
+206,..\data\human\test\e00017.wav,e00017,test,Normal,1,2000,1,79534,16,0
+207,..\data\human\test\e00018.wav,e00018,test,Normal,1,2000,1,78904,16,0
+208,..\data\human\test\e00019.wav,e00019,test,Normal,1,2000,1,43398,16,0
+209,..\data\human\test\e00020.wav,e00020,test,CAD,0,2000,1,48436,16,1
+210,..\data\human\test\e00021.wav,e00021,test,Normal,1,2000,1,48874,16,0
+211,..\data\human\test\e00022.wav,e00022,test,Normal,1,2000,1,32514,16,0
+212,..\data\human\test\e00023.wav,e00023,test,Normal,1,2000,1,29764,16,0
+213,..\data\human\test\e00024.wav,e00024,test,Normal,1,2000,1,42386,16,0
+214,..\data\human\test\e00025.wav,e00025,test,Normal,1,2000,1,45214,16,0
+215,..\data\human\test\e00026.wav,e00026,test,Normal,1,2000,1,17178,16,0
+216,..\data\human\test\e00027.wav,e00027,test,Normal,1,2000,1,62976,16,0
+217,..\data\human\test\e00028.wav,e00028,test,Normal,1,2000,1,26612,16,0
+218,..\data\human\test\e00029.wav,e00029,test,Normal,1,2000,1,63658,16,0
+219,..\data\human\test\e00030.wav,e00030,test,Normal,1,2000,1,58886,16,0
+220,..\data\human\test\e00031.wav,e00031,test,Normal,1,2000,1,101542,16,0
+221,..\data\human\test\e00032.wav,e00032,test,Unknown,1,2000,1,62334,16,0
+222,..\data\human\test\e00033.wav,e00033,test,Normal,1,2000,1,18214,16,0
+223,..\data\human\test\e00034.wav,e00034,test,Normal,1,2000,1,22180,16,0
+224,..\data\human\test\e00035.wav,e00035,test,Normal,1,2000,1,67336,16,0
+225,..\data\human\test\e00036.wav,e00036,test,Normal,1,2000,1,28812,16,0
+226,..\data\human\test\e00037.wav,e00037,test,Normal,1,2000,1,83566,16,0
+227,..\data\human\test\e00038.wav,e00038,test,Normal,1,2000,1,24918,16,0
+228,..\data\human\test\e00039.wav,e00039,test,Unknown,0,2000,1,19334,16,0
+229,..\data\human\test\e00040.wav,e00040,test,Normal,1,2000,1,83394,16,0
+230,..\data\human\test\e00041.wav,e00041,test,Normal,1,2000,1,45910,16,0
+231,..\data\human\test\e00042.wav,e00042,test,Normal,1,2000,1,44976,16,0
+232,..\data\human\test\e00043.wav,e00043,test,Normal,1,2000,1,57022,16,0
+233,..\data\human\test\e00044.wav,e00044,test,Unknown,0,2000,1,28874,16,0
+234,..\data\human\test\e00045.wav,e00045,test,Normal,1,2000,1,43514,16,0
+235,..\data\human\test\e00046.wav,e00046,test,Normal,1,2000,1,29736,16,0
+236,..\data\human\test\e00047.wav,e00047,test,Normal,1,2000,1,53056,16,0
+237,..\data\human\test\e00048.wav,e00048,test,CAD,0,2000,1,44258,16,1
+238,..\data\human\test\e00049.wav,e00049,test,Normal,1,2000,1,45486,16,0
+239,..\data\human\test\e00050.wav,e00050,test,Normal,1,2000,1,45888,16,0
+240,..\data\human\test\e00051.wav,e00051,test,Normal,1,2000,1,49662,16,0
+241,..\data\human\test\e00052.wav,e00052,test,Normal,1,2000,1,55002,16,0
+242,..\data\human\test\e00053.wav,e00053,test,Normal,1,2000,1,48846,16,0
+243,..\data\human\test\e00054.wav,e00054,test,Normal,1,2000,1,97360,16,0
+244,..\data\human\test\e00055.wav,e00055,test,Normal,1,2000,1,98908,16,0
+245,..\data\human\test\e00059.wav,e00059,test,CAD,1,2000,1,41239,16,1
+246,..\data\human\test\e00071.wav,e00071,test,CAD,0,2000,1,42354,16,1
+247,..\data\human\test\e00087.wav,e00087,test,CAD,1,2000,1,43468,16,1
+248,..\data\human\test\e00097.wav,e00097,test,CAD,1,2000,1,43979,16,1
+249,..\data\human\test\e00114.wav,e00114,test,CAD,1,2000,1,43933,16,1
+250,..\data\human\test\e00120.wav,e00120,test,CAD,0,2000,1,95239,16,1
+251,..\data\human\test\e00135.wav,e00135,test,CAD,1,2000,1,42075,16,1
+252,..\data\human\test\e00140.wav,e00140,test,CAD,1,2000,1,46580,16,1
+253,..\data\human\test\e00142.wav,e00142,test,CAD,0,2000,1,48436,16,1
+254,..\data\human\test\e00152.wav,e00152,test,CAD,1,2000,1,23313,16,1
+255,..\data\human\test\e00176.wav,e00176,test,CAD,1,2000,1,77824,16,1
+256,..\data\human\test\e00191.wav,e00191,test,CAD,0,2000,1,163266,16,1
+257,..\data\human\test\e00195.wav,e00195,test,CAD,1,2000,1,38640,16,1
+258,..\data\human\test\e00216.wav,e00216,test,CAD,1,2000,1,16254,16,1
+259,..\data\human\test\e00228.wav,e00228,test,CAD,1,2000,1,42539,16,1
+260,..\data\human\test\e00266.wav,e00266,test,CAD,1,2000,1,36549,16,1
+261,..\data\human\test\e00275.wav,e00275,test,CAD,1,2000,1,20991,16,1
+262,..\data\human\test\e00295.wav,e00295,test,CAD,1,2000,1,43700,16,1
+263,..\data\human\test\e00304.wav,e00304,test,CAD,1,2000,1,26667,16,1
+264,..\data\human\test\e00305.wav,e00305,test,CAD,0,2000,1,26471,16,1
+265,..\data\human\test\e00321.wav,e00321,test,CAD,1,2000,1,19598,16,1
+266,..\data\human\test\e00328.wav,e00328,test,CAD,1,2000,1,41378,16,1
+267,..\data\human\test\e00330.wav,e00330,test,CAD,1,2000,1,47555,16,1
+268,..\data\human\test\e00336.wav,e00336,test,CAD,0,2000,1,24521,16,1
+269,..\data\human\test\e00359.wav,e00359,test,CAD,1,2000,1,41796,16,1
+270,..\data\human\test\e00373.wav,e00373,test,CAD,1,2000,1,29861,16,1
+271,..\data\human\test\e00388.wav,e00388,test,CAD,0,2000,1,42865,16,1
+272,..\data\human\test\e00435.wav,e00435,test,CAD,0,2000,1,47347,16,1
+273,..\data\human\test\e00456.wav,e00456,test,CAD,1,2000,1,47555,16,1
+274,..\data\human\test\e00457.wav,e00457,test,CAD,0,2000,1,29676,16,1
+275,..\data\human\test\e00461.wav,e00461,test,CAD,1,2000,1,31021,16,1
+276,..\data\human\test\e00475.wav,e00475,test,CAD,1,2000,1,23406,16,1
+277,..\data\human\test\e00477.wav,e00477,test,CAD,1,2000,1,31394,16,1
+278,..\data\human\test\e00523.wav,e00523,test,CAD,1,2000,1,81089,16,1
+279,..\data\human\test\e00526.wav,e00526,test,CAD,1,2000,1,21177,16,1
+280,..\data\human\test\e00528.wav,e00528,test,CAD,1,2000,1,47509,16,1
+281,..\data\human\test\e00536.wav,e00536,test,CAD,1,2000,1,37292,16,1
+282,..\data\human\test\e00537.wav,e00537,test,CAD,1,2000,1,23267,16,1
+283,..\data\human\test\e00539.wav,e00539,test,CAD,0,2000,1,92518,16,1
+284,..\data\human\test\e00551.wav,e00551,test,CAD,1,2000,1,42818,16,1
+285,..\data\human\test\e00562.wav,e00562,test,CAD,0,2000,1,47555,16,1
+286,..\data\human\test\e00591.wav,e00591,test,CAD,0,2000,1,38546,16,1
+287,..\data\human\test\e00601.wav,e00601,test,CAD,1,2000,1,45465,16,1
+288,..\data\human\test\e00603.wav,e00603,test,CAD,1,2000,1,183402,16,1
+289,..\data\human\test\e00605.wav,e00605,test,CAD,1,2000,1,42994,16,1
+290,..\data\human\test\e00619.wav,e00619,test,CAD,1,2000,1,18902,16,1
+291,..\data\human\test\e00622.wav,e00622,test,CAD,0,2000,1,41564,16,1
+292,..\data\human\test\e00627.wav,e00627,test,CAD,1,2000,1,34320,16,1
+293,..\data\human\test\e00648.wav,e00648,test,CAD,1,2000,1,21781,16,1
+294,..\data\human\test\e00657.wav,e00657,test,CAD,1,2000,1,40125,16,1
+295,..\data\human\test\e00670.wav,e00670,test,CAD,1,2000,1,21688,16,1

@@ -1,0 +1,28 @@
+id,path,name,dataset,diagnosis,quality,sr,channels,length,bits,class_diagn,range_start,range_end
+0,train\training-a\a0001.wav,a0001,training-a,MVP,1,2000,1,71332,16,1,0,15999
+1,train\training-a\a0001.wav,a0001,training-a,MVP,1,2000,1,71332,16,1,16000,31999
+2,train\training-a\a0001.wav,a0001,training-a,MVP,1,2000,1,71332,16,1,32000,47999
+3,train\training-a\a0001.wav,a0001,training-a,MVP,1,2000,1,71332,16,1,48000,63999
+4,train\training-a\a0002.wav,a0002,training-a,MVP,1,2000,1,41657,16,1,0,15999
+5,train\training-a\a0002.wav,a0002,training-a,MVP,1,2000,1,41657,16,1,16000,31999
+6,train\training-a\a0003.wav,a0003,training-a,MVP,1,2000,1,61440,16,1,0,15999
+7,train\training-a\a0003.wav,a0003,training-a,MVP,1,2000,1,61440,16,1,16000,31999
+8,train\training-a\a0003.wav,a0003,training-a,MVP,1,2000,1,61440,16,1,32000,47999
+9,train\training-a\a0004.wav,a0004,training-a,Benign,1,2000,1,71193,16,1,0,15999
+10,train\training-a\a0004.wav,a0004,training-a,Benign,1,2000,1,71193,16,1,16000,31999
+11,train\training-a\a0004.wav,a0004,training-a,Benign,1,2000,1,71193,16,1,32000,47999
+12,train\training-a\a0004.wav,a0004,training-a,Benign,1,2000,1,71193,16,1,48000,63999
+13,train\training-a\a0005.wav,a0005,training-a,Benign,1,2000,1,71332,16,1,0,15999
+14,train\training-a\a0005.wav,a0005,training-a,Benign,1,2000,1,71332,16,1,16000,31999
+15,train\training-a\a0005.wav,a0005,training-a,Benign,1,2000,1,71332,16,1,32000,47999
+16,train\training-a\a0005.wav,a0005,training-a,Benign,1,2000,1,71332,16,1,48000,63999
+18,train\training-a\a0006.wav,a0006,training-a,AD,0,2000,1,41518,16,1,16000,31999
+20,train\training-a\a0007.wav,a0007,training-a,Normal ,1,2000,1,71332,16,0,16000,31999
+21,train\training-a\a0007.wav,a0007,training-a,Normal ,1,2000,1,71332,16,0,32000,47999
+22,train\training-a\a0007.wav,a0007,training-a,Normal ,1,2000,1,71332,16,0,48000,63999
+24,train\training-a\a0008.wav,a0008,training-a,MVP,0,2000,1,71611,16,1,16000,31999
+25,train\training-a\a0008.wav,a0008,training-a,MVP,0,2000,1,71611,16,1,32000,47999
+26,train\training-a\a0008.wav,a0008,training-a,MVP,0,2000,1,71611,16,1,48000,63999
+27,train\training-a\a0009.wav,a0009,training-a,Normal ,1,2000,1,71611,16,0,0,15999
+28,train\training-a\a0009.wav,a0009,training-a,Normal ,1,2000,1,71611,16,0,16000,31999
+29,train\training-a\a0009.wav,a0009,training-a,Normal ,1,2000,1,71611,16,0,32000,47999
