@@ -24,6 +24,7 @@ class Physionet2016(Dataset):
 		self.meta_file_test = pjoin(self.dataset_path, 'test_list.csv')
 		self.train_audio_path = f"{self.dataset_path}/audiofiles/train/*/*.wav"
 		self.num_classes = 2
+		self.target_sample_rate = 2000
 
 	
 
@@ -37,6 +38,7 @@ class Physionet2022(Dataset):
 		self.meta_file_test = pjoin(self.dataset_path, 'test_list.csv')
 		self.train_audio_path = f"{self.dataset_path}/training_data/*.wav"
 		self.num_classes = 2
+		self.target_sample_rate = 4000
 
 def save_training_data_to_csv(metadata, dataset):
 	metadata_df = pd.DataFrame(metadata)
@@ -185,7 +187,7 @@ def get_file_metadata_human_ph2022(path: str, anno: pd.DataFrame, dataset_object
 	elif dataclass == "Present":
 		dataclass = 1
 	elif dataclass == "Unknown":
-		dataclass = -1
+		dataclass = 2
 	else:
 		raise ValueError(f"Unknown class {dataclass}")
 	meta["label_1"] = dataclass
@@ -229,7 +231,118 @@ def dataset_statistics(dataset: Dataset):
 	print("Bits count", train_data["bits"].value_counts())
 
 def plot_statistics(dataset: Dataset):
-	pass
+	import matplotlib.pyplot as plt
+	import seaborn as sns
+	from mpl_toolkits.axes_grid1 import ImageGrid
+	import io
+	data = dataset.load_dataset()
+	p_size=12
+	font_size=26
+	def make_plots(plot_data, dataset: Dataset, name=""):
+		
+		fig, axs = plt.subplots(1, 3, figsize=(p_size*3, p_size))
+		seconds = plot_data["length"] / dataset.target_sample_rate
+		CLASSES_1 = {0: "NORMAL", 1: "ABNORMAL", 2: "UNKNOWN"}
+		CLASS_LABEL_1 = "label_1" 		# abnormal / normal
+		CLASS_COLORS_1 = ["green", "red", "blue"]
+		# Length plot with class colors
+		bar_colors = [CLASS_COLORS_1[label] for label in plot_data[CLASS_LABEL_1].values]
+		axs[0].bar(range(len(seconds)), seconds, color=bar_colors, width=1.0)
+		axs[0].set_title(f"Length {name}", fontsize=font_size)
+		axs[0].set_xlabel("Sample", fontsize=font_size)
+		axs[0].set_ylabel("Seconds", fontsize=font_size)
+		# increase tick size
+		axs[0].tick_params(axis='both', which='major', labelsize=font_size-4)
+		
+		
+		# Histogram plot using sns.histplot
+		sns.histplot(data=seconds, bins=200, kde=True, ax=axs[1], color="blue")
+		axs[1].set_title(f"Length histogram {name}", fontsize=font_size)
+		axs[1].set_xlabel("Seconds", fontsize=font_size)
+		axs[1].set_ylabel("Count", fontsize=font_size)
+		axs[1].tick_params(axis='both', which='major', labelsize=font_size-4)
+
+		#############
+		# Create a sub-figure for pie chart and statistics
+		subfig, subaxs = plt.subplots(2, 1, figsize=(p_size, p_size))
+		# margin and padding 0
+		subfig.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=0, hspace=0)
+
+		
+		class_counts = plot_data[CLASS_LABEL_1].value_counts(sort=False)
+		# better class_counts which guarantees the order of the classes 0 then 1
+		class_counts = [class_counts[0], class_counts[1]]
+		subaxs[0].pie(class_counts, labels=[CLASSES_1[0], CLASSES_1[1]], autopct='%1.1f%%', colors=CLASS_COLORS_1, textprops={'fontsize': font_size-1})
+		subaxs[0].set_title(f"Class balance {name}", fontsize=font_size+3)
+		subaxs[0].set_aspect('equal')  # Make the pie chart circular
+		# make sub plot left centered
+		
+		# Statistical information
+		negatives = seconds[plot_data[CLASS_LABEL_1] == 0]
+		positives = seconds[plot_data[CLASS_LABEL_1] == 1]
+		mean_duration_neg = np.mean(negatives)
+		mean_duration_pos = np.mean(positives)
+		total_count = len(seconds)
+
+		text_content = f"Average length (Negative): {mean_duration_neg:.2f}s\n"
+		text_content += f"Average length (Positive): {mean_duration_pos:.2f}s\n"
+		text_content += f"Average length (All): {np.mean(seconds):.2f}s\n"
+		text_content += f"Standard deviation (Negative): {np.std(seconds[plot_data[CLASS_LABEL_1] == 0]):.2f}s\n"
+		text_content += f"Standard deviation (Positive): {np.std(seconds[plot_data[CLASS_LABEL_1] == 1]):.2f}s\n"
+		text_content += f"Standard deviation (All): {np.std(seconds):.2f}s\n"
+		text_content += f"Median length: {np.median(seconds):.2f}s\n"
+		text_content += f"Minimum length: {np.min(seconds):.2f}s\n"
+		text_content += f"Maximum length: {np.max(seconds):.2f}s\n"
+		text_content += f"Correlation class<>length: {plot_data[CLASS_LABEL_1].corr(seconds):.4f}\n"
+		text_content += f"Counts: neg.: {len(negatives)} pos.: {len(positives)} total: {total_count}/3240"
+		
+		subaxs[1].text(-0.00, 0.5, text_content, fontsize=font_size+9, ha="left", va="center")
+		subaxs[1].axis('off')
+
+		# Adjust spacing in the sub-figure
+		subfig.subplots_adjust(hspace=0.0, wspace=0.0, left=0.0, right=1.0, bottom=0.0, top=1.0)
+		
+		# Add the sub-figure to the main figure
+		buf = io.BytesIO()
+		subfig.savefig(buf, format='png')
+		buf.seek(0)
+		img = plt.imread(buf)
+		axs[2].imshow(img)
+		axs[2].axis('off')
+		#############
+		return fig
+
+
+	figs = []
+	dataset_names = data.dataset.unique()
+	for name in dataset_names:
+		data_dataset = data[data.dataset == name]
+		print(f"Dataset {name}", f"{len(data_dataset)}/{len(data)}")
+		# plot length + pie chart class balance + plot histogram of length
+		figs.append(make_plots(data_dataset, name=name, dataset=dataset))
+
+	# Combine all figs into a single image grid (2, 3)
+	fig = plt.figure(figsize=(p_size*3*3, p_size*2))
+	grid = ImageGrid(fig, 111, nrows_ncols=(3, 2), axes_pad=0.5)
+
+	for i, (ax, im) in enumerate(zip(grid, figs)):
+		ax.cla()
+		ax.axis('off')
+		
+		buf = io.BytesIO()
+		im.savefig(buf, format='png')
+		buf.seek(0)
+		
+		img = plt.imread(buf)
+		ax.imshow(img)
+
+		ax.set_title(f"Dataset {dataset_names[i]}", fontsize=font_size+3)
+
+	plt.tight_layout()
+	plt.show()
+
+	fig = make_plots(data, name="All datasets", dataset=dataset)
+	plt.show()
 
 
 if __name__ == '__main__':
@@ -241,8 +354,9 @@ if __name__ == '__main__':
 	import pandas as pd
 	import tqdm.autonotebook as tqdm
 	import torchaudio
-	#parse_physionet2022()
+	parse_physionet2022()
 	#parse_physionet2016()
 	print("Done parsing")
 	#dataset_statistics(Physionet2016())
 	dataset_statistics(Physionet2022())
+	plot_statistics(Physionet2022())
