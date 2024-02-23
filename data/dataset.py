@@ -355,8 +355,8 @@ if __name__ == '__main__':
 	import tqdm.autonotebook as tqdm
 	import torchaudio
 	parse_physionet2022()
-	#parse_physionet2016()
+	parse_physionet2016()
 	print("Done parsing")
-	#dataset_statistics(Physionet2016())
+	dataset_statistics(Physionet2016())
 	dataset_statistics(Physionet2022())
 	plot_statistics(Physionet2022())
