@@ -11,4 +11,5 @@ hop_length: 50
 n_ftt: 50
 top_db: 50
 
-  
+task_type: training
+run_name: blank_name

@@ -16,23 +16,26 @@ class Run:
 	# load and parse metadata
 	# call the classifier or trainer
 	def __init__(self, config_update_dict=None) -> None:
+		self.config = Config() # base config with barebones
 		self.setup_config(config_update_dict)
 		self.setup_run_name(config_update_dict)
 		self.setup_run_results_path()
 		self.setup_logger(True)
+		self.save_config()
 		setup_environment(self.config)
 		
 	def setup_run_name(self, config_update_dict: dict=None):
 		"""
 		Sets self.run_name_suffix and self.run_name
 		"""
-		if config_update_dict is not None and "run_name_suffix" in config_update_dict.keys():
-			self.run_name_suffix = config_update_dict["run_name_suffix"]													# run_name_suffix is set in config_update_dict
+		if config_update_dict is not None and Config.Names.run_name_suffix in config_update_dict.keys():
+			self.run_name_suffix = config_update_dict[Config.Names.run_name_suffix]													# run_name_suffix is set in config_update_dict
 		else:
-			self.run_name_suffix = "".join(random.choices(string.ascii_uppercase, k=5))	# random string
+			self.run_name_suffix = "".join(random.choices(string.ascii_uppercase, k=4))	# random string
 		self.run_name = f"{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_{self.run_name_suffix}"
+		self.config[Config.Names.run_name] = self.run_name
 
-	def get_run_results_path(self, run_name):
+	def _get_run_results_path(self, run_name):
 		"""
 		Returns the result directory path of the TrainingAndEvaluation run with the provided name
 		"""
@@ -81,12 +84,13 @@ class Run:
 		"""
 		Loads and returns the Config of the TrainingAndEvaluation run with the provided name
 		"""
-		current_path = pjoin(Run.get_run_results_path(self.run_name), self.config["config_filename"])
+		current_path = pjoin(Run._get_run_results_path(self.run_name), self.config["config_filename"])
 		return Config(config_update_path=current_path)
 
 	def setup_config(self, config_update_dict: dict):
 		"""
-		Sets self.config based on the provided config_update_dict as well as config["config_update_dict_path"]
+		Creates config object. If project config exists, it is loaded and extended with the provided config_update_dict
+		Checks config_update_dict for a path to a run config and updates the config with it
 		Saves self.config._config_dict as YAML under the name constants.FILENAME_RUN_CONFIG
 		"""
 		# check if "project_config.yaml" exists
@@ -94,8 +98,41 @@ class Run:
 		if not os.path.isfile(project_config_path):
 			project_config_path = None
 		self.config = Config(project_config_path)
-		if self.config["load_config_from_run_name"] is not None and self.config["load_config_from_run_name"] != "":
-			run_config_path = pjoin(Run.get_run_results_path(self.config["load_config_from_run_name"]), self.config["config_filename"])
+		if config_update_dict is not None and config_update_dict.get(Config.Names.load_config_from_run_name) is not None:
+			run_config_path = pjoin(self._get_run_results_path(config_update_dict[Config.Names.load_config_from_run_name]), \
+						   self.config["config_filename"])
 			self.config.update_config_yaml(run_config_path)
-			self.log_training(f"Updating config with config from {self.config['load_config_from_run_name']}", level=logging.WARNING)
-		self.save_config()
+			print(f"Updating config with config from {self.config['load_config_from_run_name']}")
+		if config_update_dict is not None:
+			# Still apply the update dict after the run config, even if extra loaded from file
+			self.config.update_config_dict(config_update_dict)
+		
+
+	def start_task(self):
+		"""
+		Starts the task of the TrainingAndEvaluation run
+		"""
+		if self.config[Config.Names.task_type] == Config.Names.task_type_training:
+			task_runner = TrainTask(self)
+		elif self.config[Config.Names.task_type] == Config.Names.task_type_inference:
+			task_runner = InferenceTask(self)
+		task_runner.start_task()
+
+class TrainTask:
+	def __init__(self, run: Run) -> None:
+		self.run = run
+
+	def start_task(self):
+		print("Start training pipeline")	
+		print(self.run.config.get_dict())
+
+class InferenceTask:
+	def __init__(self, run: Run) -> None:
+		self.run = run
+
+	def start_task(self):
+		print("Start inference pipeline")	
+		print(self.run.config.get_dict())
+
+
+	
