@@ -167,6 +167,9 @@ def get_file_metadata_human_ph2022(path: str, anno: pd.DataFrame, dataset_object
 	meta["path"] = path.replace(dataset_object.dataset_path + "\\","")
 	patient_id = Path(path).name.split(".")[0].split("_")[0] # first block till _ from file name
 	patient_id = int(patient_id)
+	#if patient_id in anno.get("Additional ID").values:
+	#	patient_id = patient_id + "+" + anno[anno.get("Additional ID") == patient_id].index[0]
+	# TODO beachten dass additional ID nur einseitig beschrieben wird -> map oder so als vergleich, beide Fälle müssen gleiche ID haben
 	meta["patient_id"] = patient_id
 	meta["dataset"] = dataset_object.folder_name
 	#meta['diagnosis'] = diagnosis	# not given
@@ -205,7 +208,7 @@ def parse_physionet2022():
 	annotation.index = annotation.index.astype(int)
 	training_files = glob.glob(dataset.train_audio_path)
 	training_files = [normpath(path) for path in training_files]
-	print("All train data count", len(training_files))
+	print("All existing audio files count", len(training_files))
 	print("All annotations count", len(annotation))
 	metadata = []
 	pbar = tqdm.tqdm(total=len(training_files), position=0, leave=True, desc="Physionet 2022 Human data list")
@@ -357,6 +360,6 @@ if __name__ == '__main__':
 	parse_physionet2022()
 	parse_physionet2016()
 	print("Done parsing")
-	dataset_statistics(Physionet2016())
+	#dataset_statistics(Physionet2016())
 	dataset_statistics(Physionet2022())
-	plot_statistics(Physionet2022())
+	#plot_statistics(Physionet2022())

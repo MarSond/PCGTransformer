@@ -16,10 +16,10 @@ class Run:
 	# load and parse metadata
 	# call the classifier or trainer
 	def __init__(self, config_update_dict=None) -> None:
+		self.setup_config(config_update_dict)
 		self.setup_run_name(config_update_dict)
 		self.setup_run_results_path()
 		self.setup_logger(True)
-		self.setup_config(config_update_dict)
 		setup_environment(self.config)
 		
 	def setup_run_name(self, config_update_dict: dict=None):
@@ -84,12 +84,16 @@ class Run:
 		current_path = pjoin(Run.get_run_results_path(self.run_name), self.config["config_filename"])
 		return Config(config_update_path=current_path)
 
-	def setup_config(self, config_update_dict):
+	def setup_config(self, config_update_dict: dict):
 		"""
 		Sets self.config based on the provided config_update_dict as well as config["config_update_dict_path"]
 		Saves self.config._config_dict as YAML under the name constants.FILENAME_RUN_CONFIG
 		"""
-		self.config = Config(config_update_dict)
+		# check if "project_config.yaml" exists
+		project_config_path = pjoin("project_config.yaml")
+		if not os.path.isfile(project_config_path):
+			project_config_path = None
+		self.config = Config(project_config_path)
 		if self.config["load_config_from_run_name"] is not None and self.config["load_config_from_run_name"] != "":
 			run_config_path = pjoin(Run.get_run_results_path(self.config["load_config_from_run_name"]), self.config["config_filename"])
 			self.config.update_config_yaml(run_config_path)
