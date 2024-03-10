@@ -56,7 +56,8 @@ class Run:
 		Sets self.logger_dict
 		"""
 		log_filename = pjoin(self.run_results_path, self.config['log_output_filename']) if log_to_file else None
-		self.logger_dict = logging_helper.get_logger_dict(["training", "features", "metadata"], sub_name=self.run_name, to_console=True, log_filename=log_filename)
+		log_request_dict = {"training": logging.DEBUG, "features": logging.INFO, "metadata": logging.INFO}
+		self.logger_dict = logging_helper.get_logger_dict(logger_map=log_request_dict, sub_name=self.run_name, to_console=True, log_filename=log_filename)
 		self.logger_dict["training"].info(f"Created logger dict {self.logger_dict.keys()}. Log file: {log_filename}. Sub name: {self.run_name}")
 
 	def log(self, message, logger_name, level=logging.INFO):
@@ -132,7 +133,7 @@ class InferenceTask:
 
 	def start_task(self):
 		print("Start inference pipeline")	
-		print(self.run.config.get_dict())
+		self.run.log_training(self.run.config.get_dict(), level=logging.ERROR)
 
 
 	
