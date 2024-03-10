@@ -10,6 +10,8 @@ import MLHelper.tools.logging_helper as logging_helper
 import logging
 from MLHelper.config import Config
 from MLHelper.config import setup_environment
+from MLHelper.audio.audioutils import AudioUtil
+from data.dataset import Dataset, Physionet2016, Physionet2022
 
 class Run:
 	# create run folder
@@ -56,7 +58,7 @@ class Run:
 		Sets self.logger_dict
 		"""
 		log_filename = pjoin(self.run_results_path, self.config['log_output_filename']) if log_to_file else None
-		log_request_dict = {"training": logging.DEBUG, "features": logging.INFO, "metadata": logging.INFO}
+		log_request_dict = {"training": logging.DEBUG, "preprocessing": logging.INFO, "metadata": logging.INFO}
 		self.logger_dict = logging_helper.get_logger_dict(logger_map=log_request_dict, sub_name=self.run_name, to_console=True, log_filename=log_filename)
 		self.logger_dict["training"].info(f"Created logger dict {self.logger_dict.keys()}. Log file: {log_filename}. Sub name: {self.run_name}")
 
@@ -119,21 +121,58 @@ class Run:
 			task_runner = InferenceTask(self)
 		task_runner.start_task()
 
-class TrainTask:
+class TaskBase:
 	def __init__(self, run: Run) -> None:
 		self.run = run
+		self.task_mode = self.run.config[Config.Names.task_type]
+	
+	def start_task(self):
+		self.run.log_training(self.run.config.get_dict(), level=logging.ERROR)
+		self.load_metadata()
+
+	def load_metadata(self):
+		assert self.run.config[Config.Names.task_type] in [Config.Names.task_type_training, Config.Names.task_type_inference], \
+			f"Unknown task type {self.run.config[Config.Names.task_type]}"
+		if self.run.config[Config.Names.task_type] == Config.Names.task_type_training:
+			dataset_name = self.run.config["train_dataset"]
+		elif self.run.config[Config.Names.task_type] == Config.Names.task_type_inference:
+			dataset_name = self.run.config["inference_dataset"]
+		# load metadata
+		self.run.log_training("Loading metadata", level=logging.INFO)
+		if dataset_name == "physionet2016":
+			dataset = Physionet2016()
+		elif dataset_name == "physionet2022":
+			dataset = Physionet2022()
+		else:
+			raise Exception(f"Unknown dataset name {dataset_name}")
+		# load data list
+		# fitler data out
+		# split data into chunks
+		dataset.load_dataset()
+		chunk_list: pd.DataFrame = AudioUtil.Loading.get_audio_chunk_list(dataset.datalist, dataset.target_sample_rate, \
+											self.run.config["chunk_duration"],\
+											dataset.dataset_path, self.run.logger_dict["preprocessing"], padding_threshold=0.65)
+		# load metadata
+		self.run.log_training("Loaded metadata", level=logging.INFO)
+
+
+
+class TrainTask(TaskBase):
+	def __init__(self, run: Run) -> None:
+		super().__init__(run)
 
 	def start_task(self):
 		print("Start training pipeline")	
-		print(self.run.config.get_dict())
+		super().start_task()
 
-class InferenceTask:
+class InferenceTask(TaskBase):
 	def __init__(self, run: Run) -> None:
-		self.run = run
+		super().__init__(run)
 
 	def start_task(self):
-		print("Start inference pipeline")	
-		self.run.log_training(self.run.config.get_dict(), level=logging.ERROR)
+		print("Start inference pipeline")
+		super().start_task()	
+		
 
 
 	

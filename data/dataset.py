@@ -12,6 +12,7 @@ class Dataset:
 
 	def load_dataset(self) -> pd.DataFrame:
 		dataframe = pd.read_csv(self.meta_file_train, index_col="id", encoding='utf-8')
+		self.datalist = dataframe
 		return dataframe
 
 class Physionet2016(Dataset):
@@ -22,7 +23,9 @@ class Physionet2016(Dataset):
 		self.dataset_path = pjoin(self.base_path, self.folder_name)
 		self.meta_file_train = pjoin(self.dataset_path, 'train_list.csv')
 		self.meta_file_test = pjoin(self.dataset_path, 'test_list.csv')
-		self.train_audio_path = f"{self.dataset_path}/audiofiles/train/*/*.wav"
+
+		self.train_audio_base_folder = f"{self.dataset_path}/audiofiles/train/"
+		self.train_audio_search_pattern = f"{self.dataset_path}/audiofiles/train/*/*.wav"
 		self.num_classes = 2
 		self.target_sample_rate = 2000
 
@@ -36,7 +39,8 @@ class Physionet2022(Dataset):
 		self.dataset_path = pjoin(self.base_path, self.folder_name)
 		self.meta_file_train = pjoin(self.dataset_path, 'train_list.csv')
 		self.meta_file_test = pjoin(self.dataset_path, 'test_list.csv')
-		self.train_audio_path = f"{self.dataset_path}/training_data/*.wav"
+		self.train_audio_base_folder = f"{self.dataset_path}/training_data/"
+		self.train_audio_search_pattern = f"{self.dataset_path}/training_data/*.wav"
 		self.num_classes = 2
 		self.target_sample_rate = 4000
 
@@ -95,7 +99,7 @@ def parse_physionet2016():
 	Parse the folder structure of the Physionet 2016 dataset and create meta files
 	"""
 	dataset = Physionet2016()
-	train_data = glob.glob(dataset.train_audio_path)
+	train_data = glob.glob(dataset.train_audio_search_pattern)
 	train_data = [normpath(path) for path in train_data]
 	dataset_names = ['training-a', 'training-b', 'training-c', 'training-d', 'training-e', 'training-f']
 	name_list = pd.DataFrame()
@@ -204,9 +208,9 @@ def parse_physionet2022():
 	annotation = pd.read_csv(pjoin(dataset.dataset_path, "training_data.csv"), index_col="Patient ID")
 	print(annotation.head())
 	print("Annotation types", annotation.dtypes)
-	print("Looking for train data in", dataset.train_audio_path)
+	print("Looking for train data in", dataset.train_audio_search_pattern)
 	annotation.index = annotation.index.astype(int)
-	training_files = glob.glob(dataset.train_audio_path)
+	training_files = glob.glob(dataset.train_audio_search_pattern)
 	training_files = [normpath(path) for path in training_files]
 	print("All existing audio files count", len(training_files))
 	print("All annotations count", len(annotation))
