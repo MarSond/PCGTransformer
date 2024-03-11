@@ -14,6 +14,13 @@ class Dataset:
 		dataframe = pd.read_csv(self.meta_file_train, index_col="id", encoding='utf-8')
 		self.datalist = dataframe
 		return dataframe
+	
+	# check if get attribute datalist is loaded
+	def __getattr__(self, name):
+		if name == "datalist":
+			return self.load_dataset()
+		else:
+			raise AttributeError(f"Attribute {name} not found")
 
 class Physionet2016(Dataset):
 
@@ -27,7 +34,7 @@ class Physionet2016(Dataset):
 		self.train_audio_base_folder = f"{self.dataset_path}/audiofiles/train/"
 		self.train_audio_search_pattern = f"{self.dataset_path}/audiofiles/train/*/*.wav"
 		self.num_classes = 2
-		self.target_sample_rate = 2000
+		self.target_samplerate = 2000
 
 	
 
@@ -42,7 +49,7 @@ class Physionet2022(Dataset):
 		self.train_audio_base_folder = f"{self.dataset_path}/training_data/"
 		self.train_audio_search_pattern = f"{self.dataset_path}/training_data/*.wav"
 		self.num_classes = 2
-		self.target_sample_rate = 4000
+		self.target_samplerate = 4000
 
 def save_training_data_to_csv(metadata, dataset):
 	metadata_df = pd.DataFrame(metadata)
