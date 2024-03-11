@@ -1,55 +1,30 @@
-import parameters as cfg
 from .cnn_dataset import CNN_Dataset
 import torch
-from ml_helper import metrics
 from tqdm.autonotebook import tqdm
 from torch.utils.data import DataLoader
-from os.path import join as pjoin
-from ml_helper.metrics import MetricsTracker
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, confusion_matrix, matthews_corrcoef
-from ml_helper import ml_base
-from ml_helper.utils import MLLogging
-from torch.cuda.amp import autocast
+import pandas as pd
 
-class CNN_Inference(ml_base.MLBase):
 
-	def __init__(self, base_config, device, datalist):
-		self.base_config = base_config
-		self.device = device
+class CNN_Inference():
+
+	def __init__(self, run, model, datalist: pd.DataFrame):
+		self.run = run
+		self.model = model
+		self.base_config = run.config
+		self.device = run.device
 		self.datalist = datalist
 		self.batchsize = 1
-		self.logger, self.tensor_logger = MLLogging.getLogger([cfg.MAIN_LOGGER, cfg.TENSOR_LOGGER])
-		self.metrics = MetricsTracker(
-			config=base_config, device=device, metrics_class=metrics.TorchMetricsAdapter)
-
-	def get_model(self, path=None, name=None):
-		model_base = self.base_config['model']
-		if path is None:
-			path = pjoin(model_base, self.base_config['model_path'])
-		model = self.load_model(path=path, name=name)
-		model.eval()
-		model = model.to(self.device)
-		self.model=model
-		return model
+		self.dataset_base = run.task.dataset.dataset_path
 
 	def get_dataloader(self):
-		full_dataset = CNN_Dataset(self.datalist, run_config=self.base_config)
+		full_dataset = CNN_Dataset(datalist=self.datalist, run=self.run)
 		full_dataset.set_mode("validation")
-		testloader = DataLoader(full_dataset, batch_size=self.batchsize, shuffle=True, drop_last=True)
+		testloader = DataLoader(full_dataset, batch_size=self.batchsize, shuffle=True, drop_last=False)
 		return testloader
 
 	# prediction of one batch
-	def predict_step(self, inputs, labels):
-		with autocast():	
-			self.tensor_logger.info(f"predict_step inputs shape {inputs.shape}")
-			outputs = self.model(inputs)
-
-		probabilities = torch.softmax(outputs, dim=1)
-		return probabilities
-
-
 	def start_inference(self):
-		model = self.model #get_model()
 		self.model.eval()
 		testloader = self.get_dataloader()
 		pbar = tqdm(total=len(testloader), desc="Inference")

@@ -1,36 +1,38 @@
 import torch.nn as nn
-import parameters as cfg
-import logging
+import MLHelper.constants as const
+from run import Run
 
-def get_model(run_config):
-	type = run_config['model_type']
+def get_model(run: Run):
+	type = run.config[const.CNN_PARAMS][const.MODEL_SUB_TYPE]
 	if type == 1:
-		return CNN_Model_1(run_config)
+		return CNN_Model_1(run)
 	elif type == 2:
-		return CNN_Model_2(run_config)
+		return CNN_Model_2(run)
 	elif type == 3:
-		return CNN_Model_3(run_config)
+		return CNN_Model_3(run)
 	else:
 		raise ValueError(f"Model type {type} not found")
 
 class CNN_Base(nn.Module):
-	def __init__(self, run_config):
+	def __init__(self, run: Run):
 		super().__init__()
-		self.num_classes = run_config['num_classes']
-		self.target_samplerate = run_config['target_samplerate']
-		self.pDrop0 = run_config['drop0']
-		self.pDrop1 = run_config['drop1']
-		self.seconds = run_config['seconds']
-		self.n_mels = run_config['n_mels']
-		if run_config['activation'] == "relu":
+		run_config = run.config
+		cnn_config = run_config[const.CNN_PARAMS]
+		self.num_classes = run.task.dataset.num_classes
+		self.target_samplerate = run.task.dataset.target_samplerate
+		self.pDrop0 = cnn_config[const.DROP0]
+		self.pDrop1 = cnn_config[const.DROP1]
+		self.seconds = run_config[const.CHUNK_DURATION]
+		self.n_mels = cnn_config[const.N_MELS]
+		if cnn_config[const.ACTIVATION] == const.ACTIVATION_RELU:
 			self.activation = nn.ReLU(inplace=True)
-		elif run_config['activation'] == "l_relu":
+		elif cnn_config[const.ACTIVATION] == const.ACTIVATION_L_RELU:
 			self.activation = nn.LeakyReLU(inplace=True)	
-		elif run_config['activation'] == "silu":
+		elif cnn_config[const.ACTIVATION] == const.ACTIVATION_SILU:
 			self.activation = nn.SiLU(inplace=True)
-		else: raise ValueError(f"Activation {run_config['activation']} not found in YAMNET Model list")
+		else: raise ValueError(f"Activation {cnn_config[const.ACTIVATION]} not found in YAMNET Model list")
 		self.softmax = nn.Softmax(dim=1)
-		self.tensor_logger = logging.getLogger(cfg.TENSOR_LOGGER)
+		self.tensor_logger = run.logger_dict["tensor"]
 		self._initialize_weights()
 	
 
