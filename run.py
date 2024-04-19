@@ -68,8 +68,8 @@ class Run:
 		Sets self.logger_dict
 		"""
 		log_filename = pjoin(self.run_results_path, self.config[const.FILENAME_LOG_OUTPUT]) if log_to_file else None
-		log_request_dict = {"training": logging.INFO, "preprocessing": logging.INFO, \
-						"metadata": logging.INFO, "tensor": logging.WARNING, "inference": logging.INFO}
+		log_request_dict = {"training": logging.INFO, "preprocessing": logging.WARNING, \
+							"metadata": logging.INFO, "tensor": logging.WARNING, "inference": logging.INFO}
 		self.logger_dict = logging_helper.get_logger_dict(logger_map=log_request_dict, sub_name=self.run_name, to_console=True, log_filename=log_filename)
 		self.logger_dict["training"].info(f"Created logger dict {self.logger_dict.keys()}. Log file: {log_filename}. Sub name: {self.run_name}")
 		self.train_logger = self.logger_dict["training"]

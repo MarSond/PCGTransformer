@@ -185,6 +185,8 @@ def parse_physionet2022():
 	pbar = tqdm.tqdm(total=len(training_files), position=0, leave=True, desc="Physionet 2022 Human data list")
 	for file in training_files:
 		meta = get_file_metadata_human_ph2022(file, annotation, dataset)
+		if meta["label_1"] == 2:
+			continue # TODO removed unknowns
 		pbar.update(1)
 		metadata.append(meta)
 		

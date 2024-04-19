@@ -15,7 +15,7 @@ project_config = {
 	const.TRAIN_FRAC: 0.8,
 	const.MODEL_TYPE: const.CNN,
 	const.TRAIN_DATASET: const.PHYSIONET_2016,
-	const.INFERENCE_DATASET: const.PHYSIONET_2016,
+	const.INFERENCE_DATASET: const.PHYSIONET_2022,
 	const.INFERENCE_MODEL: "",
 	const.AUGMENTATION_RATE: 0.65,
 	const.NUM_WORKERS: 0,
