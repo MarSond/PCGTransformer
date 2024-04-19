@@ -111,3 +111,5 @@ env.bak/
 venv.bak/
 
 runs/
+
+.vscode/
