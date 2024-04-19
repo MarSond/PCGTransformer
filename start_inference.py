@@ -5,7 +5,7 @@ run1_name = "run1"
 
 if __name__ == "__main__":
 	print("Start inference pipeline")
-	inference_update_dict = { "task_type": "inference", const.METADATA_FRAC: 0.1, const.INFERENCE_MODEL: {const.EPOCHS: 70, const.KFOLD: 10} }
+	inference_update_dict = { const.TASK_TYPE: const.INFERENCE, const.METADATA_FRAC: 1.0, const.INFERENCE_MODEL: {const.EPOCHS: 70, const.KFOLD: 2} }
 
 	run1_dict = inference_update_dict.copy()
 	run1_dict.update({const.LOAD_PREVIOUS_RUN_NAME: run1_name})
