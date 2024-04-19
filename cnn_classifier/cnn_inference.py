@@ -4,43 +4,43 @@ from tqdm.autonotebook import tqdm
 from torch.utils.data import DataLoader
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, confusion_matrix, matthews_corrcoef
 import pandas as pd
-
+from MLHelper import constants as const
+from data.dataset import AudioDataset
+from run import Run
+from MLHelper.ml_loop import ML_Loop
 
 class CNN_Inference():
 
-	def __init__(self, run, model, datalist: pd.DataFrame):
+
+	def init_inference(self, run: Run, model, dataset: AudioDataset):
 		self.run = run
 		self.model = model
 		self.base_config = run.config
 		self.device = run.device
-		self.datalist = datalist
-		self.batchsize = 1
-		self.dataset_base = run.task.dataset.dataset_path
+		self.dataset = dataset
+		
+		_, self.valid_loader = self.dataset.get_dataloaders(num_split=1, PT_Dataset_Class=CNN_Dataset)
 
-	def get_dataloader(self):
-		full_dataset = CNN_Dataset(datalist=self.datalist, run=self.run)
-		full_dataset.set_mode("validation")
-		testloader = DataLoader(full_dataset, batch_size=self.batchsize, shuffle=True, drop_last=False)
-		return testloader
 
 	# prediction of one batch
-	def start_inference(self):
+	def start_inference(self, run: Run, model, dataset: AudioDataset):
+		self.init_inference(run, model, dataset)
 		self.model.eval()
-		testloader = self.get_dataloader()
+		testloader = self.valid_loader
 		pbar = tqdm(total=len(testloader), desc="Inference")
 		y_true = []
 		y_pred = []
-		#self.metrics.reset_epoch_metrics(validation=True)
+		#self.metrics.reset_epoch_metrics(validation=True)	
 		for batch_idx, (data, target) in enumerate(testloader):
 			data, target = data.to(self.device), target.to(self.device)
 			with torch.no_grad():
-				probabilities  = self.predict_step(data, target)
+				probabilities  = ML_Loop.predict_step(model=self.model, inputs=data, tensor_logger=None) # TODO
 				prediction = probabilities.argmax(dim=1, keepdim=True)
 				y_true += target.cpu().numpy().tolist()
 				y_pred += prediction.cpu().numpy().tolist()
 				#self.metrics.update_step(predictions=prediction, labels=y_pred, loss=None, validation=True)
 			pbar.update(1)
-			pbar.set_postfix_str(f"Batch: {batch_idx}/{len(testloader)} + Output: {prediction.cpu().numpy()} - Target: {target.cpu().numpy()}")
+			pbar.set_postfix_str(f"Batch: {batch_idx}/{len(testloader)} ") #+ Output: {prediction.cpu().numpy()} - Target: {target.cpu().numpy()}")
 		pbar.close()
 		#fold_metrics = self.metrics.save_epoch_metrics(validation=True)
 		#self.metrics.finish_fold()

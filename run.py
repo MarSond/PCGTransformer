@@ -14,7 +14,7 @@ from MLHelper.config import Config
 from MLHelper import constants as const
 from MLHelper.config import setup_environment
 from MLHelper.audio.audioutils import AudioUtil
-from data.dataset import Physionet2016, Physionet2022
+
 
 class Run:
 	# create run folder
@@ -22,13 +22,13 @@ class Run:
 	# call the classifier or trainer
 	def __init__(self, config_update_dict=None) -> None:
 		self.config = Config() # base config with barebones
-		self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 		self.setup_config(config_update_dict)
 		self.setup_run_name(config_update_dict)
 		self.setup_run_results_path()
 		self.setup_logger(log_to_file=True)
 		self.save_config()
 		setup_environment(self.config)
+		self.device = torch.device("cuda")
 		
 	def setup_run_name(self, config_update_dict: dict=None):
 		"""
@@ -68,10 +68,11 @@ class Run:
 		Sets self.logger_dict
 		"""
 		log_filename = pjoin(self.run_results_path, self.config[const.FILENAME_LOG_OUTPUT]) if log_to_file else None
-		log_request_dict = {"training": logging.DEBUG, "preprocessing": logging.INFO, \
-						"metadata": logging.INFO, "tensor": logging.DEBUG, "inference": logging.INFO}
+		log_request_dict = {"training": logging.INFO, "preprocessing": logging.INFO, \
+						"metadata": logging.INFO, "tensor": logging.WARNING, "inference": logging.INFO}
 		self.logger_dict = logging_helper.get_logger_dict(logger_map=log_request_dict, sub_name=self.run_name, to_console=True, log_filename=log_filename)
 		self.logger_dict["training"].info(f"Created logger dict {self.logger_dict.keys()}. Log file: {log_filename}. Sub name: {self.run_name}")
+		self.train_logger = self.logger_dict["training"]
 
 	def log(self, message, logger_name, level=logging.INFO):
 		"""
@@ -138,56 +139,10 @@ class Run:
 		self.task.start_task()
 
 class TaskBase:
+	
 	def __init__(self, run: Run) -> None:
 		self.run = run
-		self.config = self.run.config
-		self.task_mode = self.run.config[const.TASK_TYPE]
-	
-	def start_task(self):
-		self.run.log_training(self.run.config.get_dict(), level=logging.ERROR)
-		self.load_metadata()
-
-	def _load_dataset_object(self):
-		assert self.run.config[const.TASK_TYPE] in [const.TASK_TYPE_TRAINING, const.TASK_TYPE_INFERENCE], \
-			f"Unknown task type {self.run.config[const.TASK_TYPE]}"
-		if self.run.config[const.TASK_TYPE] == const.TASK_TYPE_TRAINING:
-			dataset_name = self.run.config[const.TRAIN_DATASET]
-		elif self.run.config[const.TASK_TYPE] == const.TASK_TYPE_INFERENCE:
-			dataset_name = self.run.config[const.INFERENCE_DATASET]
-		# load metadata
-		self.run.log_training("Loading metadata", level=logging.INFO)
-		if dataset_name == "physionet2016":
-			dataset = Physionet2016()
-		elif dataset_name == "physionet2022":
-			dataset = Physionet2022()
-		else:
-			raise Exception(f"Unknown dataset name {dataset_name}")
-		dataset.load_dataset()
-		self.run.log_training("Loaded Dataset Object", level=logging.INFO)
-		return dataset
-
-	def get_inferencer(self):
-		if self.config[const.MODEL_TYPE] == const.CNN:
-			from cnn_classifier import cnn_inference
-			return cnn_inference.CNN_Inference
-		elif self.config[const.MODEL_TYPE] == const.BEATS:
-			pass
-		else:
-			raise Exception(f"Unknown model type for get inferencer {self.config['model_type']}")
-
-	def load_metadata(self):
-		dataset = self._load_dataset_object()
-		datalist = dataset.datalist.sample(frac=self.config[const.METADATA_FRAC], \
-								random_state=self.config[const.SEED]).reset_index(drop=True)
-		
-		chunk_list: pd.DataFrame = AudioUtil.Loading.get_audio_chunk_list(datalist, dataset.target_samplerate, \
-											self.config[const.CHUNK_DURATION],\
-											dataset.dataset_path, self.run.logger_dict["preprocessing"], padding_threshold=0.65)
-		# TODO move to Kfold level
-		MLUtil.log_class_balance(data=chunk_list[self.config['label_name']], logger=self.run.logger_dict["metadata"], extra_info="After audio chunking and frac", level=logging.WARNING)
-		self.class_weights = MLUtil.get_class_weights(chunk_list[self.config['label_name']])
-		self.dataset = dataset
-		self.run.log_training("Loaded metadata", level=logging.INFO)
+		self.config = run.config
 
 	def load_model(self, path: str):
 		# load model
@@ -206,15 +161,26 @@ class TaskBase:
 			pass
 		else:
 			raise Exception(f"Unknown model type {self.config['model_type']}")
+		model = model.to(self.run.device)
 		
 		self.run.log_training(f"Loaded model {path}", level=logging.INFO)
 		return model
+	
+	def get_inferencer(self):
+		if self.config[const.MODEL_TYPE] == const.CNN:
+			from cnn_classifier import cnn_inference
+			return cnn_inference.CNN_Inference()
+		elif self.config[const.MODEL_TYPE] == const.BEATS:
+			pass
+		else:
+			raise Exception(f"Unknown model type {self.config['model_type']}")
 
 
 class TrainTask(TaskBase):
 
 	def __init__(self, run: Run) -> None:
 		super().__init__(run)
+		
 
 	def start_task(self):
 		print("Start training pipeline")	
@@ -224,8 +190,26 @@ class InferenceTask(TaskBase):
 
 	def __init__(self, run: Run) -> None:
 		super().__init__(run)
+		self.run.config[const.KFOLD_SPLITS] = 1
+		self.run.save_config()
+		
 
-	def _get_model_path(self):
+	def get_dataset(self): # -> AudioDataset
+		from data.dataset import Physionet2016, Physionet2022
+		if self.config[const.INFERENCE_DATASET] == const.PHYSIONET_2016:
+			dataset = Physionet2016()
+		elif self.config[const.INFERENCE_DATASET] == const.PHYSIONET_2022:
+			dataset = Physionet2022()
+		else:
+			raise Exception(f"Unknown dataset type {self.config[const.TRAIN_DATASET]}")
+		dataset.set_run(self.run)
+		dataset.load_file_list()
+		dataset.prepare_chunks()
+		dataset.prepare_kfold_splits()
+		return dataset
+	
+
+	def _get_inference_model_path(self):
 		# get model path
 		model_selection = self.config[const.INFERENCE_MODEL]
 		model_filename = const.get_model_filename(self.config[const.MODEL_TYPE], model_selection[const.EPOCHS], model_selection[const.KFOLD])
@@ -234,17 +218,12 @@ class InferenceTask(TaskBase):
 
 	def start_task(self):
 		self.run.log_training("Starting inference pipeline", level=logging.INFO)
-		super().start_task()	
+
+		self.dataset = self.get_dataset()
+		
 		# load inference model
-		inference_model = super().load_model(self._get_model_path())
+		inference_model = super().load_model(self._get_inference_model_path())
 		inferencer_class = super().get_inferencer()
-		inferencer = inferencer_class(self.run, inference_model, self.dataset.datalist)
 		self.run.log_training("Loaded all needed things for inference", level=logging.WARNING)
-		inferencer.start_inference()
-		# start inference
-		
-
-		
-
-
+		inferencer_class.start_inference(run=self.run, model=inference_model, dataset=self.dataset)
 	

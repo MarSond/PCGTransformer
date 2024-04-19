@@ -8,11 +8,15 @@ from cnn_dataset import CNN_Dataset
 from run import Run
 import MLHelper.constants as const
 from MLHelper.ml_loop import ML_Loop
+from data.dataset import AudioDataset
+
 
 class CNN_Loop(ML_Loop):
 
-	def __init__(self, run: Run) -> None:
-		super().__init__(run)
+	def __init__(self, run: Run, dataset: AudioDataset) -> None:
+		super().__init__(run=run, dataset=dataset)
 	
+	def prepare_self(self):
+
 
 	
