@@ -19,7 +19,7 @@ class CNN_Inference():
 		self.device = run.device
 		self.dataset = dataset
 		
-		_, self.valid_loader = self.dataset.get_dataloaders(num_split=1, PT_Dataset_Class=CNN_Dataset)
+		_, self.valid_loader = self.dataset.get_dataloaders(num_split=1, Torch_Dataset_Class=CNN_Dataset)
 
 
 	# prediction of one batch

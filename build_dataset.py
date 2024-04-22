@@ -212,13 +212,14 @@ def plot_statistics(dataset: AudioDataset):
 	import seaborn as sns
 	from mpl_toolkits.axes_grid1 import ImageGrid
 	import io
+	dataset.set_run(Run())
 	data = dataset.load_file_list()
 	p_size=12
 	font_size=26
+
 	def make_plots(plot_data, dataset: AudioDataset, name=""):
-		
 		fig, axs = plt.subplots(1, 3, figsize=(p_size*3, p_size))
-		seconds = plot_data["length"] / dataset.target_sample_rate
+		seconds = plot_data["length"] / dataset.target_samplerate
 		CLASSES_1 = {0: "NORMAL", 1: "ABNORMAL", 2: "UNKNOWN"}
 		CLASS_LABEL_1 = "label_1" 		# abnormal / normal
 		CLASS_COLORS_1 = ["green", "red", "blue"]
@@ -321,12 +322,22 @@ def plot_statistics(dataset: AudioDataset):
 	fig = make_plots(data, name="All datasets", dataset=dataset)
 	plt.show()
 
+def start_parse():
+	parse_physionet2022()
+	parse_physionet2016()
+	print("Done parsing")
+
+def start_statistics():
+	dataset_statistics(Physionet2016())
+	dataset_statistics(Physionet2022())
+	
+def start_plot():
+	plot_statistics(Physionet2016())
+	plot_statistics(Physionet2022())
 
 if __name__ == '__main__':
 	# parse folder structure and create meta files
-	parse_physionet2022()
-	#parse_physionet2016()
-	print("Done parsing")
-	#dataset_statistics(Physionet2016())
-	dataset_statistics(Physionet2022())
-	#plot_statistics(Physionet2022())
+	
+	start_parse()
+	start_statistics()
+	start_plot()

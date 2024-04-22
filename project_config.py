@@ -32,7 +32,7 @@ project_config = {
 		const.LEARNING_RATE: 0.001,
 		const.N_MELS: 512,
 		const.HOP_LENGTH: 128,
-		const.N_FTT: 1024,
+		const.N_FFT: 1024,
 		const.TOP_DB: 80,
 		const.SIGNAL_FILTER: const.BUTTERPASS,
 		const.BUTTERPASS_LOW: 25,

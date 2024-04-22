@@ -32,14 +32,15 @@ class AudioDataset:
 		assert self.run is not None, "Run object not set"
 		assert self.kfold_splits > 0, "No kfold splits prepared"
 		assert len(self.chunk_list) > 0, "No dataset chunks prepared"
-		assert 0 < self.run.config[const.TRAIN_FRAC] <= 1, "Train fraction must be between 0 and 1"
+		assert 0 <= self.run.config[const.TRAIN_FRAC] <= 1, "Train fraction must be between 0 and 1"
 
 	def _get_kfold_entry(self, fold_number: int, train_list, valid_list) -> dict:
 		fold_entry = { "fold": -1, "class_balance": None, "train_idx": None, "valid_idx": None }
 		fold_entry["fold"] = fold_number
 		fold_entry["train_idx"] = train_list.index.to_list()
 		fold_entry["valid_idx"] = valid_list.index.to_list()
-		fold_entry["class_balance"] = MLUtil.get_class_weights(train_list[self.run.config[const.LABEL_NAME]])
+		fold_entry["train_class_balance"] = MLUtil.get_class_weights(train_list[self.run.config[const.LABEL_NAME]])
+		fold_entry["valid_class_balance"] = MLUtil.get_class_weights(valid_list[self.run.config[const.LABEL_NAME]])
 		return fold_entry
 
 	def prepare_kfold_splits(self):
@@ -51,7 +52,7 @@ class AudioDataset:
 		# do kfold splits on chunk_list
 		if self.kfold_splits == 0 or self.kfold_splits == 1:
 			# no kfold split - Split with train_frac
-			train_list = self.chunk_list.sample(frac=self.run.config[const.TRAIN_FRAC])
+			train_list = self.chunk_list.sample(frac=self.run.config[const.TRAIN_FRAC], random_state=const.SEED_VALUE)
 			valid_list = self.chunk_list.drop(train_list.index)
 
 			fold_entry = self._get_kfold_entry(fold_number=1, train_list=train_list, valid_list=valid_list)
@@ -71,12 +72,13 @@ class AudioDataset:
 				self.kfold_split_data.append(fold_entry)
 		self.run.train_logger.info(f"Prepared {self.kfold_splits} kfold splits")
 
-	def get_dataloaders(self, num_split: int, PT_Dataset_Class: Dataset) -> tuple[DataLoader, DataLoader]:
+	def get_dataloaders(self, num_split: int, Torch_Dataset_Class: Dataset) -> tuple[DataLoader, DataLoader]:
 		# get a set of training and validation dataloader. num_split is the number of prepared kfold split. 
 		# num_split begins regularly with 1. Value of 0 returns the full dataset
 		# takes the pytorch dataset class as input
 		assert len(self.kfold_split_data) > 0, "No kfold splits prepared"
-		assert num_split <= len(self.kfold_split_data), f"num_split {num_split} is higher than the number of prepared kfold splits of {len(self.kfold_split_data)}"
+		assert num_split <= len(self.kfold_split_data), \
+			f"num_split {num_split} is higher than the number of prepared kfold splits of {len(self.kfold_split_data)}"
 		assert num_split >= 1, f"num_split {num_split} is lower than 0"
 		self._self_asserts_for_training()
 
@@ -86,15 +88,30 @@ class AudioDataset:
 		train_indices = current_fold["train_idx"]
 		valid_indices = current_fold["valid_idx"]
 
-		# Create training and validation datasets
-		train_dataset = PT_Dataset_Class(datalist=self.chunk_list.iloc[train_indices], run=self.run)
-		train_dataset.set_mode(const.TRAINING)
-		valid_dataset = PT_Dataset_Class(datalist=self.chunk_list.iloc[valid_indices], run=self.run)
-		valid_dataset.set_mode(const.VALIDATION)
+		if self.run.config[const.TASK_TYPE] == const.TASK_TYPE_DEMO:
+			train_mode = const.DEMO
+			valid_mode = const.DEMO
+		else:
+			train_mode = const.TRAINING
+			valid_mode = const.VALIDATION
 
+
+		# Create training and validation datasets
+		train_dataset = Torch_Dataset_Class(datalist=self.chunk_list.iloc[train_indices], run=self.run)
+		train_dataset.set_mode(train_mode)
+		valid_dataset = Torch_Dataset_Class(datalist=self.chunk_list.iloc[valid_indices], run=self.run)
+		valid_dataset.set_mode(valid_mode)
+
+		
 		# Create training and validation dataloaders
-		trainloader = DataLoader(train_dataset, batch_size=self.batchsize, shuffle=True, drop_last=False)
-		validloader = DataLoader(valid_dataset, batch_size=self.batchsize, shuffle=False, drop_last=False)
+		if train_dataset is None or len(train_dataset) == 0:
+			trainloader = None
+		else:
+			trainloader = DataLoader(train_dataset, batch_size=self.batchsize, shuffle=True, drop_last=False)
+		if valid_dataset is None or len(valid_dataset) == 0:
+			validloader = None
+		else:
+			validloader = DataLoader(valid_dataset, batch_size=self.batchsize, shuffle=False, drop_last=False)
 
 		return trainloader, validloader
 
@@ -103,7 +120,7 @@ class AudioDataset:
 		assert len(self.file_list) > 0, "No file list loaded. Lenght 0"
 
 		seconds = self.run.config[const.CHUNK_DURATION]
-		samplerate = self.target_samplerate = 2000
+		samplerate = self.target_samplerate
 		audio_path = self.dataset_path
 		self.chunk_list = AudioUtil.Loading.get_audio_chunk_list(datalist=self.file_list, target_sr=samplerate, duration=seconds, \
 														   base_path=audio_path, logger=self.run.train_logger)
@@ -123,7 +140,7 @@ class AudioDataset:
 			self.run.log_training(f"Loaded {len(self.file_list)} files from {file_path}", level=logging.INFO)
 		else:
 			print(f"Loaded {len(self.file_list)} files from {file_path}")
-		self.file_list = self.file_list.sample(frac=self.run.config[const.METADATA_FRAC]).reset_index(drop=True)
+		self.file_list = self.file_list.sample(frac=self.run.config[const.METADATA_FRAC], random_state=const.SEED_VALUE).reset_index(drop=True)
 		if self.run is not None:
 			self.run.log_training(f"Count after fractionating with {self.run.config[const.METADATA_FRAC]} : {len(self.file_list)}", level=logging.WARNING)
 		else:

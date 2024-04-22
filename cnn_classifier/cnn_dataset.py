@@ -18,7 +18,7 @@ class CNN_Dataset(Dataset):
 		self.base_path = run.task.dataset.dataset_path
 		self.n_mels = self.cnn_config[const.N_MELS]
 		self.hop_length = self.cnn_config[const.HOP_LENGTH]
-		self.n_fft = self.cnn_config[const.N_FTT]
+		self.n_fft = self.cnn_config[const.N_FFT]
 		self.top_db = self.cnn_config[const.TOP_DB]
 		self.target_samplerate = run.task.dataset.target_samplerate
 		self.augmentation_rate = self.config[const.AUGMENTATION_RATE]
@@ -32,55 +32,69 @@ class CNN_Dataset(Dataset):
 		# Absolute file path of the audio file - concatenate the audio directory with
 		# the relative path
 		current_row = self.datalist.iloc[idx]
-		audio_file = pjoin(self.base_path, current_row['path'])
+		audio_filename = pjoin(self.base_path, current_row['path'])
 		frame_start = current_row['range_start']
 		frame_end = current_row['range_end']
 		class_id = current_row[self.config[const.LABEL_NAME]]
-
+		chunk_name = str(audio_filename.split("\\")[-1]) + "+" + str(frame_start) + "_" + str(frame_end)
 		# print("file and class: ", audio_file, class_id)
-		raw_audio, file_sr = AudioUtil.Loading.load_audiofile(audio_file, start_frame=frame_start, end_frame=frame_end, target_length=self.config[const.CHUNK_DURATION])
+		raw_audio, file_sr = AudioUtil.Loading.load_audiofile(audio_filename, start_frame=frame_start, end_frame=frame_end, target_length=self.config[const.CHUNK_DURATION])
 		if file_sr != self.target_samplerate:
 			self.run.logger_dict["preprocessing"].info("Sample rate mismatch: {} != {}".format(file_sr, self.target_samplerate))
 			raw_audio = preprocessing.resample(raw_audio, file_sr, self.target_samplerate)
 		
-		if self.mode == "audio":
-			sgram_raw = AudioUtil.SignalFeatures.get_melspectrogram(raw_audio, sr=file_sr, n_mels=self.n_mels, top_db=self.top_db, n_fft=self.n_fft, hop_length=self.hop_length, use_librosa=True)
-
+		######## raw audio 
+			
 		if self.cnn_config[const.BUTTERPASS_LOW] != 0 and self.cnn_config[const.BUTTERPASS_HIGH] != 0:
-			audio = preprocessing.Filter.butter_bandpass_filter(raw_audio, self.cnn_config[const.BUTTERPASS_LOW], self.cnn_config[const.BUTTERPASS_HIGH], file_sr, order=self.cnn_config[const.BUTTERPASS_ORDER])
-		else: audio = raw_audio
-		audio = preprocessing.max_abs_normalization(audio)
-		# dur_aud = AudioUtil.pad_trunc(rechan, self.duration)
-		# shift_aud = AudioUtil.time_shift(dur_aud, self.shift_pct)
-
+			filtered_audio = preprocessing.Filter.butter_bandpass_filter(raw_audio, lowcut=self.cnn_config[const.BUTTERPASS_LOW], \
+																highcut=self.cnn_config[const.BUTTERPASS_HIGH], \
+																fs=file_sr, order=self.cnn_config[const.BUTTERPASS_ORDER])
+		else: 
+			filtered_audio = raw_audio
+		filtered_audio = preprocessing.max_abs_normalization(filtered_audio)
+		
+		######## filtered audio
+  
 		if self.mode != const.VALIDATION:
 			_audio_augmentation = augmentation.AudioAugmentation.get_audio_augmentation(p=self.augmentation_rate)
 			_sgram_augmentation = augmentation.AudioAugmentation.get_spectrogram_augmentation(p=self.augmentation_rate)
 
-		if self.mode == const.MODE_AUDIO_VISUALIZATION:
+		if self.mode == const.DEMO:
 			# return raw waveform, filtered waveform, raw spectrogram, filtered spectrogram
+			sgram_raw = self._get_mel(raw_audio, file_sr)
+			sgram_filtered = self._get_mel(filtered_audio, file_sr)
+			audio_augmented = _audio_augmentation(samples=filtered_audio, sample_rate=file_sr)
+			sgram_processed = self._get_mel(audio_augmented, file_sr)
+			sgram_augmented = _sgram_augmentation(magnitude_spectrogram=sgram_processed)
+			sgram_final = sgram_augmented
+			return raw_audio, filtered_audio, audio_augmented, sgram_raw, sgram_filtered, sgram_augmented, class_id, chunk_name
 		
-			audio_augmented = _audio_augmentation(samples=audio, sample_rate=file_sr)
-			sgram_processed = AudioUtil.SignalFeatures.get_melspectrogram(audio_augmented, sr=file_sr, n_mels=self.n_mels, top_db=self.top_db, n_fft=self.n_fft, hop_length=self.hop_length)
-			sgram_final = _sgram_augmentation(magnitude_spectrogram=sgram_processed)
-			
-			return raw_audio, audio, sgram_raw, sgram_final, class_id.item(), audio_file
+		elif self.mode == const.TRAINING :
+			# training uses augmentation and signal filtering
+			audio_augmented = _audio_augmentation(samples=filtered_audio, sample_rate=file_sr)
+			sgram_raw = self._get_mel(filtered_audio, file_sr)
+			sgram_augmented = _sgram_augmentation(magnitude_spectrogram=sgram_raw)	
+			sgram_final = sgram_augmented
 		
-		if self.mode == const.TRAINING :
-
-			audio_augmented = _audio_augmentation(samples=audio, sample_rate=file_sr)
-			sgram_raw = AudioUtil.SignalFeatures.get_melspectrogram(audio_augmented, sr=file_sr, n_mels=self.n_mels, top_db=self.top_db, n_fft=self.n_fft, hop_length=self.hop_length)
-			sgram_final = _sgram_augmentation(magnitude_spectrogram=sgram_raw)	
 		elif self.mode == const.VALIDATION:
-			sgram_final = AudioUtil.SignalFeatures.get_melspectrogram(audio, sr=file_sr, n_mels=self.n_mels, n_fft=self.n_fft, hop_length=self.hop_length)
+			# Validation uses no augmentation but signal filtering
+			sgram_augmented = self._get_mel(filtered_audio, file_sr)
+			sgram_final = sgram_augmented
+		
 		else:
 			raise ValueError("Mode must be either 'train' or 'validation'")
+		
+		######## after processing
+  
 		if not isinstance(sgram_final, torch.Tensor):
 			sgram_final = tensor(sgram_final)
 		return sgram_final, class_id
 
+	def _get_mel(self, audio, file_sr):
+		return AudioUtil.SignalFeatures.get_melspectrogram(audio, sr=file_sr, n_mels=self.n_mels, top_db=self.top_db, n_fft=self.n_fft, hop_length=self.hop_length)
+
 	def set_mode(self, mode):
-		if mode == const.TRAINING or mode == const.VALIDATION or mode == const.MODE_AUDIO_VISUALIZATION:
+		if mode == const.TRAINING or mode == const.VALIDATION or mode == const.TASK_TYPE_DEMO:
 			self.mode = mode
 		else:
 			raise ValueError("Mode must be either 'train' or 'validation'")

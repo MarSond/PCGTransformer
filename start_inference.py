@@ -10,5 +10,5 @@ if __name__ == "__main__":
 	run1_dict = inference_update_dict.copy()
 	run1_dict.update({const.LOAD_PREVIOUS_RUN_NAME: run1_name})
 	run1 = Run(config_update_dict=run1_dict)
-
+	run1.setup_task()
 	run1.start_task()

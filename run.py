@@ -1,3 +1,4 @@
+from abc import abstractmethod
 import os
 import os.path
 from os.path import join as pjoin
@@ -126,16 +127,23 @@ class Run:
 			# Still apply the update dict after the run config, even if extra loaded from file
 			self.config.update_config_dict(config_update_dict)
 		
-
-	def start_task(self):
+	def setup_task(self):
 		"""
-		Starts the task of the TrainingAndEvaluation run
+		Sets up the task of the TrainingAndEvaluation run
 		"""
 		if self.config[const.TASK_TYPE] == const.TASK_TYPE_TRAINING:
 			task = TrainTask(self)
 		elif self.config[const.TASK_TYPE] == const.TASK_TYPE_INFERENCE:
 			task = InferenceTask(self)
+		elif self.config[const.TASK_TYPE] == const.TASK_TYPE_DEMO:
+			task = DemoTask(self)
+		else:
+			raise Exception(f"Unknown task type {self.config[const.TASK_TYPE]}")
 		self.task = task
+		self.task.setup_task()
+
+	def start_task(self):
+		assert hasattr(self, "task"), "Task not set up"
 		self.task.start_task()
 
 class TaskBase:
@@ -174,6 +182,54 @@ class TaskBase:
 			pass
 		else:
 			raise Exception(f"Unknown model type {self.config['model_type']}")
+	
+	def get_dataset(self): # -> AudioDataset
+		from data.dataset import Physionet2016, Physionet2022
+		if self.config[const.TASK_TYPE] == const.TASK_TYPE_TRAINING:
+			mode = const.TASK_TYPE_TRAINING
+		elif self.config[const.TASK_TYPE] == const.TASK_TYPE_INFERENCE:	
+			mode = const.TASK_TYPE_INFERENCE
+		elif self.config[const.TASK_TYPE] == const.TASK_TYPE_DEMO:
+			mode = const.TASK_TYPE_DEMO		
+		else:
+			raise Exception(f"Unknown mode {self.config[const.TASK_TYPE]}")
+		if mode == const.TASK_TYPE_TRAINING:	
+			dataset_mode = const.TRAIN_DATASET
+		elif mode == const.TASK_TYPE_INFERENCE or mode == const.TASK_TYPE_DEMO:
+			dataset_mode = const.INFERENCE_DATASET
+		else:
+			raise Exception(f"Unknown mode {mode}")
+		if self.config[dataset_mode] == const.PHYSIONET_2016:
+			dataset = Physionet2016()
+		elif self.config[dataset_mode] == const.PHYSIONET_2022:
+			dataset = Physionet2022()
+		else:
+			raise Exception(f"Unknown dataset {self.config[dataset_mode]}")
+		dataset.set_run(self.run)
+		dataset.load_file_list()
+		dataset.prepare_chunks()
+		dataset.prepare_kfold_splits()
+		return dataset
+
+	@abstractmethod
+	def setup_task(self):
+		pass
+
+	@abstractmethod
+	def start_task(self):
+		pass
+
+class DemoTask(TaskBase):
+
+	def __init__(self, run: Run) -> None:
+		super().__init__(run)
+	
+	def start_task(self):
+		# likely nothing here 
+		pass
+		
+	def setup_task(self):
+		self.dataset = self.get_dataset()
 
 
 class TrainTask(TaskBase):
@@ -183,7 +239,10 @@ class TrainTask(TaskBase):
 		
 
 	def start_task(self):
-		print("Start training pipeline")	
+		print("Start training pipeline")
+
+	def setup_task(self):
+		pass	
 
 
 class InferenceTask(TaskBase):
@@ -193,20 +252,13 @@ class InferenceTask(TaskBase):
 		self.run.config[const.KFOLD_SPLITS] = 1
 		self.run.save_config()
 		
-
-	def get_dataset(self): # -> AudioDataset
-		from data.dataset import Physionet2016, Physionet2022
-		if self.config[const.INFERENCE_DATASET] == const.PHYSIONET_2016:
-			dataset = Physionet2016()
-		elif self.config[const.INFERENCE_DATASET] == const.PHYSIONET_2022:
-			dataset = Physionet2022()
-		else:
-			raise Exception(f"Unknown dataset type {self.config[const.TRAIN_DATASET]}")
-		dataset.set_run(self.run)
-		dataset.load_file_list()
-		dataset.prepare_chunks()
-		dataset.prepare_kfold_splits()
-		return dataset
+	def setup_task(self):
+		self.dataset = self.get_dataset()
+		
+		# load inference model
+		self.inference_model = super().load_model(self._get_inference_model_path())
+		self.inferencer_class = super().get_inferencer()
+		self.run.log_training("Loaded all needed things for inference", level=logging.WARNING)
 	
 
 	def _get_inference_model_path(self):
@@ -218,12 +270,6 @@ class InferenceTask(TaskBase):
 
 	def start_task(self):
 		self.run.log_training("Starting inference pipeline", level=logging.INFO)
-
-		self.dataset = self.get_dataset()
-		
-		# load inference model
-		inference_model = super().load_model(self._get_inference_model_path())
-		inferencer_class = super().get_inferencer()
-		self.run.log_training("Loaded all needed things for inference", level=logging.WARNING)
-		inferencer_class.start_inference(run=self.run, model=inference_model, dataset=self.dataset)
+	
+		self.inferencer_class.start_inference(run=self.run, model=self.inference_model, dataset=self.dataset)
 	
