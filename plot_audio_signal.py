@@ -18,7 +18,7 @@ class DataAnalysis:
 		self.run.config[const.TASK_TYPE] = const.TASK_TYPE_DEMO
 		self.run.config[const.INFERENCE_DATASET] = dataset_name
 		self.run.config[const.KFOLD_SPLITS] = 1
-		self.run.config[const.METADATA_FRAC] = 0.1
+		self.run.config[const.METADATA_FRAC] = 0.2
 		self.run.config[const.CNN_PARAMS][const.BATCH_SIZE] = 1
 		self.run.config[const.CNN_PARAMS][const.AUGMENTATION_RATE] = 1.0
 		if self.demo_task == const.TASK_TYPE_TRAINING:
@@ -55,7 +55,14 @@ class DataAnalysis:
 
 		# Erster Subplot für das rohe Audiosignal
 		AudioUtil.SignalPlotting.show_signal(raw_audio, samplerate=sr, raw=True, ax=ax1)
-		ax1.set_title(f'Raw Audio Class ID: {class_id}')
+		# red if class is 1, green on class 0
+		if class_id == 1:
+			ax1.set_title(f'Raw Audio Class ID: {class_id}', color='red')
+		elif class_id == 0:
+			ax1.set_title(f'Raw Audio Class ID: {class_id}', color='green')
+		else:
+			ax1.set_title(f'Raw Audio Class ID: {class_id}')
+		
 
 		# Zweiter Subplot für das bearbeitete Audiosignal
 		AudioUtil.SignalPlotting.show_signal(filtered_audio, samplerate=sr, raw=True, ax=ax2)
@@ -91,12 +98,14 @@ class DataAnalysis:
 		ax_text.text(0.5, 0.5, text_content, ha='center', va='center', fontsize=11, wrap=True)
 		return ax1, ax2, ax3, ax4, ax5, ax6, ax_text
 
-	def plot_signal_statistics(self, num_samples=10, offset=0, show=True, fig_file_name=None):
+	def plot_signal_statistics(self, num_samples=10, offset=0, show=True, fig_file_name="sample"):
 		offset += 1 # offset starts with 1, depends on order in the loop and how skip is used
 		# loop train and valid loader back to back
 		loader_counter = 0
 		if num_samples == 0:
 			num_samples = len(self.demo_loader)
+		if num_samples + offset > len(self.demo_loader):
+			num_samples = len(self.demo_loader) - offset
 		fig = plt.figure(figsize=(35, 4*num_samples))  
 		gs = gridspec.GridSpec(num_samples, 7)  # 10 Reihen für die Samples, 5 Spalten für die Subplots
 		for raw_audio, filtered_audio, audio_augmented, sgram_raw, sgram_filtered, sgram_augmented, class_id, audio_file_name in self.demo_loader:
@@ -135,10 +144,9 @@ class DataAnalysis:
 
 			#########
 		plt.tight_layout()
-		if fig_file_name is None:
-			random_number = np.random.randint(0, 10000)
-			fig_file_name = f"audio_example_images/{num_samples}_samples_{offset}_offset_{random_number}.png"
-			fig.savefig(fig_file_name)
+
+		fig_file_name = f"audio_example_images/{fig_file_name}_{num_samples}_samples_{offset}_offset.png"
+		fig.savefig(fig_file_name)
 		if show:
 			plt.show()
 
@@ -146,7 +154,16 @@ class DataAnalysis:
 if __name__ == "__main__":
 	analysis = DataAnalysis(const.PHYSIONET_2022)
 	length = len(analysis.demo_loader)
-	max_per_run = 120
+	max_per_run = 50
 	for i in range(0, length, max_per_run):
-		analysis.plot_signal_statistics(num_samples=max_per_run, offset=i, show=False, fig_file_name=None)
+		analysis.plot_signal_statistics(num_samples=max_per_run, offset=i, show=False, fig_file_name="ph2022")
+		# release memory
+		plt.close("all")
+	
+	analysis2 = DataAnalysis(const.PHYSIONET_2016)
+	length = len(analysis2.demo_loader)
+	max_per_run = 50
+	for i in range(0, length, max_per_run):
+		analysis2.plot_signal_statistics(num_samples=max_per_run, offset=i, show=False, fig_file_name="ph2016")
+		plt.close("all")
 	
