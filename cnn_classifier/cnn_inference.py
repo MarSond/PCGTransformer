@@ -21,6 +21,15 @@ class CNN_Inference():
 		
 		_, self.valid_loader = self.dataset.get_dataloaders(num_split=1, Torch_Dataset_Class=CNN_Dataset)
 
+	def plot_batch(self, data, target):
+		import matplotlib.pyplot as plt
+		import numpy as np
+		fig, axs = plt.subplots(2, 5, figsize=(20, 10))
+		for i in range(10):
+			axs[i//5, i%5].imshow(data[i].squeeze().cpu().numpy(), cmap='gray')
+			axs[i//5, i%5].set_title(f"Label: {target[i]}")
+		plt.show()
+
 
 	# prediction of one batch
 	def start_inference(self, run: Run, model, dataset: AudioDataset):
@@ -32,6 +41,7 @@ class CNN_Inference():
 		y_pred = []
 		#self.metrics.reset_epoch_metrics(validation=True)	
 		for batch_idx, (data, target) in enumerate(testloader):
+			#self.plot_batch(data, target)
 			data, target = data.to(self.device), target.to(self.device)
 			with torch.no_grad():
 				probabilities  = ML_Loop.predict_step(model=self.model, inputs=data, tensor_logger=None) # TODO
@@ -41,6 +51,8 @@ class CNN_Inference():
 				#self.metrics.update_step(predictions=prediction, labels=y_pred, loss=None, validation=True)
 			pbar.update(1)
 			pbar.set_postfix_str(f"Batch: {batch_idx}/{len(testloader)} ") #+ Output: {prediction.cpu().numpy()} - Target: {target.cpu().numpy()}")
+			if run.config[const.SINGLE_BATCH_MODE]:
+				break
 		pbar.close()
 		#fold_metrics = self.metrics.save_epoch_metrics(validation=True)
 		#self.metrics.finish_fold()
@@ -49,9 +61,11 @@ class CNN_Inference():
 		f1 = f1_score(y_true, y_pred, average='macro')
 		precision = precision_score(y_true, y_pred, average='macro')
 		recall = recall_score(y_true, y_pred, average='macro')
-		specificity = recall_score(y_true, y_pred, pos_label=0, average='macro')
+		tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
+		specificity = tn / (tn+fp)
 		confusion = confusion_matrix(y_true, y_pred)
 		mcc = matthews_corrcoef(y_true, y_pred)
+		pred_count_per_class = pd.Series(y_pred).value_counts()
 		
 		print(f"Accuracy: {accuracy}")
 		print(f"F1: {f1}")
@@ -60,5 +74,8 @@ class CNN_Inference():
 		print(f"Specificity: {specificity}")
 		print(f"Confusion Matrix: \n{confusion}")
 		print(f"MCC: {mcc}")
+		print(f"Predictions per class:\n{pred_count_per_class}")
+		print(f"True labels per class:\n{pd.Series(y_true).value_counts()}")
+		print(const.CLASS_DESCRIPTION)
 		return accuracy, f1, precision, recall, specificity, confusion
 

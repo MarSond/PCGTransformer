@@ -6,6 +6,7 @@ from pathlib import Path
 from os.path import normpath, join as pjoin
 import tqdm.autonotebook as tqdm
 import glob
+import MLHelper.constants as const
 from run import Run
 
 def save_training_data_to_csv(metadata, dataset):
@@ -155,10 +156,10 @@ def get_file_metadata_human_ph2022(path: str, anno: pd.DataFrame, dataset_object
 	dataclass = anno.get("Murmur").loc[patient_id]
 
 	if dataclass == "Absent":
-		dataclass = 0
-	elif dataclass == "Present":
+		dataclass = const.CLASS_NEGATIVE
+	elif dataclass == const.CLASS_POSITIVE:
 		dataclass = 1
-	elif dataclass == "Unknown":
+	elif dataclass == const.CLASS_UNKNOWN:
 		dataclass = 2
 	else:
 		raise ValueError(f"Unknown class {dataclass}")
@@ -206,6 +207,10 @@ def dataset_statistics(dataset: AudioDataset):
 	print("Channels count", train_data["channels"].value_counts());print("\n")
 	print("Length count", train_data["length"].value_counts());print("\n")
 	print("Bits count", train_data["bits"].value_counts());print("\n")
+	# todo get hearttcycles, statistics of 
+	if isinstance(dataset, Physionet2022):
+		pass
+
 
 def plot_statistics(dataset: AudioDataset):
 	import matplotlib.pyplot as plt
