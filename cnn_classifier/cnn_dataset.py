@@ -43,18 +43,26 @@ class CNN_Dataset(Dataset):
 			self.run.logger_dict["preprocessing"].info("Sample rate mismatch: {} != {}".format(file_sr, self.target_samplerate))
 			raw_audio = preprocessing.resample(raw_audio, file_sr, self.target_samplerate)
 		
-		######## raw audio 
-			
+		######## Butter filter 	
 		if self.cnn_config[const.BUTTERPASS_LOW] != 0 and self.cnn_config[const.BUTTERPASS_HIGH] != 0:
 			filtered_audio = preprocessing.Filter.butter_bandpass_filter(raw_audio, lowcut=self.cnn_config[const.BUTTERPASS_LOW], \
 																highcut=self.cnn_config[const.BUTTERPASS_HIGH], \
 																fs=file_sr, order=self.cnn_config[const.BUTTERPASS_ORDER])
 		else: 
 			filtered_audio = raw_audio
-		filtered_audio = preprocessing.max_abs_normalization(filtered_audio)
 		
-		######## filtered audio
-  
+		######## Normalization
+		if self.config[const.NORMALIZATION] == const.NORMALIZATION_MINMAX:
+			filtered_audio = preprocessing.max_abs_normalization(filtered_audio)
+		elif self.config[const.NORMALIZATION] == const.NORMALIZATION_ZSCORE:
+			filtered_audio = preprocessing.zscore_normalization(filtered_audio)
+		elif self.config[const.NORMALIZATION] == const.NORMALIZATION_NONE:
+			pass
+		else:
+			raise ValueError(f"Normalization type {self.config[const.NORMALIZATION]} not supported")
+
+		
+		######## 
 		if self.mode != const.VALIDATION:
 			_audio_augmentation = augmentation.AudioAugmentation.get_audio_augmentation(p=self.augmentation_rate)
 			_sgram_augmentation = augmentation.AudioAugmentation.get_spectrogram_augmentation(p=self.augmentation_rate)
