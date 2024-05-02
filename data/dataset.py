@@ -9,12 +9,16 @@ from MLHelper.audio.audioutils import AudioUtil
 import logging
 from sklearn.model_selection import StratifiedGroupKFold
 from torch.utils.data import DataLoader, Dataset
+import json
+
 
 class AudioDataset:
+	
+	columns = [const.META_LABEL_1, const.META_PATIENT_ID, const.META_AUDIO_PATH, "dataset", "diagnosis", \
+				"quality", const.META_SAMPLERATE, "channels", const.META_LENGTH, "bits"]
 
 	def __init__(self):
 		self.base_path = os.path.dirname(__file__)
-		self.columns = [const.META_LABEL_1, const.META_PATIENT_ID, "path", "dataset", "diagnosis", "quality", "sr", "channels", "length", "bits"]
 		self.meta_file_train = None			# File path to the training metadata
 		self.meta_file_test = None
 		self.chunk_list = None # Chunks generated from the dataset file list
@@ -145,6 +149,7 @@ class AudioDataset:
 			self.run.log_training(f"Count after fractionating with {self.run.config[const.METADATA_FRAC]} : {len(self.file_list)}", level=logging.WARNING)
 		else:
 			print(f"Count after fractionating with {self.run.config[const.METADATA_FRAC]} : {len(self.file_list)}")
+		self.file_list[const.META_HEARTCYCLES] = self.file_list[const.META_HEARTCYCLES].apply(json.loads)
 		MLUtil.log_class_balance(data=self.file_list[self.run.config[const.LABEL_NAME]], logger=self.run.train_logger, \
 						    extra_info="Audio files after frac", level=logging.INFO)
 		return self.file_list
@@ -163,7 +168,7 @@ class Physionet2016(AudioDataset):
 		self.train_audio_base_folder = f"{self.dataset_path}/audiofiles/train/"
 		self.train_audio_search_pattern = f"{self.dataset_path}/audiofiles/train/*/*.wav"
 		self.num_classes = 2
-		self.target_samplerate = 2000
+		self.target_samplerate = 4000
 
 	
 

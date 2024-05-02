@@ -37,7 +37,9 @@ class DataAnalysis:
 		train_loader, valid_loader = self.run.task.dataset.get_dataloaders(num_split=1, Torch_Dataset_Class=CNN_Dataset) # TODO select Dataset class
 		return train_loader, valid_loader
 
-	def make_singlefile_plot(self, raw_audio, filtered_audio, audio_augmented, sgram_raw, sgram_filtered, sgram_augmented, class_id, audio_file_name, ax=None):
+	def make_singlefile_plot(self, raw_audio, filtered_audio, audio_augmented, sgram_raw, sgram_filtered, sgram_augmented, meta_row, audio_file_name, ax=None):
+		class_id = meta_row[const.META_LABEL_1]
+		cycle_index = meta_row[const.META_HEARTCYCLES]
 		sr = self.run.task.dataset.target_samplerate
 		cnn_config = self.run.config[const.CNN_PARAMS]
 		config = self.run.config
@@ -108,9 +110,7 @@ class DataAnalysis:
 			num_samples = len(self.demo_loader) - offset
 		fig = plt.figure(figsize=(35, 4*num_samples))  
 		gs = gridspec.GridSpec(num_samples, 7)  # 10 Reihen für die Samples, 5 Spalten für die Subplots
-		for raw_audio, filtered_audio, audio_augmented, sgram_raw, sgram_filtered, sgram_augmented, class_id, audio_file_name in self.demo_loader:
-			# convert class_id to int and audio_file_name to string
-			class_id = int(class_id)
+		for raw_audio, filtered_audio, audio_augmented, sgram_raw, sgram_filtered, sgram_augmented, metadata_row, audio_file_name in self.demo_loader:
 			audio_file_name = str(audio_file_name[0])
 			loader_counter += 1
 			if loader_counter < offset:
@@ -129,7 +129,7 @@ class DataAnalysis:
 			ax_text = plt.subplot(gs[row_index, 6])  # Ändern Sie den Spaltenindex auf 6, da es 7 Spalten gibt
 			try:
 				self.make_singlefile_plot(raw_audio, filtered_audio, audio_augmented, sgram_raw, \
-							  sgram_filtered, sgram_augmented, class_id, audio_file_name, ax=(ax1, ax2, ax3, ax4, ax5, ax6, ax_text))
+							  sgram_filtered, sgram_augmented, metadata_row, audio_file_name, ax=(ax1, ax2, ax3, ax4, ax5, ax6, ax_text))
 			except Exception as e:
 				print(f"Error in display_sample {e}")
 				# fill ax blank
@@ -150,8 +150,7 @@ class DataAnalysis:
 		if show:
 			plt.show()
 
-
-if __name__ == "__main__":
+def multiple():
 	analysis = DataAnalysis(const.PHYSIONET_2022)
 	length = len(analysis.demo_loader)
 	max_per_run = 50
@@ -166,4 +165,13 @@ if __name__ == "__main__":
 	for i in range(0, length, max_per_run):
 		analysis2.plot_signal_statistics(num_samples=max_per_run, offset=i, show=False, fig_file_name="ph2016")
 		plt.close("all")
-	
+
+
+def single():
+	analysis = DataAnalysis(const.PHYSIONET_2022)
+	analysis.plot_signal_statistics(num_samples=1, offset=0, show=True, fig_file_name=None)
+
+
+if __name__ == "__main__":
+	#multiple()
+ 	single()

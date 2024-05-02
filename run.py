@@ -112,7 +112,7 @@ class Run:
 		# check if "project_config.py" exists, then use it "project_config: dict object as confuig update
 		try:
 			import project_config
-			update_dict = project_config.project_config
+			update_dict = project_config.project_config.copy()
 		except Exception as e:
 			update_dict = None
 			print(f"Could not import project_config.py. Exception: {e}")
