@@ -184,8 +184,9 @@ def _get_heartcycle_indicies_2022(file_path: str) -> list:
 			s1_end_times.append(end_time)
 
 	# Hinzufügen des Endwerts des letzten S1-Zyklus, falls vorhanden
-	if s1_end_times:
-		s1_start_times.append(s1_end_times[-1])
+ 	# Nein , da Ende vom S1 zyklus nicht der ende vom gesamten Zyklus ist
+	#if s1_end_times:
+	#	s1_start_times.append(s1_end_times[-1])
 
 	return s1_start_times
 
@@ -247,9 +248,9 @@ def parse_physionet2022():
 	metadata = []
 	pbar = tqdm.tqdm(total=len(training_files), position=0, leave=True, desc="Physionet 2022 Human data list")
 	for file in training_files:
-		if "50782_MV_1.wav" in file:
-			print("Found 50782_MV_1.wav\n Skipping it for now because no heartcycles are available")
-			continue
+		#if "50782_MV_1.wav" in file:
+			#print("Found 50782_MV_1.wav\n Skipping it for now because no heartcycles are available")
+			#continue
 		meta = get_file_metadata_human_ph2022(file, annotation, dataset)
 		if meta[const.META_LABEL_1] == const.CLASS_UNKNOWN:
 			continue # TODO removed unknowns

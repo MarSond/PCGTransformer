@@ -33,8 +33,8 @@ class CNN_Dataset(Dataset):
 		# the relative path
 		current_row = self.datalist.iloc[idx]
 		audio_filename = pjoin(self.base_path, current_row[const.META_AUDIO_PATH])
-		frame_start = current_row['range_start']
-		frame_end = current_row['range_end']
+		frame_start = current_row[const.CHUNK_RANGE_START]
+		frame_end = current_row[const.CHUNK_RANGE_END]
 		class_id = current_row[self.config[const.LABEL_NAME]]
 		chunk_name = str(audio_filename.split("\\")[-1]) + "+" + str(frame_start) + "_" + str(frame_end)
 		# print("file and class: ", audio_file, class_id)
@@ -75,7 +75,9 @@ class CNN_Dataset(Dataset):
 			sgram_processed = self._get_mel(audio_augmented, file_sr)
 			sgram_augmented = _sgram_augmentation(magnitude_spectrogram=sgram_processed)
 			sgram_final = sgram_augmented
-			return raw_audio, normalized_audio, audio_augmented, sgram_raw, sgram_filtered, sgram_augmented, current_row.to_dict(), chunk_name
+			full_raw_audio, full_sr = AudioUtil.Loading.load_audiofile(audio_filename)
+			full_raw_audio = preprocessing.resample(full_raw_audio, full_sr, self.target_samplerate)
+			return raw_audio, normalized_audio, full_raw_audio, sgram_raw, sgram_filtered, sgram_augmented, current_row.to_dict(), chunk_name
 		
 		elif self.mode == const.TRAINING :
 			# training uses augmentation and signal filtering

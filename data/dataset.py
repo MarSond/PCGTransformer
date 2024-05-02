@@ -168,7 +168,7 @@ class Physionet2016(AudioDataset):
 		self.train_audio_base_folder = f"{self.dataset_path}/audiofiles/train/"
 		self.train_audio_search_pattern = f"{self.dataset_path}/audiofiles/train/*/*.wav"
 		self.num_classes = 2
-		self.target_samplerate = 4000
+		self.target_samplerate = 2000
 
 	
 
