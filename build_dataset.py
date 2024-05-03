@@ -334,10 +334,24 @@ def dataset_statistics(dataset: AudioDataset):
 		print("Durchschnittliche BPM:", bpm_values.mean())
 
 
+
+			# Berechnen der Länge in Sekunden für jede Datei
+		train_data["length_in_seconds"] = train_data[const.META_LENGTH] / train_data[const.META_SAMPLERATE]
+		train_data["cycle_length"] = train_data[const.META_HEARTCYCLES].apply(lambda x: sum([end-start for start, end in zip(x[:-1], x[1:])]))
+		# Berechnen der Länge der Herzzyklen in Samples für jede Datei
+		train_data["cycle_length_in_samples"] = train_data["cycle_length"] * train_data[const.META_SAMPLERATE]
+
+		print("Total length in seconds", train_data["length_in_seconds"].sum())
+		print("Total length in samples", train_data[const.META_LENGTH].sum())
+
+		print("Total cycle length in seconds", train_data["cycle_length"].sum())
+		print("Total cycle length in samples", train_data["cycle_length_in_samples"].sum())
+
+		# print anteile der Herzzyklen an der gesamten Länge
+		print("Cycle length in seconds / total length in seconds", train_data["cycle_length"].sum() / train_data["length_in_seconds"].sum())
+		print("Cycle length in samples / total length in samples", train_data["cycle_length_in_samples"].sum() / train_data[const.META_LENGTH].sum())
+		print("Prozentualer Anteil der Herzzyklen an der Gesamtlänge", train_data["cycle_length"].sum() / train_data["length_in_seconds"].sum() * 100, "%")
 		plt.show()
-
-
-
 
 def calculate_bpm(data):
 	# Extrahiert den ersten und letzten Timestamp der Herzzyklen

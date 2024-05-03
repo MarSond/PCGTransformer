@@ -127,7 +127,7 @@ class AudioDataset:
 		samplerate = self.target_samplerate
 		audio_path = self.dataset_path
 		self.chunk_list = AudioUtil.Loading.get_audio_chunk_list(datalist=self.file_list, target_sr=samplerate, duration=seconds, \
-														   base_path=audio_path, logger=self.run.logger_dict["preprocessing"], padding_threshold=0.65)
+														   base_path=audio_path, logger=self.run.logger_dict["preprocessing"], padding_threshold=self.run.config[const.CHUNK_PADDING_THRESHOLD])
 		MLUtil.log_class_balance(data=self.chunk_list[self.run.config[const.LABEL_NAME]], logger=self.run.train_logger, \
 						   extra_info="Audio files after chunking", level=logging.WARNING)
 		return self.chunk_list
