@@ -1,9 +1,8 @@
 import os
 from os.path import join as pjoin
-from os.path import normpath
 import pandas as pd
 from run import Run
-import MLHelper.constants as const
+from MLHelper.constants import *
 from MLHelper.tools.utils import MLUtil
 from MLHelper.audio.audioutils import AudioUtil
 import logging
@@ -14,8 +13,8 @@ import json
 
 class AudioDataset:
 	
-	columns = [const.META_LABEL_1, const.META_PATIENT_ID, const.META_AUDIO_PATH, "dataset", "diagnosis", \
-				"quality", const.META_SAMPLERATE, "channels", const.META_LENGTH, "bits"]
+	columns = [META_LABEL_1, META_PATIENT_ID, META_AUDIO_PATH, META_DATASET, META_DIAGNOSIS, \
+				META_QUALITY, META_SAMPLERATE, META_CHANNELS, META_LENGTH, META_BITS, META_HEARTCYCLES]
 
 	def __init__(self):
 		self.base_path = os.path.dirname(__file__)
@@ -27,8 +26,8 @@ class AudioDataset:
 
 	def set_run(self, run: Run):
 		self.run = run
-		self.kfold_splits = run.config[const.KFOLD_SPLITS]
-		self.batchsize = self.run.config[const.CNN_PARAMS][const.BATCH_SIZE]
+		self.kfold_splits = run.config[KFOLD_SPLITS]
+		self.batchsize = self.run.config[CNN_PARAMS][BATCH_SIZE]
 
 	def _self_asserts_for_training(self):
 		assert self.meta_file_train is not None, "No meta file for training set"
@@ -36,15 +35,15 @@ class AudioDataset:
 		assert self.run is not None, "Run object not set"
 		assert self.kfold_splits > 0, "No kfold splits prepared"
 		assert len(self.chunk_list) > 0, "No dataset chunks prepared"
-		assert 0 <= self.run.config[const.TRAIN_FRAC] <= 1, "Train fraction must be between 0 and 1"
+		assert 0 <= self.run.config[TRAIN_FRAC] <= 1, "Train fraction must be between 0 and 1"
 
 	def _get_kfold_entry(self, fold_number: int, train_list, valid_list) -> dict:
-		fold_entry = { "fold": -1, "class_balance": None, "train_idx": None, "valid_idx": None }
-		fold_entry["fold"] = fold_number
-		fold_entry["train_idx"] = train_list.index.to_list()
-		fold_entry["valid_idx"] = valid_list.index.to_list()
-		fold_entry["train_class_balance"] = MLUtil.get_class_weights(train_list[self.run.config[const.LABEL_NAME]])
-		fold_entry["valid_class_balance"] = MLUtil.get_class_weights(valid_list[self.run.config[const.LABEL_NAME]])
+		fold_entry = { FOLD: -1, TRAIN_INDEX: [], VALID_INDEX: [], TRAIN_CLASS_BALANCE: {}, VALID_CLASS_BALANCE: {} }
+		fold_entry[FOLD] = fold_number
+		fold_entry[TRAIN_INDEX] = train_list.index.to_list()
+		fold_entry[VALID_INDEX] = valid_list.index.to_list()
+		fold_entry[TRAIN_CLASS_BALANCE] = MLUtil.get_class_weights(train_list[self.run.config[LABEL_NAME]])
+		fold_entry[VALID_CLASS_BALANCE] = MLUtil.get_class_weights(valid_list[self.run.config[LABEL_NAME]])
 		return fold_entry
 
 	def prepare_kfold_splits(self):
@@ -56,18 +55,18 @@ class AudioDataset:
 		# do kfold splits on chunk_list
 		if self.kfold_splits == 0 or self.kfold_splits == 1:
 			# no kfold split - Split with train_frac
-			train_list = self.chunk_list.sample(frac=self.run.config[const.TRAIN_FRAC], random_state=const.SEED_VALUE)
+			train_list = self.chunk_list.sample(frac=self.run.config[TRAIN_FRAC], random_state=SEED_VALUE)
 			valid_list = self.chunk_list.drop(train_list.index)
 
 			fold_entry = self._get_kfold_entry(fold_number=1, train_list=train_list, valid_list=valid_list)
 			
 			self.kfold_split_data.append(fold_entry)
 		else:
-			data_kfold_object = StratifiedGroupKFold(n_splits=self.run.config[const.KFOLD_SPLITS], shuffle=True, random_state=const.SEED_VALUE)
+			data_kfold_object = StratifiedGroupKFold(n_splits=self.run.config[KFOLD_SPLITS], shuffle=True, random_state=SEED_VALUE)
 			current_fold_number = 0
 			
-			label_list = self.chunk_list.get(self.run.config[const.LABEL_NAME])
-			name_list = self.chunk_list.get(const.META_PATIENT_ID)	# unique identifier for each file and thus hopefully patient
+			label_list = self.chunk_list.get(self.run.config[LABEL_NAME])
+			name_list = self.chunk_list.get(META_PATIENT_ID)	# unique identifier for each file and thus hopefully patient
 			for train_index, val_index in data_kfold_object.split(self.chunk_list, label_list, name_list):
 				current_fold_number += 1 # fold number starts with 1
 				train_list = self.chunk_list.iloc[train_index]
@@ -88,16 +87,16 @@ class AudioDataset:
 
 		# Get training and validation indices from kfold_split_data
 		current_fold = self.kfold_split_data[num_split-1] # Numbering of Folds starts with 1
-		assert num_split == current_fold["fold"], "num_split does not match the kfold split data" 
+		assert num_split == current_fold[FOLD], "num_split does not match the kfold split data" 
 		train_indices = current_fold["train_idx"]
 		valid_indices = current_fold["valid_idx"]
 
-		if self.run.config[const.TASK_TYPE] == const.TASK_TYPE_DEMO:
-			train_mode = const.DEMO
-			valid_mode = const.DEMO
+		if self.run.config[TASK_TYPE] == TASK_TYPE_DEMO:
+			train_mode = DEMO
+			valid_mode = DEMO
 		else:
-			train_mode = const.TRAINING
-			valid_mode = const.VALIDATION
+			train_mode = TRAINING
+			valid_mode = VALIDATION
 
 
 		# Create training and validation datasets
@@ -123,17 +122,17 @@ class AudioDataset:
 		assert self.file_list is not None, "No file list loaded"
 		assert len(self.file_list) > 0, "No file list loaded. Lenght 0"
 
-		seconds = self.run.config[const.CHUNK_DURATION]
+		seconds = self.run.config[CHUNK_DURATION]
 		samplerate = self.target_samplerate
 		audio_path = self.dataset_path
 		self.chunk_list = AudioUtil.Loading.get_audio_chunk_list(datalist=self.file_list, target_sr=samplerate, duration=seconds, \
-														   base_path=audio_path, logger=self.run.logger_dict["preprocessing"], padding_threshold=self.run.config[const.CHUNK_PADDING_THRESHOLD])
-		MLUtil.log_class_balance(data=self.chunk_list[self.run.config[const.LABEL_NAME]], logger=self.run.train_logger, \
+														   base_path=audio_path, logger=self.run.logger_dict["preprocessing"], padding_threshold=self.run.config[CHUNK_PADDING_THRESHOLD])
+		MLUtil.log_class_balance(data=self.chunk_list[self.run.config[LABEL_NAME]], logger=self.run.train_logger, \
 						   extra_info="Audio files after chunking", level=logging.WARNING)
 		return self.chunk_list
 
-	def load_file_list(self, mode=const.TASK_TYPE_TRAINING) -> pd.DataFrame:
-		if mode == const.TASK_TYPE_TRAINING:
+	def load_file_list(self, mode=TASK_TYPE_TRAINING) -> pd.DataFrame:
+		if mode == TASK_TYPE_TRAINING:
 			file_path = self.meta_file_train
 		elif mode == "test":
 			file_path = self.meta_file_test
@@ -144,13 +143,13 @@ class AudioDataset:
 			self.run.log_training(f"Loaded {len(self.file_list)} files from {file_path}", level=logging.INFO)
 		else:
 			print(f"Loaded {len(self.file_list)} files from {file_path}")
-		self.file_list = self.file_list.sample(frac=self.run.config[const.METADATA_FRAC], random_state=const.SEED_VALUE).reset_index(drop=True)
+		self.file_list = self.file_list.sample(frac=self.run.config[METADATA_FRAC], random_state=SEED_VALUE).reset_index(drop=True)
 		if self.run is not None:
-			self.run.log_training(f"Count after fractionating with {self.run.config[const.METADATA_FRAC]} : {len(self.file_list)}", level=logging.WARNING)
+			self.run.log_training(f"Count after fractionating with {self.run.config[METADATA_FRAC]} : {len(self.file_list)}", level=logging.WARNING)
 		else:
-			print(f"Count after fractionating with {self.run.config[const.METADATA_FRAC]} : {len(self.file_list)}")
-		self.file_list[const.META_HEARTCYCLES] = self.file_list[const.META_HEARTCYCLES].apply(json.loads)
-		MLUtil.log_class_balance(data=self.file_list[self.run.config[const.LABEL_NAME]], logger=self.run.train_logger, \
+			print(f"Count after fractionating with {self.run.config[METADATA_FRAC]} : {len(self.file_list)}")
+		self.file_list[META_HEARTCYCLES] = self.file_list[META_HEARTCYCLES].apply(json.loads)
+		MLUtil.log_class_balance(data=self.file_list[self.run.config[LABEL_NAME]], logger=self.run.train_logger, \
 						    extra_info="Audio files after frac", level=logging.INFO)
 		return self.file_list
 	

@@ -6,7 +6,7 @@ run1_name = "run1"
 if __name__ == "__main__":
 
 	inference_update_dict = { 	const.TASK_TYPE: const.INFERENCE, const.METADATA_FRAC: 0.2, \
-						  		const.INFERENCE_MODEL: {const.EPOCHS: 70, const.KFOLD: 10}, \
+						  		const.INFERENCE_MODEL: {const.EPOCHS: 70, const.FOLD: 10}, \
 								const.CNN_PARAMS: {const.BATCH_SIZE: 1},  \
 								const.SINGLE_BATCH_MODE: False, const.TRAIN_FRAC: 0.0, \
 								const.INFERENCE_DATASET: const.PHYSIONET_2022, \

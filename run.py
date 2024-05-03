@@ -264,7 +264,7 @@ class InferenceTask(TaskBase):
 	def _get_inference_model_path(self):
 		# get model path
 		model_selection = self.config[const.INFERENCE_MODEL]
-		model_filename = const.get_model_filename(self.config[const.MODEL_TYPE], model_selection[const.EPOCHS], model_selection[const.KFOLD])
+		model_filename = const.get_model_filename(self.config[const.MODEL_TYPE], model_selection[const.EPOCHS], model_selection[const.FOLD])
 		model_path = pjoin(self.run._get_run_results_path(self.config[const.LOAD_PREVIOUS_RUN_NAME]), const.MODEL_FOLDER, model_filename)
 		return model_path
 
