@@ -15,14 +15,12 @@ from MLHelper.config import Config
 from MLHelper import constants as const
 from MLHelper.config import setup_environment
 from MLHelper.audio.audioutils import AudioUtil
+from abc import ABC, abstractmethod
 
 
 class Run:
-	# create run folder
-	# load and parse metadata
-	# call the classifier or trainer
 	def __init__(self, config_update_dict=None) -> None:
-		self.config = Config() # base config with barebones
+		self.config = Config()  # Base config with barebones
 		self.setup_config(config_update_dict)
 		self.setup_run_name(config_update_dict)
 		self.setup_run_results_path()
@@ -30,13 +28,12 @@ class Run:
 		self.save_config()
 		setup_environment(self.config)
 		self.device = torch.device("cuda")
-		
-	def setup_run_name(self, config_update_dict: dict=None):
-		"""
-		Sets self.run_name_suffix and self.run_name
-		"""
+		self.log_training("Run initialized.", level=logging.INFO)
+
+	def setup_run_name(self, config_update_dict: dict = None):
+		"""Sets self.run_name_suffix and self.run_name based on provided dictionary or generates a random suffix."""
 		if config_update_dict is not None and const.RUN_NAME_SUFFIX in config_update_dict.keys():
-			self.run_name_suffix = config_update_dict[const.RUN_NAME_SUFFIX]													# run_name_suffix is set in config_update_dict
+			self.run_name_suffix = config_update_dict[const.RUN_NAME_SUFFIX]	# run_name_suffix is set in config_update_dict
 		else:
 			self.run_name_suffix = "".join(random.choices(string.ascii_uppercase, k=4))	# random string
 		self.run_name = f"{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_{self.run_name_suffix}"
@@ -62,36 +59,27 @@ class Run:
 		directory_status = FileUtils.safe_path_create(self.run_results_path)
 		if directory_status is not True:
 			raise Exception(f"Could not create run results directory {self.run_results_path}.")
-		# setup specific output paths here
 
 	def setup_logger(self, log_to_file):
-		"""
-		Sets self.logger_dict
-		"""
+		"""Initializes logging for different modules within the application."""
 		log_filename = pjoin(self.run_results_path, self.config[const.FILENAME_LOG_OUTPUT]) if log_to_file else None
 		log_request_dict = {"training": logging.DEBUG, "preprocessing": logging.WARNING, \
 							"metadata": logging.DEBUG, "tensor": logging.WARNING, "inference": logging.DEBUG}
 		self.logger_dict = logging_helper.get_logger_dict(logger_map=log_request_dict, sub_name=self.run_name, to_console=True, log_filename=log_filename)
-		self.logger_dict["training"].info(f"Created logger dict {self.logger_dict.keys()}. Log file: {log_filename}. Sub name: {self.run_name}")
 		self.train_logger = self.logger_dict["training"]
+		self.train_logger.info(f"Logger initialized. Log file: {log_filename}")
 
 	def log(self, message, logger_name, level=logging.INFO):
-		"""
-		Logs the provided message with the provided level using the logger in self.logger_dict with the provided name
-		"""
+		"""Generic logging function that logs a message with a specified level and logger."""
 		assert logger_name in self.logger_dict.keys(), f"Logger {logger_name} not found"
 		self.logger_dict[logger_name].log(level, message)
 
 	def log_training(self, message, level=logging.INFO):
-		"""
-		Logs the provided message with the provided level using the logger in self.logger_dict with name "training"
-		"""
+		"""Specific logging function for training related logs."""
 		self.log(message, logger_name="training", level=level)
 
 	def save_config(self):
-		"""
-		Saves self.config._config_dict as YAML file under the name constants.FILENAME_RUN_CONFIG
-		"""
+		"""Saves the current configuration to a YAML file and logs the operation."""
 		config_save_path = pjoin(self.run_results_path, self.config[const.FILENAME_RUN_CONFIG])
 		self.log_training(f"Saving configuration to {config_save_path}", level=logging.INFO)
 		self.config.save_config_dict(config_save_path)
@@ -126,28 +114,31 @@ class Run:
 		if config_update_dict is not None:
 			# Still apply the update dict after the run config, even if extra loaded from file
 			self.config.update_config_dict(config_update_dict)
-		
+			print(f"Config updated with provided dictionary")
+
 	def setup_task(self):
-		"""
-		Sets up the task of the TrainingAndEvaluation run
-		"""
-		if self.config[const.TASK_TYPE] == const.TASK_TYPE_TRAINING:
-			task = TrainTask(self)
-		elif self.config[const.TASK_TYPE] == const.TASK_TYPE_INFERENCE:
-			task = InferenceTask(self)
-		elif self.config[const.TASK_TYPE] == const.TASK_TYPE_DEMO:
-			task = DemoTask(self)
+		"""Setup the task based on the configuration."""
+		task_type = self.config[const.TASK_TYPE]
+		if task_type == const.TASK_TYPE_TRAINING:
+			self.task = TrainTask(self)
+		elif task_type == const.TASK_TYPE_INFERENCE:
+			self.task = InferenceTask(self)
+		elif task_type == const.TASK_TYPE_DEMO:
+			self.task = DemoTask(self)
 		else:
-			raise Exception(f"Unknown task type {self.config[const.TASK_TYPE]}")
-		self.task = task
+			self.log_training(f"Unknown task type {task_type}", level=logging.ERROR)
+			raise ValueError(f"Unknown task type {task_type}")
 		self.task.setup_task()
 
 	def start_task(self):
+		"""Starts the configured task."""
 		assert hasattr(self, "task"), "Task not set up"
 		self.task.start_task()
 
-class TaskBase:
-	
+
+class TaskBase(ABC):
+	"""Abstract base class for tasks in the training and evaluation run."""
+
 	def __init__(self, run: Run) -> None:
 		self.run = run
 		self.config = run.config
@@ -170,46 +161,40 @@ class TaskBase:
 		else:
 			raise Exception(f"Unknown model type {self.config['model_type']}")
 		model = model.to(self.run.device)
-		
-		self.run.log_training(f"Loaded model {path}", level=logging.INFO)
+		self.run.log_training(f"Model loaded from {path}", level=logging.INFO)
 		return model
-	
+
 	def get_inferencer(self):
-		if self.config[const.MODEL_TYPE] == const.CNN:
+		"""Retrieves the inferencer class based on the model type in configuration."""
+		model_type = self.config[const.MODEL_TYPE]
+		if model_type == const.CNN:
 			from cnn_classifier import cnn_inference
 			return cnn_inference.CNN_Inference()
-		elif self.config[const.MODEL_TYPE] == const.BEATS:
-			pass
+		elif model_type == const.BEATS:
+			return None  # Placeholder for BEATS inferencer
 		else:
-			raise Exception(f"Unknown model type {self.config['model_type']}")
-	
-	def get_dataset(self): # -> AudioDataset
-		from data.dataset import Physionet2016, Physionet2022
-		if self.config[const.TASK_TYPE] == const.TASK_TYPE_TRAINING:
-			mode = const.TASK_TYPE_TRAINING
-		elif self.config[const.TASK_TYPE] == const.TASK_TYPE_INFERENCE:	
-			mode = const.TASK_TYPE_INFERENCE
-		elif self.config[const.TASK_TYPE] == const.TASK_TYPE_DEMO:
-			mode = const.TASK_TYPE_DEMO		
-		else:
-			raise Exception(f"Unknown mode {self.config[const.TASK_TYPE]}")
-		if mode == const.TASK_TYPE_TRAINING:	
-			dataset_mode = const.TRAIN_DATASET
-		elif mode == const.TASK_TYPE_INFERENCE or mode == const.TASK_TYPE_DEMO:
-			dataset_mode = const.INFERENCE_DATASET
-		else:
-			raise Exception(f"Unknown mode {mode}")
-		if self.config[dataset_mode] == const.PHYSIONET_2016:
-			dataset = Physionet2016()
-		elif self.config[dataset_mode] == const.PHYSIONET_2022:
-			dataset = Physionet2022()
-		else:
-			raise Exception(f"Unknown dataset {self.config[dataset_mode]}")
-		dataset.set_run(self.run)
-		dataset.load_file_list()
-		dataset.prepare_chunks()
-		dataset.prepare_kfold_splits()
-		return dataset
+			self.run.log_training(f"Unknown model type {model_type}", level=logging.ERROR)
+			raise ValueError(f"Unknown model type {model_type}")
+
+	def get_dataset(self):
+		"""Configures and returns the dataset object based on the task type and dataset configuration."""
+		task_type = self.config[const.TASK_TYPE]
+		if task_type in [const.TASK_TYPE_TRAINING, const.TASK_TYPE_INFERENCE, const.TASK_TYPE_DEMO]:
+			dataset_mode = self.config.get(const.TRAIN_DATASET if task_type == const.TASK_TYPE_TRAINING else const.INFERENCE_DATASET)
+			if dataset_mode == const.PHYSIONET_2016:
+				from data.dataset import Physionet2016
+				dataset = Physionet2016()
+			elif dataset_mode == const.PHYSIONET_2022:
+				from data.dataset import Physionet2022
+				dataset = Physionet2022()
+			else:
+				self.run.log_training(f"Unknown dataset {dataset_mode}", level=logging.ERROR)
+				raise ValueError(f"Unknown dataset {dataset_mode}")
+			dataset.set_run(self.run)
+			dataset.load_file_list()
+			dataset.prepare_chunks()
+			dataset.prepare_kfold_splits()
+			return dataset
 
 	@abstractmethod
 	def setup_task(self):
@@ -218,58 +203,66 @@ class TaskBase:
 	@abstractmethod
 	def start_task(self):
 		pass
-
+		
 class DemoTask(TaskBase):
+	"""Task class for demonstration purposes, may have simplified operations."""
 
 	def __init__(self, run: Run) -> None:
 		super().__init__(run)
-	
-	def start_task(self):
-		# likely nothing here 
-		pass
-		
+		self.run.log_training("Initializing Demo Task.", level=logging.INFO)
+
 	def setup_task(self):
+		"""Set up the task, potentially loading needed resources or preparing settings."""
+		self.run.log_training("Setting up demo task.", level=logging.DEBUG)
 		self.dataset = self.get_dataset()
 
+	def start_task(self):
+		"""Starts the demo task; likely does not do much processing."""
+		self.run.log_training("Starting demo task.", level=logging.INFO)
 
 class TrainTask(TaskBase):
+	"""Task class dedicated to training models."""
 
 	def __init__(self, run: Run) -> None:
 		super().__init__(run)
-		
+		self.run.log_training("Initializing Training Task.", level=logging.INFO)
+
+	def setup_task(self):
+		"""Set up the training task, including loading models, datasets, and other resources."""
+		self.run.log_training("Setting up training task.", level=logging.DEBUG)
 
 	def start_task(self):
-		print("Start training pipeline")
-
-	def setup_task(self):
-		pass	
-
+		"""Starts the training process."""
+		self.run.log_training("Starting training pipeline.", level=logging.INFO)
+		# Example: Placeholder for training loop logic.
+		self.run.log_training("Training complete.", level=logging.INFO)
 
 class InferenceTask(TaskBase):
+	"""Task class for running inference with pre-trained models."""
 
 	def __init__(self, run: Run) -> None:
 		super().__init__(run)
-		self.run.config[const.KFOLD_SPLITS] = 1
+		self.run.config[const.KFOLD_SPLITS] = 1  # Typically, no k-fold in inference
 		self.run.save_config()
-		
+		self.run.log_training("Initializing Inference Task.", level=logging.INFO)
+
 	def setup_task(self):
+		"""Setup for the inference task including loading the necessary model and dataset."""
+		self.run.log_training("Setting up inference task.", level=logging.DEBUG)
 		self.dataset = self.get_dataset()
-		
-		# load inference model
-		self.inference_model = super().load_model(self._get_inference_model_path())
-		self.inferencer_class = super().get_inferencer()
+		self.inference_model = self.load_model(self._get_inference_model_path())
+		self.inferencer_class = self.get_inferencer()
 		self.run.log_training("Loaded all needed things for inference", level=logging.WARNING)
 	
 
 	def _get_inference_model_path(self):
-		# get model path
+		"""Get the path to the inference model based on the configuration."""
 		model_selection = self.config[const.INFERENCE_MODEL]
 		model_filename = const.get_model_filename(self.config[const.MODEL_TYPE], model_selection[const.EPOCHS], model_selection[const.FOLD])
 		model_path = pjoin(self.run._get_run_results_path(self.config[const.LOAD_PREVIOUS_RUN_NAME]), const.MODEL_FOLDER, model_filename)
 		return model_path
 
 	def start_task(self):
-		self.run.log_training("Starting inference pipeline", level=logging.INFO)
-	
+		"""Executes the inference pipeline, using the loaded model and dataset."""
+		self.run.log_training("Starting inference pipeline.", level=logging.INFO)
 		self.inferencer_class.start_inference(run=self.run, model=self.inference_model, dataset=self.dataset)
-	

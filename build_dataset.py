@@ -27,6 +27,8 @@ def get_base_metadata(path):
 	meta[const.META_BITS] = info.bits_per_sample 
 	return meta
 
+def _get_heartcycle_indicies_2016(file_path: str) -> list:
+	return []
 
 def get_file_metadata_human_ph2016(path: str, anno: pd.DataFrame, data_classes: pd.DataFrame, dataset_object: Physionet2016) -> dict:
 	meta = get_base_metadata(path)
@@ -51,22 +53,22 @@ def get_file_metadata_human_ph2016(path: str, anno: pd.DataFrame, data_classes: 
 			val = "Unknown"
 		diagnosis = str(val)
 
-	meta["path"] = path.replace(dataset_object.dataset_path + "\\","")
+	meta[const.META_AUDIO_PATH] = path.replace(dataset_object.dataset_path + "\\","")
 	
 	#meta["path"] = path.replace(paths['train_audio_path'].replace("/","\\") + "\\","")
 	meta["patient_id"] = id
-	meta["dataset"] = dataset_object.folder_name+"-"+dataset_name
-	meta['diagnosis'] = diagnosis	# NOT the label, but the diagnosis string
-	meta["quality"] = int(quality)
-	#meta["min_amp"] = audio[0].min().item()
-	#meta["max_amp"] = audio[0].max().item()
+	meta[const.META_DATASET] = dataset_object.folder_name+"-"+dataset_name
+	meta[const.META_DIAGNOSIS] = diagnosis	# NOT the label, but the diagnosis string
+	meta[const.META_QUALITY] = int(quality)
+
 	try:    # Try "updated" annotation list
 		dataclass = int(anno.loc[id]['Class (-1=normal 1=abnormal)'].squeeze())
 	except KeyError:	# If fails, use original dataset annotation
 		dataclass = int(data_classes.loc[id]['class'].squeeze())
 	if dataclass == -1:
 		dataclass = 0
-	meta["label_1"] = dataclass
+	meta[const.META_LABEL_1] = dataclass
+	meta[const.META_HEARTCYCLES] = _get_heartcycle_indicies_2016(file_path=path)
 	return meta
 
 
@@ -138,7 +140,6 @@ def parse_physionet2016():
 	for file in train_data:
 		metadata.append(get_file_metadata_human_ph2016(file, anno, data_classes, dataset))
 		pbar.update(1)
-	metadata[const.META_HEARTCYCLES] = metadata[const.META_HEARTCYCLES].apply(json.dumps)
 	save_training_data_to_csv(metadata, dataset)
 
 
@@ -478,7 +479,7 @@ def plot_statistics(dataset: AudioDataset):
 	plt.show()
 
 def start_parse():
-	#parse_physionet2016()
+	parse_physionet2016()
 	parse_physionet2022()
 	print("Done parsing")
 
