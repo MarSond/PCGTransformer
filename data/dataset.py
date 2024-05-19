@@ -27,6 +27,7 @@ class AudioDataset:
 		self.chunk_list = None       # List of dataset chunks
 		self.file_list = None        
 		self.run = None
+		self.PyTorch_Dataset_Class = None
 
 	def set_run(self, run: Run):
 		"""
@@ -37,7 +38,7 @@ class AudioDataset:
 		"""
 		self.run = run
 		self.kfold_splits = run.config[KFOLD_SPLITS]
-		self.batchsize = run.config[CNN_PARAMS][BATCH_SIZE]
+		self.batchsize = run.config[BATCH_SIZE]
 
 	def _self_asserts_for_training(self):
 		"""

@@ -143,33 +143,21 @@ class TaskBase(ABC):
 		self.run = run
 		self.config = run.config
 
-	def load_model(self, path: str):
-		# load model
-		self.run.log_training("Loading model", level=logging.INFO)
-		if not os.path.exists(path):
-			raise Exception(f"Model path {path} does not exist")
-		# get model type
-		if self.config[const.MODEL_TYPE] == const.CNN:
-			from cnn_classifier import cnn_models
-			model = cnn_models.CNN_Model_1(self.run) 
-			save_dict = torch.load(path, pickle_module=dill,)
-			model.load_state_dict(save_dict['model_state_dict'])
-			if hasattr(self, "optimizer"):
-				self.optimizer.load_state_dict(save_dict['optimizer_state_dict'])
-		elif self.config[const.MODEL_TYPE] == const.BEATS:
-			pass
-		else:
-			raise Exception(f"Unknown model type {self.config['model_type']}")
-		model = model.to(self.run.device)
-		self.run.log_training(f"Model loaded from {path}", level=logging.INFO)
-		return model
+	def get_trainer(self):
+		"""Retrieves the trainer class based on the model type in configuration."""
+		model_type = self.config[const.MODEL_TYPE]
+		if model_type == const.CNN:
+			from cnn_classifier import cnn_training
+			return cnn_training.CNN_Training()
+		elif model_type == const.BEATS:
+			return None
 
-	def get_inferencer(self):
+	def get_inferencer(self, run: Run, dataset):
 		"""Retrieves the inferencer class based on the model type in configuration."""
 		model_type = self.config[const.MODEL_TYPE]
 		if model_type == const.CNN:
 			from cnn_classifier import cnn_inference
-			return cnn_inference.CNN_Inference()
+			return cnn_inference.CNN_Inference(run=run, dataset=dataset)
 		elif model_type == const.BEATS:
 			return None  # Placeholder for BEATS inferencer
 		else:
@@ -230,12 +218,17 @@ class TrainTask(TaskBase):
 	def setup_task(self):
 		"""Set up the training task, including loading models, datasets, and other resources."""
 		self.run.log_training("Setting up training task.", level=logging.DEBUG)
+		self.dataset = self.get_dataset()
+		# check if TRAINING_CHECKPOINT is set and pass it to training loop TODO
+  
+		self.run.log_training("Loaded all needed things for training", level=logging.WARNING)
 
 	def start_task(self):
 		"""Starts the training process."""
 		self.run.log_training("Starting training pipeline.", level=logging.INFO)
 		# Example: Placeholder for training loop logic.
 		self.run.log_training("Training complete.", level=logging.INFO)
+
 
 class InferenceTask(TaskBase):
 	"""Task class for running inference with pre-trained models."""
@@ -250,11 +243,10 @@ class InferenceTask(TaskBase):
 		"""Setup for the inference task including loading the necessary model and dataset."""
 		self.run.log_training("Setting up inference task.", level=logging.DEBUG)
 		self.dataset = self.get_dataset()
-		self.inference_model = self.load_model(self._get_inference_model_path())
-		self.inferencer_class = self.get_inferencer()
+		self.inference_model, _ = MLUtil.load_model(path=self._get_inference_model_path(), run=self.run, logger=self.run.train_logger)
+		self.inferencer_class = self.get_inferencer(run=self.run, dataset=self.dataset)
 		self.run.log_training("Loaded all needed things for inference", level=logging.WARNING)
 	
-
 	def _get_inference_model_path(self):
 		"""Get the path to the inference model based on the configuration."""
 		model_selection = self.config[const.INFERENCE_MODEL]

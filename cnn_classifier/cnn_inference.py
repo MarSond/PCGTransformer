@@ -1,6 +1,7 @@
 from .cnn_dataset import CNN_Dataset
 import torch
 from tqdm.autonotebook import tqdm
+from MLHelper.ml_loop import *
 from torch.utils.data import DataLoader
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, confusion_matrix, matthews_corrcoef
 import pandas as pd
@@ -9,17 +10,12 @@ from data.dataset import AudioDataset
 from run import Run
 from MLHelper.ml_loop import ML_Loop
 
-class CNN_Inference():
 
+class CNN_Inference(ML_Loop):
 
-	def init_inference(self, run: Run, model, dataset: AudioDataset):
-		self.run = run
-		self.model = model
-		self.base_config = run.config
-		self.device = run.device
-		self.dataset = dataset
-		
-		_, self.valid_loader = self.dataset.get_dataloaders(num_split=1, Torch_Dataset_Class=CNN_Dataset)
+	def __init__(self, run: Run, dataset: AudioDataset) -> None:
+		super().__init__(run, dataset, pytorch_dataset_class=CNN_Dataset)
+		#_, self.valid_loader = self.dataset.get_dataloaders(num_split=1, Torch_Dataset_Class=CNN_Dataset)
 
 	def plot_batch(self, data, target):
 		import matplotlib.pyplot as plt
@@ -30,28 +26,27 @@ class CNN_Inference():
 			axs[i//5, i%5].set_title(f"Label: {target[i]}")
 		plt.show()
 
-
-	# prediction of one batch
-	def start_inference(self, run: Run, model, dataset: AudioDataset):
-		self.init_inference(run, model, dataset)
-		self.model.eval()
-		testloader = self.valid_loader
-		pbar = tqdm(total=len(testloader), desc="Inference")
+	@fold_hook
+	def fold_loop(self, fold_idx):
+		self.prepare_fold(fold_idx)
+		# usually epoch loop is called here but we are doing inference so we don't need it
+		print("Inference loop in cnn_inference.py")
+		pbar = tqdm(total=len(self.valid_loader), desc="Inference")
 		y_true = []
 		y_pred = []
 		#self.metrics.reset_epoch_metrics(validation=True)	
-		for batch_idx, (data, target) in enumerate(testloader):
+		for batch_idx, (data, target) in enumerate(self.valid_loader):
 			#self.plot_batch(data, target)
 			data, target = data.to(self.device), target.to(self.device)
 			with torch.no_grad():
-				probabilities  = ML_Loop.predict_step(model=self.model, inputs=data, tensor_logger=None) # TODO
+				probabilities  = self.predict_step(model=self.model, inputs=data, tensor_logger=self.tensor_logger) 
 				prediction = probabilities.argmax(dim=1, keepdim=True)
 				y_true += target.cpu().numpy().tolist()
 				y_pred += prediction.cpu().numpy().tolist()
 				#self.metrics.update_step(predictions=prediction, labels=y_pred, loss=None, validation=True)
 			pbar.update(1)
-			pbar.set_postfix_str(f"Batch: {batch_idx}/{len(testloader)} ") #+ Output: {prediction.cpu().numpy()} - Target: {target.cpu().numpy()}")
-			if run.config[const.SINGLE_BATCH_MODE]:
+			pbar.set_postfix_str(f"Batch: {batch_idx}/{len(self.valid_loader)} ") #+ Output: {prediction.cpu().numpy()} - Target: {target.cpu().numpy()}")
+			if self.run.config[const.SINGLE_BATCH_MODE]:
 				break
 		pbar.close()
 		#fold_metrics = self.metrics.save_epoch_metrics(validation=True)
@@ -78,4 +73,13 @@ class CNN_Inference():
 		print(f"True labels per class:\n{pd.Series(y_true).value_counts()}")
 		print(const.CLASS_DESCRIPTION)
 		return accuracy, f1, precision, recall, specificity, confusion
+
+
+	# prediction of one batch
+	def start_inference(self, run: Run, model, dataset: AudioDataset):
+		self.model = model
+		self.model.eval()
+
+
+		self.kfold_loop()
 

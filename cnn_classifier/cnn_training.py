@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 from cnn_base import CNN_base
 import logging
 
-class CNN_Training(CNN_base):
+class CNN_Training():
 
 	def __init__(self, base_config, device, datalist, pbars: MLPbar = None):
 		super().__init__(base_config, device, datalist, pbars)
