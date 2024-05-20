@@ -29,9 +29,11 @@ class CNN_Inference(ML_Loop):
 	@fold_hook
 	def fold_loop(self, fold_idx):
 		self.prepare_fold(fold_idx)
+		pbar = tqdm(total=len(self.valid_loader), desc="Inference")
+
 		# usually epoch loop is called here but we are doing inference so we don't need it
 		print("Inference loop in cnn_inference.py")
-		pbar = tqdm(total=len(self.valid_loader), desc="Inference")
+		
 		y_true = []
 		y_pred = []
 		#self.metrics.reset_epoch_metrics(validation=True)	
