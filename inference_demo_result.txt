@@ -1,35 +1,48 @@
 ##### Inferenz auf komplettem 2016 Datensatz mit 2016 Modell
-Generated 9896 7.0s chunks in total
---------- Audio files after chunking class balance ---------
-Class 0         7559
-Class 1         2337
-Class 0 Percentage 76.4% out of 9896
-Class 1 Percentage 23.6% out of 9896
---------------------------------------------------
-Accuracy: 0.9262253663466398
-F1: 0.904194519603162
-Precision: 0.8925810104753815
-Recall: 0.9181124162223654
-Specificity: 0.9341840161182001
+Model loaded from runs/run1\models\cnn_epoch70_fold10.pt
+Loaded all needed things for inference
+Starting inference pipeline.
+Starting k-fold cross-validation
+Starting fold 1
+
+Accuracy: 0.9277485852869847
+F1: 0.9044200479828748
+Precision: 0.8886564953232761
+Recall: 0.9244749745873044
+Specificity: 0.9306786611985712
 Confusion Matrix:
-[[1391   98]
- [  48  442]]
-MCC: 0.810291292938236
-
+[[7035  524]
+ [ 191 2146]]
+MCC: 0.8123421839977003
 Predictions per class:
-[0]    1439
-[1]     540
-
+[0]    7226
+[1]    2670
+Name: count, dtype: int64
 True labels per class:
-0    1489
-1     490
-
+0    7559
+1    2337
+Name: count, dtype: int64
 0: Negative, 1: Positive, 2: Unknown
+Ending fold 1
+Ending k-fold cross-validation
 
 
 
 ##### Inferenz auf komplettem 2022 Datensatz mit 2016 Modell
 
+Setting up inference task.
+Loaded 3007 files from e:\Work\PCGClassification\PCGTransformer\data\physionet2022\train_list.csv
+Count after fractionating with 1.0 : 3007
+--------- Audio files after frac class balance ---------
+Class 0         2391
+Class 1         616
+Class 0 Percentage 79.5% out of 3007
+Class 1 Percentage 20.5% out of 3007
+--------------------------------------------------
+3003 chunks are too short                                                                                                                                                                                           
+1097 chunks above threshold = 65.0% (beeing kept)
+Total length of all files: 275374379
+Total length of all chunks skipped: 15796224 (5.74%)
 Generated 9440 7.0s chunks in total
 --------- Audio files after chunking class balance ---------
 Class 0         7549
@@ -37,22 +50,32 @@ Class 1         1891
 Class 0 Percentage 80.0% out of 9440
 Class 1 Percentage 20.0% out of 9440
 --------------------------------------------------
-Accuracy: 0.3405720338983051
-F1: 0.33676721419713634
-Precision: 0.4823381355529748
-Recall: 0.47759338372220395
-Specificity: 0.2568627450980392
+Prepared 1 K-fold splits.
+Loading model from {path}
+Model loaded from runs/run1\models\cnn_epoch70_fold10.pt
+Loaded all needed things for inference
+Starting inference pipeline.
+Starting k-fold cross-validation
+Starting fold 1
+Prepared fold 1 with train and validation loaders
+
+Accuracy: 0.35391949152542374
+F1: 0.35075550140388423
+Precision: 0.4894718119468397
+Recall: 0.4870421758524721
+Specificity: 0.26493575307987816
 Confusion Matrix:
-[[ 393 1137]
- [ 108  250]]
-MCC: -0.039786561520942815
-
+[[2000 5549]
+ [ 550 1341]]
+MCC: -0.023360000803506423
 Predictions per class:
-[1]    1387
-[0]     501
-
+[1]    6890
+[0]    2550
+Name: count, dtype: int64
 True labels per class:
-0    1530
-1     358
-
+0    7549
+1    1891
+Name: count, dtype: int64
 0: Negative, 1: Positive, 2: Unknown
+Ending fold 1
+Ending k-fold cross-validation

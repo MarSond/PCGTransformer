@@ -99,6 +99,7 @@ class AudioDataset:
 				fold_entry = self._get_kfold_entry(fold_number=current_fold_number, train_list=train_list, valid_list=valid_list)
 				self.kfold_split_data.append(fold_entry)
 		self.run.train_logger.info(f"Prepared {self.kfold_splits} K-fold splits.")
+		self.run.train_logger.debug(f"K-fold split data: {self.kfold_split_data}")
 
 	def get_dataloaders(self, num_split: int, Torch_Dataset_Class: Dataset) -> tuple[DataLoader, DataLoader]:
 		"""
