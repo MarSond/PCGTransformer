@@ -64,10 +64,9 @@ class Run:
 
 	def setup_logger(self, log_to_file):
 		"""Initializes logging for different modules within the application."""
-		log_filename = pjoin(self.run_results_path,
-		                     self.config[const.FILENAME_LOG_OUTPUT]) if log_to_file else None
-		log_request_dict = {"training": logging.DEBUG, "preprocessing": logging.WARNING,
-                      "metadata": logging.DEBUG, "tensor": logging.WARNING, "inference": logging.DEBUG}
+		log_filename = pjoin(self.run_results_path, self.config[const.FILENAME_LOG_OUTPUT]) if log_to_file else None
+		log_request_dict = {"training": logging.DEBUG, "preprocessing": logging.WARNING, "loop": logging.WARNING, \
+							"metadata": logging.DEBUG, "tensor": logging.WARNING, "inference": logging.DEBUG}
 		self.logger_dict = logging_helper.get_logger_dict(
 			logger_map=log_request_dict, sub_name=self.run_name, to_console=True, log_filename=log_filename)
 		self.train_logger = self.logger_dict["training"]
@@ -75,28 +74,28 @@ class Run:
 
 	def log(self, message, logger_name, level=logging.INFO):
 		"""Generic logging function that logs a message with a specified level and logger."""
-		assert logger_name in self.logger_dict.keys(
-		), f"Logger {logger_name} not found"
+		assert logger_name in self.logger_dict.keys(), f"Logger {logger_name} not found"
 		self.logger_dict[logger_name].log(level, message)
 
 	def log_training(self, message, level=logging.INFO):
 		"""Specific logging function for training related logs."""
 		self.log(message, logger_name="training", level=level)
+	
+	def log_loop(self, message, level=logging.INFO):
+		"""Specific logging function for loop related logs."""
+		self.log(message, logger_name="loop", level=level)
 
 	def save_config(self):
 		"""Saves the current configuration to a YAML file and logs the operation."""
-		config_save_path = pjoin(self.run_results_path,
-		                         self.config[const.FILENAME_RUN_CONFIG])
-		self.log_training(
-			f"Saving configuration to {config_save_path}", level=logging.INFO)
+		config_save_path = pjoin(self.run_results_path, self.config[const.FILENAME_RUN_CONFIG])
+		self.log_training(f"Saving configuration to {config_save_path}", level=logging.INFO)
 		self.config.save_config_dict(config_save_path)
 
 	def load_config(self) -> Config:
 		"""
 		Loads and returns the Config of the TrainingAndEvaluation run with the provided name
 		"""
-		current_path = pjoin(Run._get_run_results_path(
-			self.run_name), self.config[const.FILENAME_RUN_CONFIG])
+		current_path = pjoin(Run._get_run_results_path(self.run_name), self.config[const.FILENAME_RUN_CONFIG])
 		return Config(config_update_path=current_path)
 
 	def setup_config(self, config_update_dict: dict):
@@ -115,11 +114,10 @@ class Run:
 
 		self.config = Config(update_dict=update_dict)
 		if config_update_dict is not None and config_update_dict.get(const.LOAD_PREVIOUS_RUN_NAME) is not None:
-			run_config_path = pjoin(self._get_run_results_path(
-				config_update_dict[const.LOAD_PREVIOUS_RUN_NAME]), self.config[const.FILENAME_RUN_CONFIG])
-		self.config.update_config_yaml(run_config_path)
-		print(
-			f"Updating config with config from {self.config[const.LOAD_PREVIOUS_RUN_NAME]}")
+			run_config_path = pjoin(self._get_run_results_path(config_update_dict[const.LOAD_PREVIOUS_RUN_NAME]), \
+				self.config[const.FILENAME_RUN_CONFIG])
+			self.config.update_config_yaml(run_config_path)
+			print(f"Updating config with config from {self.config[const.LOAD_PREVIOUS_RUN_NAME]}")
 		if config_update_dict is not None:
 			# Still apply the update dict after the run config, even if extra loaded from file
 			self.config.update_config_dict(config_update_dict)
@@ -182,8 +180,7 @@ class TaskBase(ABC):
 		"""Configures and returns the dataset object based on the task type and dataset configuration."""
 		task_type = self.config[const.TASK_TYPE]
 		if task_type in [const.TASK_TYPE_TRAINING, const.TASK_TYPE_INFERENCE, const.TASK_TYPE_DEMO]:
-			dataset_mode = self.config.get(
-				const.TRAIN_DATASET if task_type == const.TASK_TYPE_TRAINING else const.INFERENCE_DATASET)
+			dataset_mode = self.config.get(const.TRAIN_DATASET if task_type == const.TASK_TYPE_TRAINING else const.INFERENCE_DATASET)
 			if dataset_mode == const.PHYSIONET_2016:
 				from data.dataset import Physionet2016
 				dataset = Physionet2016()
@@ -265,8 +262,8 @@ class InferenceTask(TaskBase):
 		"""Setup for the inference task including loading the necessary model and dataset."""
 		self.run.log_training("Setting up inference task.", level=logging.DEBUG)
 		self.dataset = self.get_dataset()
-		self.inference_model, _ = MLUtil.load_model(
-			path=self._get_inference_model_path(), run=self.run, logger=self.run.train_logger)
+		self.inference_model, _ = MLUtil.load_model(path=self._get_inference_model_path(), \
+			run=self.run, logger=self.run.train_logger)
 		self.inferencer_class = self.get_inferencer(
 			run=self.run, dataset=self.dataset)
 		self.run.log_training(

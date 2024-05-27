@@ -4,14 +4,15 @@ from run import Run
 
 if __name__ == "__main__":
 
-	train_update_dict = {TASK_TYPE: TRAINING, METADATA_FRAC: 0.1,
+	train_update_dict = {TASK_TYPE: TRAINING, METADATA_FRAC: 0.05,
                       CNN_PARAMS: {},
-                      SINGLE_BATCH_MODE: False, TRAIN_FRAC: 0.8, KFOLD_SPLITS: 0, \
+                      SINGLE_BATCH_MODE: False, TRAIN_FRAC: 0.8, KFOLD_SPLITS: 5, \
                       # TRAINING_CHECKPOINT: {EPOCH: 10, RUN_NAME: "run1_name"}, \
                       CHUNK_DURATION: 7.0, CHUNK_METHOD: CHUNK_METHOD_FIXED, \
                       }
 
-	run1_dict = train_update_dict.copy().update({TRAIN_DATASET: PHYSIONET_2022})
+	run1_dict = train_update_dict.copy()
+	run1_dict.update({TRAIN_DATASET: PHYSIONET_2022})
 
 	run1 = Run(config_update_dict=run1_dict)
 	run1.setup_task()

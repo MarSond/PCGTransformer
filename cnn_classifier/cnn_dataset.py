@@ -40,7 +40,7 @@ class CNN_Dataset(Dataset):
 		# print("file and class: ", audio_file, class_id)
 		raw_audio, file_sr = AudioUtil.Loading.load_audiofile(audio_filename, start_frame=frame_start, end_frame=frame_end, target_length=self.config[const.CHUNK_DURATION])
 		if file_sr != self.target_samplerate:
-			self.run.logger_dict["preprocessing"].info("Sample rate mismatch: {} != {}".format(file_sr, self.target_samplerate))
+			# self.run.logger_dict["preprocessing"].info("Sample rate mismatch: {} != {}".format(file_sr, self.target_samplerate))
 			raw_audio = preprocessing.resample(raw_audio, file_sr, self.target_samplerate)
 		
 		######## Butter filter 	

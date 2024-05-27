@@ -47,9 +47,9 @@ class AudioDataset:
 		assert self.meta_file_train is not None, "Training metadata file not set."
 		assert self.meta_file_test is not None, "Testing metadata file not set."
 		assert self.run is not None, "Run configuration not set."
-		assert self.kfold_splits > 0, "K-fold splits not prepared."
+		assert self.kfold_splits > 0, "Atleast one split needed."
 		assert len(self.chunk_list) > 0, "No dataset chunks prepared."
-		assert 0 <= self.run.config[TRAIN_FRAC] <= 1, "Training fraction must be between 0 and 1."
+		assert 0.0 <= self.run.config[TRAIN_FRAC] <= 1.0, "Training fraction must be between 0 and 1."
 
 	def _get_kfold_entry(self, fold_number: int, train_list, valid_list) -> dict:
 		"""
@@ -80,7 +80,7 @@ class AudioDataset:
 		self._self_asserts_for_training()
 		self.kfold_split_data = []
 
-		if self.kfold_splits in {0, 1}:
+		if self.kfold_splits == 1:
 			# If no K-fold split is needed, use the training fraction to split the data.
 			# no kfold split - Split with train_frac
 			train_list = self.chunk_list.sample(frac=self.run.config[TRAIN_FRAC], random_state=SEED_VALUE)

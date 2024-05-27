@@ -4,7 +4,7 @@ import numpy as np
 import torchaudio
 from pathlib import Path
 from os.path import normpath, join as pjoin
-import tqdm.autonotebook as tqdm
+from tqdm.auto import tqdm
 import glob
 import MLHelper.constants as const
 from run import Run
