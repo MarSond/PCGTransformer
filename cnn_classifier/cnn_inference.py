@@ -31,8 +31,6 @@ class CNN_Inference(ML_Loop):
 		self.prepare_fold(fold_idx)
 		pbar = tqdm(total=len(self.valid_loader), desc="Inference")
 
-		# usually epoch loop is called here but we are doing inference so we don't need it
-		print("Inference loop in cnn_inference.py")
 
 		y_true = []
 		y_pred = []
@@ -41,8 +39,7 @@ class CNN_Inference(ML_Loop):
 			# self.plot_batch(data, target)
 			data, target = data.to(self.device), target.to(self.device)
 			with torch.no_grad():
-				probabilities = self.predict_step(
-					model=self.model, inputs=data, tensor_logger=self.tensor_logger)
+				probabilities = self.predict_step(model=self.model, inputs=data, tensor_logger=self.tensor_logger)
 				prediction = probabilities.argmax(dim=1, keepdim=True)
 				y_true += target.cpu().numpy().tolist()
 				y_pred += prediction.cpu().numpy().tolist()

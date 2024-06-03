@@ -65,12 +65,20 @@ class Run:
 	def setup_logger(self, log_to_file):
 		"""Initializes logging for different modules within the application."""
 		log_filename = pjoin(self.run_results_path, self.config[const.FILENAME_LOG_OUTPUT]) if log_to_file else None
-		log_request_dict = {"training": logging.DEBUG, "preprocessing": logging.WARNING, "loop": logging.WARNING, \
-							"metadata": logging.DEBUG, "tensor": logging.WARNING, "inference": logging.DEBUG}
+		
+		log_request_dict = {
+			"training":		{logging_helper.LEVEL_CONSOLE: logging.DEBUG, 	logging_helper.LEVEL_FILE: logging.DEBUG},
+			"preprocessing":{logging_helper.LEVEL_CONSOLE: logging.WARNING,	logging_helper.LEVEL_FILE: logging.INFO},
+			"loop":			{logging_helper.LEVEL_CONSOLE: logging.WARNING,	logging_helper.LEVEL_FILE: logging.WARNING},
+			"metadata":		{logging_helper.LEVEL_CONSOLE: logging.INFO, 	logging_helper.LEVEL_FILE: logging.DEBUG},
+			"tensor":		{logging_helper.LEVEL_CONSOLE: logging.WARNING,	logging_helper.LEVEL_FILE: logging.ERROR},
+		}
 		self.logger_dict = logging_helper.get_logger_dict(
 			logger_map=log_request_dict, sub_name=self.run_name, to_console=True, log_filename=log_filename)
+		
 		self.train_logger = self.logger_dict["training"]
 		self.train_logger.info(f"Logger initialized. Log file: {log_filename}")
+
 
 	def log(self, message, logger_name, level=logging.INFO):
 		"""Generic logging function that logs a message with a specified level and logger."""

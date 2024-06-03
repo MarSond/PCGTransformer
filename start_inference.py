@@ -9,7 +9,7 @@ run1_name = "run1"
 if __name__ == "__main__":
 
 	inference_update_dict = {	TASK_TYPE: INFERENCE, METADATA_FRAC: 0.2, \
-								INFERENCE_MODEL: {EPOCHS: 70, FOLD: 10}, \
+									INFERENCE_MODEL: {EPOCHS: 70, FOLD: 10}, \
 								BATCH_SIZE: 1, EPOCHS: 1,  \
 								SINGLE_BATCH_MODE: False, TRAIN_FRAC: 0.0, \
 								INFERENCE_DATASET: PHYSIONET_2016, \
