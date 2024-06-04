@@ -173,7 +173,7 @@ class TaskBase(ABC):
 
 	def get_inferencer(self, run: Run, dataset):
 		"""Retrieves the inferencer class based on the model type in configuration."""
-		model_type = self.config[const.MODEL_TYPE]
+		model_type = self.config[const.MODEL_METHOD_TYPE]
 		if model_type == const.CNN:
 			from cnn_classifier import cnn_inference
 			return cnn_inference.CNN_Inference(run=run, dataset=dataset)
@@ -253,7 +253,6 @@ class TrainTask(TaskBase):
 		self.run.log_training("Starting training pipeline.", level=logging.INFO)
 		self.trainer_class.start_training_run()
 		# reminder: dataset object contains all files but also the kfold splits and dataloaders prepared
-		# TODO log the File IDs used for training
 		self.run.log_training("Training complete.", level=logging.CRITICAL)
 
 
@@ -281,7 +280,7 @@ class InferenceTask(TaskBase):
 		"""Get the path to the inference model based on the configuration."""
 		model_selection = self.config[const.INFERENCE_MODEL]
 		model_filename = const.get_model_filename(
-			self.config[const.MODEL_TYPE], model_selection[const.EPOCHS], model_selection[const.FOLD])
+			self.config[const.MODEL_METHOD_TYPE], model_selection[const.EPOCHS], model_selection[const.FOLD])
 		model_path = pjoin(self.run._get_run_results_path(
 			self.config[const.LOAD_PREVIOUS_RUN_NAME]), const.MODEL_FOLDER, model_filename)
 		return model_path

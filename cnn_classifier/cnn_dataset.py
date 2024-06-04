@@ -26,7 +26,6 @@ class CNN_Dataset(Dataset):
 
 	def __len__(self):
 		return len(self.datalist)
-		# TODO verify datalist is only data of current fold
   
 	def __getitem__(self, idx):
 		# Absolute file path of the audio file - concatenate the audio directory with
