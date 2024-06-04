@@ -32,7 +32,7 @@ class CNN_Base(nn.Module):
 			self.activation = nn.SiLU(inplace=True)
 		else: raise ValueError(f"Activation {cnn_config[const.ACTIVATION]} not found in YAMNET Model list")
 		self.softmax = nn.Softmax(dim=1)
-		self.tensor_logger = run.logger_dict["tensor"]
+		self.tensor_logger = run.logger_dict[const.LOGGER_TENSOR]
 		self._initialize_weights()
 	
 

@@ -67,16 +67,16 @@ class Run:
 		log_filename = pjoin(self.run_results_path, self.config[const.FILENAME_LOG_OUTPUT]) if log_to_file else None
 		
 		log_request_dict = {
-			"training":		{logging_helper.LEVEL_CONSOLE: logging.DEBUG, 	logging_helper.LEVEL_FILE: logging.DEBUG},
-			"preprocessing":{logging_helper.LEVEL_CONSOLE: logging.WARNING,	logging_helper.LEVEL_FILE: logging.INFO},
-			"loop":			{logging_helper.LEVEL_CONSOLE: logging.WARNING,	logging_helper.LEVEL_FILE: logging.WARNING},
-			"metadata":		{logging_helper.LEVEL_CONSOLE: logging.INFO, 	logging_helper.LEVEL_FILE: logging.DEBUG},
-			"tensor":		{logging_helper.LEVEL_CONSOLE: logging.WARNING,	logging_helper.LEVEL_FILE: logging.ERROR},
+			const.LOGGER_TRAINING:		{logging_helper.LEVEL_CONSOLE: logging.DEBUG, 	logging_helper.LEVEL_FILE: logging.DEBUG},
+			const.LOGGER_PREPROCESSING:	{logging_helper.LEVEL_CONSOLE: logging.WARNING,	logging_helper.LEVEL_FILE: logging.INFO},
+			const.LOGGER_LOOP:			{logging_helper.LEVEL_CONSOLE: logging.WARNING,	logging_helper.LEVEL_FILE: logging.WARNING},
+			const.LOGGER_METADATA:		{logging_helper.LEVEL_CONSOLE: logging.INFO, 	logging_helper.LEVEL_FILE: logging.DEBUG},
+			const.LOGGER_TENSOR:		{logging_helper.LEVEL_CONSOLE: logging.WARNING,	logging_helper.LEVEL_FILE: logging.ERROR},
 		}
 		self.logger_dict = logging_helper.get_logger_dict(
 			logger_map=log_request_dict, sub_name=self.run_name, to_console=True, log_filename=log_filename)
 		
-		self.train_logger = self.logger_dict["training"]
+		self.train_logger = self.logger_dict[const.LOGGER_TRAINING]
 		self.train_logger.info(f"Logger initialized. Log file: {log_filename}")
 
 
@@ -87,11 +87,11 @@ class Run:
 
 	def log_training(self, message, level=logging.INFO):
 		"""Specific logging function for training related logs."""
-		self.log(message, logger_name="training", level=level)
+		self.log(message, logger_name=const.LOGGER_TRAINING, level=level)
 	
 	def log_loop(self, message, level=logging.INFO):
 		"""Specific logging function for loop related logs."""
-		self.log(message, logger_name="loop", level=level)
+		self.log(message, logger_name=const.LOGGER_LOOP, level=level)
 
 	def save_config(self):
 		"""Saves the current configuration to a YAML file and logs the operation."""

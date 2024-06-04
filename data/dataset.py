@@ -98,8 +98,8 @@ class AudioDataset:
 				valid_list = self.chunk_list.iloc[val_index]
 				fold_entry = self._get_kfold_entry(fold_number=current_fold_number, train_list=train_list, valid_list=valid_list)
 				self.kfold_split_data.append(fold_entry)
-		self.run.log(f"Prepared {self.kfold_splits} K-fold splits.", logger_name="metadata", level=logging.WARNING)
-		self.run.log(f"K-fold split data: {self.kfold_split_data}", logger_name="metadata", level=logging.DEBUG)
+		self.run.log(f"Prepared {self.kfold_splits} K-fold splits.", logger_name=LOGGER_METADATA, level=logging.WARNING)
+		self.run.log(f"K-fold split data: {self.kfold_split_data}", logger_name=LOGGER_METADATA, level=logging.DEBUG)
 
 	def get_dataloaders(self, num_split: int, Torch_Dataset_Class: Dataset) -> tuple[DataLoader, DataLoader]:
 		"""
@@ -151,9 +151,11 @@ class AudioDataset:
 		audio_path = self.dataset_path
 		self.chunk_list = AudioUtil.Loading.get_audio_chunk_list(
 			datalist=self.file_list, target_sr=samplerate, duration=seconds,
-			base_path=audio_path, logger=self.run.logger_dict["preprocessing"], padding_threshold=self.run.config[CHUNK_PADDING_THRESHOLD]
+			base_path=audio_path, logger=self.run.logger_dict[LOGGER_PREPROCESSING], \
+			padding_threshold=self.run.config[CHUNK_PADDING_THRESHOLD]
 		)
-		MLUtil.log_class_balance(data=self.chunk_list[self.run.config[LABEL_NAME]], logger=self.run.logger_dict["metadata"], \
+		MLUtil.log_class_balance(data=self.chunk_list[self.run.config[LABEL_NAME]], \
+									logger=self.run.logger_dict[LOGGER_METADATA], \
 								 extra_info="Audio files after chunking", level=logging.WARNING)
 		return self.chunk_list
 
@@ -167,16 +169,17 @@ class AudioDataset:
 
 		self.file_list = pd.read_csv(file_path, index_col="id", encoding='utf-8')
 		if self.run is not None:
-			self.run.log(f"Loaded {len(self.file_list)} files from {file_path}", logger_name="training", level=logging.INFO)
+			self.run.log(f"Loaded {len(self.file_list)} files from {file_path}", logger_name=LOGGER_TRAINING, level=logging.INFO)
 		else:
 			print(f"Loaded {len(self.file_list)} files from {file_path}")
 		self.file_list = self.file_list.sample(frac=self.run.config[METADATA_FRAC], random_state=SEED_VALUE).reset_index(drop=True)
 		if self.run is not None:
-			self.run.log(f"Count after fractionating with {self.run.config[METADATA_FRAC]} : {len(self.file_list)}", logger_name="training", level=logging.WARNING)
+			self.run.log(f"Count after fractionating with {self.run.config[METADATA_FRAC]} : {len(self.file_list)}", \
+				logger_name=LOGGER_TRAINING, level=logging.WARNING)
 		else:
 			print(f"Count after fractionating with {self.run.config[METADATA_FRAC]} : {len(self.file_list)}")
 		self.file_list[META_HEARTCYCLES] = self.file_list[META_HEARTCYCLES].apply(json.loads)
-		MLUtil.log_class_balance(data=self.file_list[self.run.config[LABEL_NAME]], logger=self.run.logger_dict["metadata"], \
+		MLUtil.log_class_balance(data=self.file_list[self.run.config[LABEL_NAME]], logger=self.run.logger_dict[LOGGER_METADATA], \
 							extra_info="Audio files after frac", level=logging.WARNING)
 		return self.file_list
 
