@@ -156,7 +156,7 @@ class AudioDataset:
 		)
 		MLUtil.log_class_balance(data=self.chunk_list[self.run.config[LABEL_NAME]], \
 									logger=self.run.logger_dict[LOGGER_METADATA], \
-								 extra_info="Audio files after chunking", level=logging.WARNING)
+								 	extra_info="Audio files after chunking", level=logging.WARNING)
 		return self.chunk_list
 
 	def load_file_list(self, mode=TASK_TYPE_TRAINING) -> pd.DataFrame:
@@ -167,7 +167,7 @@ class AudioDataset:
 		else:
 			raise ValueError(f"Unknown mode {mode} for loading dataset")
 
-		self.file_list = pd.read_csv(file_path, index_col="id", encoding='utf-8')
+		self.file_list = pd.read_csv(file_path, index_col=META_ID, encoding='utf-8')
 		if self.run is not None:
 			self.run.log(f"Loaded {len(self.file_list)} files from {file_path}", logger_name=LOGGER_TRAINING, level=logging.INFO)
 		else:

@@ -15,7 +15,7 @@ def save_training_data_to_csv(metadata, dataset):
 	metadata_df = pd.DataFrame(metadata)
 	print(metadata_df.head())
 	print("Train path", dataset.meta_file_train)
-	metadata_df.to_csv(dataset.meta_file_train, index=True, index_label="id", encoding='utf-8')
+	metadata_df.to_csv(dataset.meta_file_train, index=True, index_label=const.META_ID, encoding='utf-8')
 
 
 def get_base_metadata(path):
