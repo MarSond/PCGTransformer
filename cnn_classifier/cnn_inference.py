@@ -1,8 +1,6 @@
 from .cnn_dataset import CNN_Dataset
 import torch
-from tqdm.auto import tqdm
 from MLHelper.ml_loop import *
-from torch.utils.data import DataLoader
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, confusion_matrix, matthews_corrcoef
 import pandas as pd
 from MLHelper import constants as const
@@ -17,6 +15,9 @@ class CNN_Inference(ML_Loop):
 		super().__init__(run, dataset, pytorch_dataset_class=CNN_Dataset)
 		# _, self.valid_loader = self.dataset.get_dataloaders(num_split=1, Torch_Dataset_Class=CNN_Dataset)
 
+	def prepare_self(self) -> None:
+		return super().prepare_self()
+
 	def plot_batch(self, data, target):
 		import matplotlib.pyplot as plt
 		import numpy as np
@@ -29,8 +30,7 @@ class CNN_Inference(ML_Loop):
 	@fold_hook
 	def fold_loop(self, fold_idx):
 		self.prepare_fold(fold_idx)
-		pbar = tqdm(total=len(self.valid_loader), desc="Inference")
-
+		self.pbars.update_total(bar_name=self.pbars.NAME_VALID, total=len(self.valid_loader))
 
 		y_true = []
 		y_pred = []
@@ -39,17 +39,15 @@ class CNN_Inference(ML_Loop):
 			# self.plot_batch(data, target)
 			data, target = data.to(self.device), target.to(self.device)
 			with torch.no_grad():
-				probabilities = self.predict_step(model=self.model, inputs=data, tensor_logger=self.tensor_logger)
+				loss, probabilities = self.predict_step(model=self.model, inputs=data, labels=target)
 				prediction = probabilities.argmax(dim=1, keepdim=True)
 				y_true += target.cpu().numpy().tolist()
 				y_pred += prediction.cpu().numpy().tolist()
 				# self.metrics.update_step(predictions=prediction, labels=y_pred, loss=None, validation=True)
-			pbar.update(1)
-			# + Output: {prediction.cpu().numpy()} - Target: {target.cpu().numpy()}")
-			pbar.set_postfix_str(f"Batch: {batch_idx}/{len(self.valid_loader)} ")
+			self.pbars.increment(bar_name=self.pbars.NAME_VALID)
+
 			if self.run.config[const.SINGLE_BATCH_MODE]:
 				break
-		pbar.close()
 		# fold_metrics = self.metrics.save_epoch_metrics(validation=True)
 		# self.metrics.finish_fold()
 		# self.metrics.print_end_summary()
@@ -61,15 +59,17 @@ class CNN_Inference(ML_Loop):
 		specificity = tn / (tn + fp)
 		confusion = confusion_matrix(y_true, y_pred)
 		mcc = matthews_corrcoef(y_true, y_pred)
+		nmcc = (mcc + 1) / 2
 		pred_count_per_class = pd.Series(y_pred).value_counts()
 
+		# TODO PLR NLR
 		print(f"Accuracy: {accuracy}")
 		print(f"F1: {f1}")
 		print(f"Precision: {precision}")
 		print(f"Recall: {recall}")
 		print(f"Specificity: {specificity}")
 		print(f"Confusion Matrix: \n{confusion}")
-		print(f"MCC: {mcc}")
+		print(f"\033[1m \033[91m Norm-MCC: {nmcc} \033[0m")
 		print(f"Predictions per class:\n{pred_count_per_class}")
 		print(f"True labels per class:\n{pd.Series(y_true).value_counts()}")
 		print(const.CLASS_DESCRIPTION)
@@ -77,7 +77,7 @@ class CNN_Inference(ML_Loop):
 
 	# prediction of one batch
 
-	def start_inference(self, model):
+	def start_inference_task(self, model):
 		self.model = model
 		self.model.eval()
 

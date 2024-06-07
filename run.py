@@ -288,4 +288,4 @@ class InferenceTask(TaskBase):
 	def start_task(self):
 		"""Executes the inference pipeline, using the loaded model and dataset."""
 		self.run.log_training("Starting inference pipeline.", level=logging.INFO)
-		self.inferencer_class.start_inference(model=self.inference_model)
+		self.inferencer_class.start_inference_task(model=self.inference_model)
