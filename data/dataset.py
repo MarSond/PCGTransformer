@@ -101,12 +101,12 @@ class AudioDataset:
 		self.run.log(f"Prepared {self.kfold_splits} K-fold splits.", logger_name=LOGGER_METADATA, level=logging.WARNING)
 		self.run.log(f"K-fold split data: {self.kfold_split_data}", logger_name=LOGGER_METADATA, level=logging.DEBUG)
 
-	def get_dataloaders(self, num_split: int, Torch_Dataset_Class: Dataset) -> tuple[DataLoader, DataLoader]:
+	def get_dataloaders(self, num_split: int, Torch_Dataset_Class: Dataset) -> tuple[DataLoader, DataLoader, dict]:
 		"""
 		Get training and validation dataloaders for a specified K-fold split.
 
 		Args:
-		num_split (int): The specific K-fold split number.
+		num_split (int): The specific K-fold split number. 10 K-Fold -> Number 1-10
 		Torch_Dataset_Class (Dataset): The PyTorch dataset class to be used.
 
 		Returns:
@@ -137,7 +137,7 @@ class AudioDataset:
 		else:
 			validloader = DataLoader(valid_dataset, batch_size=self.batchsize, shuffle=False, drop_last=False)
 
-		return trainloader, validloader
+		return trainloader, validloader, current_fold
 
 	def prepare_chunks(self):
 		"""

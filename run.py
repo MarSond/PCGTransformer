@@ -160,7 +160,7 @@ class TaskBase(ABC):
 
 	def get_trainer(self, run: Run, dataset):
 		"""Retrieves the trainer class based on the model type in configuration."""
-		model_type = self.config[const.MODEL_TYPE]
+		model_type = self.config[const.MODEL_METHOD_TYPE]
 		if model_type == const.CNN:
 			from cnn_classifier import cnn_training
 			return cnn_training.CNN_Training(run=run, dataset=dataset)
