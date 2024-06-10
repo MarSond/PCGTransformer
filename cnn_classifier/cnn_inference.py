@@ -28,8 +28,8 @@ class CNN_Inference(ML_Loop):
 		plt.show()
 
 	@fold_hook
-	def fold_loop(self, fold_idx):
-		self.prepare_fold(fold_idx)
+	def fold_loop(self, fold_idx: int, **kwargs: Any) -> None:
+		#self.prepare_fold(fold_idx)
 		self.pbars.update_total(bar_name=self.pbars.NAME_VALID, total=len(self.valid_loader))
 
 		y_true = []
@@ -69,7 +69,7 @@ class CNN_Inference(ML_Loop):
 		print(f"Recall: {recall}")
 		print(f"Specificity: {specificity}")
 		print(f"Confusion Matrix: \n{confusion}")
-		print(f"\033[1m \033[91m Norm-MCC: {nmcc} \033[0m")
+		print(f"\033[1m\033[91m Norm-MCC: {nmcc} \033[0m")
 		print(f"Predictions per class:\n{pred_count_per_class}")
 		print(f"True labels per class:\n{pd.Series(y_true).value_counts()}")
 		print(const.CLASS_DESCRIPTION)

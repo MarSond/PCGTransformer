@@ -167,8 +167,7 @@ class TaskBase(ABC):
 		elif model_type == const.BEATS:
 			return None
 		else:
-			self.run.log_training(
-				f"Unknown model type {model_type}", level=logging.ERROR)
+			self.run.log_training(f"Unknown model type {model_type}", level=logging.ERROR)
 			raise ValueError(f"Unknown model type {model_type}")
 
 	def get_inferencer(self, run: Run, dataset):
@@ -184,6 +183,8 @@ class TaskBase(ABC):
 				f"Unknown model type {model_type}", level=logging.ERROR)
 			raise ValueError(f"Unknown model type {model_type}")
 
+	
+
 	def get_dataset(self):
 		"""Configures and returns the dataset object based on the task type and dataset configuration."""
 		task_type = self.config[const.TASK_TYPE]
@@ -196,8 +197,7 @@ class TaskBase(ABC):
 				from data.dataset import Physionet2022
 				dataset = Physionet2022()
 			else:
-				self.run.log_training(
-					f"Unknown dataset {dataset_mode}", level=logging.ERROR)
+				self.run.log_training(f"Unknown dataset {dataset_mode}", level=logging.ERROR)
 				raise ValueError(f"Unknown dataset {dataset_mode}")
 			dataset.set_run(self.run)
 			dataset.load_file_list()
@@ -238,6 +238,21 @@ class TrainTask(TaskBase):
 		super().__init__(run)
 		self.run.log_training("Initializing Training Task.", level=logging.INFO)
 
+	def get_model_for_training(self):
+		# check if TRAINING_CHECKPOINT is set and load that model 
+		model = None
+		checkpoint = self.config[const.TRAINING_CHECKPOINT]
+		if checkpoint is not None:
+			assert const.EPOCH in checkpoint.keys(), "Epoch not set in checkpoint"
+			assert const.RUN_NAME in checkpoint.keys(), "Run name not set in checkpoint"
+
+			self.run.log_training("Loading model from checkpoint.", level=logging.DEBUG)
+			model = MLUtil.load_model(path=self.config[const.TRAINING_CHECKPOINT], run=self.run, logger=self.run.train_logger)
+		else:
+			self.run.log_training("Creating new model.", level=logging.INFO)
+
+		return model
+
 	def setup_task(self):
 		"""Set up the training task, including loading models, datasets, and other resources."""
 		self.run.log_training("Setting up training task.", level=logging.DEBUG)
@@ -245,13 +260,13 @@ class TrainTask(TaskBase):
 		self.trainer_class = self.get_trainer(run=self.run, dataset=self.dataset)
 		# check if TRAINING_CHECKPOINT is set and pass it to training loop TODO
 
-		self.run.log_training(
-			"Loaded all needed things for training", level=logging.WARNING)
+		self.model = self.get_model_for_training()
+		self.run.log_training("Loaded all needed things for training", level=logging.WARNING)
 
 	def start_task(self):
 		"""Starts the training process."""
 		self.run.log_training("Starting training pipeline.", level=logging.INFO)
-		self.trainer_class.start_training_run()
+		self.trainer_class.start_training_task()
 		# reminder: dataset object contains all files but also the kfold splits and dataloaders prepared
 		self.run.log_training("Training complete.", level=logging.CRITICAL)
 
@@ -271,10 +286,8 @@ class InferenceTask(TaskBase):
 		self.dataset = self.get_dataset()
 		self.inference_model, _ = MLUtil.load_model(path=self._get_inference_model_path(), \
 			run=self.run, logger=self.run.train_logger)
-		self.inferencer_class = self.get_inferencer(
-			run=self.run, dataset=self.dataset)
-		self.run.log_training(
-			"Loaded all needed things for inference", level=logging.WARNING)
+		self.inferencer_class = self.get_inferencer(run=self.run, dataset=self.dataset)
+		self.run.log_training("Loaded all needed things for inference", level=logging.WARNING)
 
 	def _get_inference_model_path(self):
 		"""Get the path to the inference model based on the configuration."""
@@ -289,3 +302,4 @@ class InferenceTask(TaskBase):
 		"""Executes the inference pipeline, using the loaded model and dataset."""
 		self.run.log_training("Starting inference pipeline.", level=logging.INFO)
 		self.inferencer_class.start_inference_task(model=self.inference_model)
+		self.run.log_training("Inference complete.", level=logging.CRITICAL)
