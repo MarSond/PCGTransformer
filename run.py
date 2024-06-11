@@ -179,8 +179,7 @@ class TaskBase(ABC):
 		elif model_type == const.BEATS:
 			return None  # Placeholder for BEATS inferencer
 		else:
-			self.run.log_training(
-				f"Unknown model type {model_type}", level=logging.ERROR)
+			self.run.log_training(f"Unknown model type {model_type}", level=logging.ERROR)
 			raise ValueError(f"Unknown model type {model_type}")
 
 	
@@ -204,6 +203,18 @@ class TaskBase(ABC):
 			dataset.prepare_chunks()
 			dataset.prepare_kfold_splits()
 			return dataset
+			
+	def create_new_model(self):
+		"""Retrieves the trainer class based on the model type in configuration."""
+		model_type = self.config[const.MODEL_METHOD_TYPE]
+		if model_type == const.CNN:
+			from cnn_classifier import cnn_models
+			return cnn_models.get_model(self.run)
+		elif model_type == const.BEATS:
+			return None
+		else:
+			self.run.log_training(f"Unknown model type {model_type}", level=logging.ERROR)
+			raise ValueError(f"Unknown model type {model_type}")
 
 	@abstractmethod
 	def setup_task(self):
@@ -250,7 +261,7 @@ class TrainTask(TaskBase):
 			model = MLUtil.load_model(path=self.config[const.TRAINING_CHECKPOINT], run=self.run, logger=self.run.train_logger)
 		else:
 			self.run.log_training("Creating new model.", level=logging.INFO)
-
+			model = self.create_new_model()
 		return model
 
 	def setup_task(self):
@@ -260,13 +271,13 @@ class TrainTask(TaskBase):
 		self.trainer_class = self.get_trainer(run=self.run, dataset=self.dataset)
 		# check if TRAINING_CHECKPOINT is set and pass it to training loop TODO
 
-		self.model = self.get_model_for_training()
+		self.start_model = self.get_model_for_training().to(self.run.device)
 		self.run.log_training("Loaded all needed things for training", level=logging.WARNING)
 
 	def start_task(self):
 		"""Starts the training process."""
 		self.run.log_training("Starting training pipeline.", level=logging.INFO)
-		self.trainer_class.start_training_task()
+		self.trainer_class.start_training_task(start_model=self.start_model)
 		# reminder: dataset object contains all files but also the kfold splits and dataloaders prepared
 		self.run.log_training("Training complete.", level=logging.CRITICAL)
 

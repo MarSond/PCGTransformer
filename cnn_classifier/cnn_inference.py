@@ -73,7 +73,7 @@ class CNN_Inference(ML_Loop):
 		print(f"Predictions per class:\n{pred_count_per_class}")
 		print(f"True labels per class:\n{pd.Series(y_true).value_counts()}")
 		print(const.CLASS_DESCRIPTION)
-		return accuracy, f1, precision, recall, specificity, confusion
+		return accuracy, f1, precision, recall, specificity, confusion, nmcc
 
 	# prediction of one batch
 
@@ -81,4 +81,4 @@ class CNN_Inference(ML_Loop):
 		self.model = model
 		self.model.eval()
 
-		self.kfold_loop()
+		self.kfold_loop(start_epoch=1)

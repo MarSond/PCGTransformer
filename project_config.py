@@ -53,7 +53,7 @@ project_config = {
 		EARLY_STOPPING_METRIC: METRICS_MCC,
 	},
 	TRANSFORMER_PARAMS: {
-		FREEZE_ENCODER: False,
+		FREEZE_ENCODER: False, #TODO not implemented
 		FREEZE_DECODER: False,
 	}
 }
