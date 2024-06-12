@@ -23,7 +23,7 @@ if __name__ == "__main__":
 	run2_dict = train_update_dict.copy()
 	run2_dict.update({TRAIN_DATASET: PHYSIONET_2016})
 
-	do_run(run1_dict)
-	#do_run(run2_dict)
+	#do_run(run1_dict)
+	do_run(run2_dict)
 
 	plt.show()

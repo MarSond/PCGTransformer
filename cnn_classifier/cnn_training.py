@@ -44,12 +44,7 @@ class CNN_Training(ML_Loop):
 		"""
 		self.kfold_loop(start_epoch=start_epoch)
 
-	def prepare_self(self):
-		# model = self.get_model() # TODO get from task (new or checkpointed) TODO Log table optionally
-		"""if self.logger.isEnabledFor(logging.DEBUG):
-			self.logger.debug(MLUtil.get_model_table(self.model))
-			#MLUtil.(self.model, (self.base_config['batchsize'], 1, 72, 157)) """
-		self.cnn_params = self.run.config[CNN_PARAMS]
+	def prepare_optimizer_sheduler(self):
 		if self.cnn_params[OPTIMIZER] == OPTIMIZER_ADAM:
 			self.optimizer = optim.Adam(filter(lambda p: p.requires_grad, self.model.parameters()), \
 				lr = self.run.config[LEARNING_RATE], weight_decay=self.cnn_params[L2_REGULATION_WEIGHT])
@@ -64,4 +59,12 @@ class CNN_Training(ML_Loop):
 		elif self.cnn_params[SHEDULER] == SHEDULER_COSINE:
 			self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=40, eta_min=0)
 			# TODO sheduler param 1 ,2 
+
+	def prepare_kfold_run(self):
+		# model = self.get_model() # TODO get from task (new or checkpointed) TODO Log table optionally
+		"""if self.logger.isEnabledFor(logging.DEBUG):
+			self.logger.debug(MLUtil.get_model_table(self.model))
+			#MLUtil.(self.model, (self.base_config['batchsize'], 1, 72, 157)) """
+		self.cnn_params = self.run.config[CNN_PARAMS]
+		
 		
