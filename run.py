@@ -65,14 +65,23 @@ class Run:
 	def setup_logger(self, log_to_file):
 		"""Initializes logging for different modules within the application."""
 		log_filename = pjoin(self.run_results_path, self.config[const.FILENAME_LOG_OUTPUT]) if log_to_file else None
-		
-		log_request_dict = {
-			const.LOGGER_TRAINING:		{logging_helper.LEVEL_CONSOLE: logging.DEBUG, 	logging_helper.LEVEL_FILE: logging.DEBUG},
-			const.LOGGER_PREPROCESSING:	{logging_helper.LEVEL_CONSOLE: logging.WARNING,	logging_helper.LEVEL_FILE: logging.INFO},
-			const.LOGGER_LOOP:			{logging_helper.LEVEL_CONSOLE: logging.WARNING,	logging_helper.LEVEL_FILE: logging.WARNING},
-			const.LOGGER_METADATA:		{logging_helper.LEVEL_CONSOLE: logging.INFO, 	logging_helper.LEVEL_FILE: logging.DEBUG},
-			const.LOGGER_TENSOR:		{logging_helper.LEVEL_CONSOLE: logging.WARNING,	logging_helper.LEVEL_FILE: logging.ERROR},
-		}
+		if MLUtil.debugger_is_active():
+			
+			log_request_dict = {
+				const.LOGGER_TRAINING:		{logging_helper.LEVEL_CONSOLE: logging.DEBUG, 	logging_helper.LEVEL_FILE: logging.DEBUG},
+				const.LOGGER_PREPROCESSING:	{logging_helper.LEVEL_CONSOLE: logging.INFO,	logging_helper.LEVEL_FILE: logging.INFO},
+				const.LOGGER_LOOP:			{logging_helper.LEVEL_CONSOLE: logging.DEBUG,	logging_helper.LEVEL_FILE: logging.DEBUG},
+				const.LOGGER_METADATA:		{logging_helper.LEVEL_CONSOLE: logging.INFO, 	logging_helper.LEVEL_FILE: logging.DEBUG},
+				const.LOGGER_TENSOR:		{logging_helper.LEVEL_CONSOLE: logging.INFO,	logging_helper.LEVEL_FILE: logging.ERROR},
+			}
+		else:
+			log_request_dict = {
+				const.LOGGER_TRAINING:		{logging_helper.LEVEL_CONSOLE: logging.INFO, 	logging_helper.LEVEL_FILE: logging.DEBUG},
+				const.LOGGER_PREPROCESSING:	{logging_helper.LEVEL_CONSOLE: logging.WARNING,	logging_helper.LEVEL_FILE: logging.INFO},
+				const.LOGGER_LOOP:			{logging_helper.LEVEL_CONSOLE: logging.INFO,	logging_helper.LEVEL_FILE: logging.DEBUG},
+				const.LOGGER_METADATA:		{logging_helper.LEVEL_CONSOLE: logging.INFO, 	logging_helper.LEVEL_FILE: logging.DEBUG},
+				const.LOGGER_TENSOR:		{logging_helper.LEVEL_CONSOLE: logging.WARNING,	logging_helper.LEVEL_FILE: logging.ERROR},
+			}
 		self.logger_dict = logging_helper.get_logger_dict(
 			logger_map=log_request_dict, sub_name=self.run_name, to_console=True, log_filename=log_filename)
 		
