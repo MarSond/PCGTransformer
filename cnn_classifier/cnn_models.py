@@ -1,6 +1,7 @@
 import torch.nn as nn
 import MLHelper.constants as const
 from run import Run
+from MLHelper.tools.utils import MLUtil
 
 def get_model(run: Run):
 	type = run.config[const.CNN_PARAMS][const.MODEL_SUB_TYPE]
@@ -33,21 +34,25 @@ class CNN_Base(nn.Module):
 		else: raise ValueError(f"Activation {cnn_config[const.ACTIVATION]} not found in YAMNET Model list")
 		self.softmax = nn.Softmax(dim=1)
 		self.tensor_logger = run.logger_dict[const.LOGGER_TENSOR]
-		self._initialize_weights()
 	
+	def initialize(self):
+		MLUtil.reset_weights(self)
+		self._initialize_weights()
+
 
 	def forward(self, x):
 		self.tensor_logger.debug(f"Raw Forward Input shape: {x.shape}")
 		self.batchsize = x.shape[0]
 		if len(x.shape) == 3: # missing channel dimension
 			x = x.unsqueeze(1)
+	
 		self.tensor_logger.info(f"Modified Forward INIT Input shape: {x.shape}")
 		return x
 
 	def _initialize_weights(self):
 		for m in self.modules():
 			if isinstance(m, nn.Conv2d):
-				nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='silu')
+				nn.init.xavier_uniform_(m.weight)
 				if m.bias is not None:
 					nn.init.constant_(m.bias, 0)
 			elif isinstance(m, nn.BatchNorm2d):
@@ -116,6 +121,7 @@ class CNN_Model_1(CNN_Base):
 		x = self.conv(x)
 		x = self.ap(x)
 		x = self.flatten(x)
+		self.tensor_logger.debug(f"shape after flatten: {x.shape}")
 		x = self.fc1_block(x)	
 		x = self.fc2_block(x)
 		x = self.fc3(x)	
