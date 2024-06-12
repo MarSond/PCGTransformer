@@ -15,8 +15,8 @@ class CNN_Inference(ML_Loop):
 		super().__init__(run, dataset, pytorch_dataset_class=CNN_Dataset)
 		# _, self.valid_loader = self.dataset.get_dataloaders(num_split=1, Torch_Dataset_Class=CNN_Dataset)
 
-	def prepare_self(self) -> None:
-		return super().prepare_self()
+	def prepare_kfold_run(self) -> None:
+		return super().prepare_kfold_run()
 
 	def plot_batch(self, data, target):
 		import matplotlib.pyplot as plt
@@ -28,7 +28,7 @@ class CNN_Inference(ML_Loop):
 		plt.show()
 
 	@fold_hook
-	def fold_loop(self, fold_idx: int, **kwargs: Any) -> None:
+	def fold_loop(self, fold_idx: int, start_epoch: int = 0, **kwargs: Any) -> None:
 		#self.prepare_fold(fold_idx)
 		self.pbars.update_total(bar_name=self.pbars.NAME_VALID, total=len(self.valid_loader))
 

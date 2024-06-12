@@ -66,13 +66,13 @@ class Run:
 		"""Initializes logging for different modules within the application."""
 		log_filename = pjoin(self.run_results_path, self.config[const.FILENAME_LOG_OUTPUT]) if log_to_file else None
 		if MLUtil.debugger_is_active():
-			
+			# TODO save model
 			log_request_dict = {
 				const.LOGGER_TRAINING:		{logging_helper.LEVEL_CONSOLE: logging.DEBUG, 	logging_helper.LEVEL_FILE: logging.DEBUG},
 				const.LOGGER_PREPROCESSING:	{logging_helper.LEVEL_CONSOLE: logging.INFO,	logging_helper.LEVEL_FILE: logging.INFO},
 				const.LOGGER_LOOP:			{logging_helper.LEVEL_CONSOLE: logging.DEBUG,	logging_helper.LEVEL_FILE: logging.DEBUG},
-				const.LOGGER_METADATA:		{logging_helper.LEVEL_CONSOLE: logging.INFO, 	logging_helper.LEVEL_FILE: logging.DEBUG},
-				const.LOGGER_TENSOR:		{logging_helper.LEVEL_CONSOLE: logging.INFO,	logging_helper.LEVEL_FILE: logging.ERROR},
+				const.LOGGER_METADATA:		{logging_helper.LEVEL_CONSOLE: logging.DEBUG, 	logging_helper.LEVEL_FILE: logging.DEBUG},
+				const.LOGGER_TENSOR:		{logging_helper.LEVEL_CONSOLE: logging.DEBUG,	logging_helper.LEVEL_FILE: logging.ERROR},
 			}
 		else:
 			log_request_dict = {
@@ -191,7 +191,6 @@ class TaskBase(ABC):
 			self.run.log_training(f"Unknown model type {model_type}", level=logging.ERROR)
 			raise ValueError(f"Unknown model type {model_type}")
 
-	
 
 	def get_dataset(self):
 		"""Configures and returns the dataset object based on the task type and dataset configuration."""
