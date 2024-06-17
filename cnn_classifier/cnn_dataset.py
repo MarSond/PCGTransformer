@@ -74,9 +74,8 @@ class CNN_Dataset(Dataset):
 			sgram_processed = self._get_mel(audio_augmented, file_sr)
 			sgram_augmented = _sgram_augmentation(magnitude_spectrogram=sgram_processed)
 			sgram_final = sgram_augmented
-			full_raw_audio, full_sr = AudioUtil.Loading.load_audiofile(audio_filename)
-			full_raw_audio = preprocessing.resample(full_raw_audio, full_sr, self.target_samplerate)
-			return raw_audio, normalized_audio, full_raw_audio, sgram_raw, sgram_filtered, sgram_augmented, current_row.to_dict(), chunk_name
+		
+			return raw_audio, normalized_audio, sgram_raw, sgram_filtered, sgram_augmented, current_row.to_dict(), chunk_name
 		
 		elif self.mode == const.TRAINING :
 			# training uses augmentation and signal filtering

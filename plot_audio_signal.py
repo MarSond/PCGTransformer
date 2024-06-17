@@ -10,7 +10,9 @@ import MLHelper.constants as const
 import matplotlib.gridspec as gridspec
 from MLHelper.audio.audioutils import AudioUtil
 import numpy as np
+from MLHelper.audio import preprocessing
 from torch import Tensor
+import os
 
 class DataAnalysis:
 	def __init__(self, dataset_name: str):
@@ -20,8 +22,8 @@ class DataAnalysis:
 		self.run.config[const.INFERENCE_DATASET] = dataset_name
 		self.run.config[const.KFOLD_SPLITS] = 1
 		self.run.config[const.METADATA_FRAC] = 1.0
-		self.run.config[const.CNN_PARAMS][const.BATCH_SIZE] = 1
-		self.run.config[const.CNN_PARAMS][const.AUGMENTATION_RATE] = 1.0
+		self.run.config[const.BATCH_SIZE] = 1
+		self.run.config[const.AUGMENTATION_RATE] = 0.0
 		self.run.config[const.CHUNK_PADDING_THRESHOLD] = 0.0
 		self.run.config[const.CHUNK_DURATION] = 20.0
 		if self.demo_task == const.TASK_TYPE_TRAINING:
@@ -37,7 +39,7 @@ class DataAnalysis:
 		self.demo_loader = train_loader if self.demo_task == const.TASK_TYPE_TRAINING else valid_loader
 
 	def get_dataloaders(self):
-		train_loader, valid_loader = self.run.task.dataset.get_dataloaders(num_split=1, Torch_Dataset_Class=CNN_Dataset) # TODO select Dataset class
+		train_loader, valid_loader, _ = self.run.task.dataset.get_dataloaders(num_split=1, Torch_Dataset_Class=CNN_Dataset) # TODO select Dataset class
 		return train_loader, valid_loader
 
 	def make_singlefile_plot(self, raw_audio, filtered_audio, full_audio, sgram_raw, sgram_filtered, \
@@ -126,11 +128,11 @@ class DataAnalysis:
 
 		# Letzter, flacher Subplot für den Text  # Nimmt beide Spalten ein
 		ax_text.axis('off')  # Keine Achsen für diesen Subplot
-		text_content = f"Raw Audio Min: {raw_audio.min():.4f}, Max: {raw_audio.max():.4f}\nProcessed Audio Min: {filtered_audio.min():.4f}, Max: {filtered_audio.max():.4f}\n" \
-									f"Raw Mel Spectrogram Min: {sgram_raw.min():.4f}, Max: {sgram_raw.max():.4f}\nProcessed Mel Spectrogram Min: {sgram_filtered.min():.4f}, Max: {sgram_filtered.max():.4f}\n" \
-									f"Class ID: {class_id} | samplerate: {sr} | seconds: {config[const.CHUNK_DURATION]}\nbutter_low {cnn_config[const.BUTTERPASS_LOW]} | butter_high {cnn_config[const.BUTTERPASS_HIGH]} | butter_order {cnn_config[const.BUTTERPASS_ORDER]}\n " \
-									f"n_mels: {cnn_config[const.N_MELS]} | n_fft: {cnn_config[const.N_FFT]} | hop_length: {cnn_config[const.HOP_LENGTH]} | top_db: {cnn_config[const.TOP_DB]}\n" \
-									f"file_name: {audio_file_name}"
+		text_content = 	f"Raw Audio Min: {raw_audio.min():.4f}, Max: {raw_audio.max():.4f}\nProcessed Audio Min: {filtered_audio.min():.4f}, Max: {filtered_audio.max():.4f}\n" \
+						f"Raw Mel Spectrogram Min: {sgram_raw.min():.4f}, Max: {sgram_raw.max():.4f}\nProcessed Mel Spectrogram Min: {sgram_filtered.min():.4f}, Max: {sgram_filtered.max():.4f}\n" \
+						f"Class ID: {class_id} | samplerate: {sr} | seconds: {config[const.CHUNK_DURATION]}\nbutter_low {cnn_config[const.BUTTERPASS_LOW]} | butter_high {cnn_config[const.BUTTERPASS_HIGH]} | butter_order {cnn_config[const.BUTTERPASS_ORDER]}\n " \
+						f"n_mels: {cnn_config[const.N_MELS]} | n_fft: {cnn_config[const.N_FFT]} | hop_length: {cnn_config[const.HOP_LENGTH]} | top_db: {cnn_config[const.TOP_DB]}\n" \
+						f"file_name: {audio_file_name}"
 
 		ax_text.text(0.5, 0.5, text_content, ha='center', va='center', fontsize=11, wrap=True)
 
@@ -155,8 +157,11 @@ class DataAnalysis:
 			num_gs = 7
 		fig = plt.figure(figsize=(5*num_gs, 4*num_samples))  
 		gs = gridspec.GridSpec(num_samples, num_gs)  # 10 Reihen für die Samples, 5 Spalten für die Subplots
-		for raw_audio, filtered_audio, full_audio, sgram_raw, sgram_filtered, sgram_augmented, metadata_row, audio_file_name in self.demo_loader:
+		for raw_audio, filtered_audio, sgram_raw, sgram_filtered, sgram_augmented, metadata_row, audio_file_name in self.demo_loader:
 			audio_file_name = str(audio_file_name[0])
+			audio_path = os.path.join(self.run.task.dataset.dataset_path, metadata_row[const.META_AUDIO_PATH][0])
+			full_audio, full_sr = AudioUtil.Loading.load_audiofile(audio_path)
+			full_audio = preprocessing.resample(full_audio, full_sr, self.run.task.dataset.target_samplerate)
 			# check values in the dict metadata_row to see if they are tensors- > convert to numpy
 			if isinstance(metadata_row[const.META_SAMPLERATE], Tensor):
 				metadata_row[const.META_SAMPLERATE] = metadata_row[const.META_SAMPLERATE].numpy().item()
@@ -167,7 +172,6 @@ class DataAnalysis:
 			if isinstance(raw_audio, Tensor):
 				raw_audio = raw_audio.numpy()
 				filtered_audio = filtered_audio.numpy()
-				full_audio = full_audio.numpy()
 				sgram_raw = sgram_raw.numpy()
 				sgram_filtered = sgram_filtered.numpy()
 				sgram_augmented = sgram_augmented.numpy()
@@ -238,9 +242,9 @@ def multiple():
 
 def single():
 	analysis = DataAnalysis(const.PHYSIONET_2022)
-	analysis.plot_signal_statistics(num_samples=70, offset=55, show=True, fig_file_name=None, final_only=True)
+	analysis.plot_signal_statistics(num_samples=3, offset=111, show=True, fig_file_name=None, final_only=True)
 
 
 if __name__ == "__main__":
-	multiple()
- 	#single()
+	#multiple()
+ 	single()
