@@ -13,10 +13,11 @@ class CNN_Inference(ML_Loop):
 
 	def __init__(self, run: Run, dataset: AudioDataset) -> None:
 		super().__init__(run, dataset, pytorch_dataset_class=CNN_Dataset)
-		# _, self.valid_loader = self.dataset.get_dataloaders(num_split=1, Torch_Dataset_Class=CNN_Dataset)
+		
 
 	def prepare_kfold_run(self) -> None:
 		return super().prepare_kfold_run()
+
 
 	def plot_batch(self, data, target):
 		import matplotlib.pyplot as plt
@@ -26,6 +27,7 @@ class CNN_Inference(ML_Loop):
 			axs[i // 5, i % 5].imshow(data[i].squeeze().cpu().numpy(), cmap='gray')
 			axs[i // 5, i % 5].set_title(f"Label: {target[i]}")
 		plt.show()
+
 
 	@validation_epoch_hook
 	def validation_epoch_loop(self, epoch: int = 0, fold: int = 0, **kwargs: Any) -> None:
@@ -52,9 +54,9 @@ class CNN_Inference(ML_Loop):
 		# self.metrics.finish_fold()
 		# self.metrics.print_end_summary()
 		accuracy = accuracy_score(y_true, y_pred)
-		f1 = f1_score(y_true, y_pred, average='macro')
-		precision = precision_score(y_true, y_pred, average='macro')
-		recall = recall_score(y_true, y_pred, average='macro')
+		f1 = f1_score(y_true, y_pred, average='binary')
+		precision = precision_score(y_true, y_pred, average='binary')
+		recall = recall_score(y_true, y_pred, average='binary')
 		tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
 		specificity = tn / (tn + fp)
 		confusion = confusion_matrix(y_true, y_pred)
@@ -75,7 +77,6 @@ class CNN_Inference(ML_Loop):
 		print(const.CLASS_DESCRIPTION)
 		return accuracy, f1, precision, recall, specificity, confusion, nmcc
 
-	# prediction of one batch
 
 	def start_inference_task(self, model):
 		self.model = model

@@ -44,7 +44,7 @@ class CNN_Training(ML_Loop):
 		"""
 		self.kfold_loop(start_epoch=start_epoch)
 
-	def prepare_optimizer_sheduler(self):
+	def prepare_optimizer_scheduler(self):
 		if self.cnn_params[OPTIMIZER] == OPTIMIZER_ADAM:
 			self.optimizer = optim.Adam(filter(lambda p: p.requires_grad, self.model.parameters()), \
 				lr = self.run.config[LEARNING_RATE], weight_decay=self.cnn_params[L2_REGULATION_WEIGHT])
