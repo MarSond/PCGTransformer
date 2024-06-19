@@ -115,3 +115,5 @@ runs/
 .vscode/
 
 audio_example_images/
+
+.idea/

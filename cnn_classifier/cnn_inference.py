@@ -27,8 +27,8 @@ class CNN_Inference(ML_Loop):
 			axs[i // 5, i % 5].set_title(f"Label: {target[i]}")
 		plt.show()
 
-	@fold_hook
-	def fold_loop(self, fold_idx: int, start_epoch: int = 0, **kwargs: Any) -> None:
+	@validation_epoch_hook
+	def validation_epoch_loop(self, epoch: int = 0, fold: int = 0, **kwargs: Any) -> None:
 		#self.prepare_fold(fold_idx)
 		self.pbars.update_total(bar_name=self.pbars.NAME_VALID, total=len(self.valid_loader))
 
@@ -40,10 +40,10 @@ class CNN_Inference(ML_Loop):
 			data, target = data.to(self.device), target.to(self.device)
 			with torch.no_grad():
 				loss, probabilities = self.predict_step(model=self.model, inputs=data, labels=target)
-				prediction = probabilities.argmax(dim=1, keepdim=True)
+				prediction = probabilities.argmax(dim=1)
 				y_true += target.cpu().numpy().tolist()
 				y_pred += prediction.cpu().numpy().tolist()
-				# self.metrics.update_step(predictions=prediction, labels=y_pred, loss=None, validation=True)
+				self.metrics.update_step(probabilities=probabilities, labels=target, loss=loss, validation=True)
 			self.pbars.increment(bar_name=self.pbars.NAME_VALID)
 
 			if self.run.config[const.SINGLE_BATCH_MODE]:
