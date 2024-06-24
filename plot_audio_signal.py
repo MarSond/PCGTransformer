@@ -39,7 +39,7 @@ class DataAnalysis:
 		self.demo_loader = train_loader if self.demo_task == const.TASK_TYPE_TRAINING else valid_loader
 
 	def get_dataloaders(self):
-		train_loader, valid_loader, _ = self.run.task.dataset.get_dataloaders(num_split=1, Torch_Dataset_Class=CNN_Dataset) # TODO select Dataset class
+		train_loader, valid_loader, _ = self.run.task.dataset.get_dataloaders(num_split=1, Torch_Dataset_Class=CNN_Dataset) 
 		return train_loader, valid_loader
 
 	def make_singlefile_plot(self, raw_audio, filtered_audio, full_audio, sgram_raw, sgram_filtered, \

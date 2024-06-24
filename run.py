@@ -61,12 +61,12 @@ class Run:
 		directory_status = FileUtils.safe_path_create(self.run_results_path)
 		if directory_status is not True:
 			raise Exception(f"Could not create run results directory {self.run_results_path}.")
+		self.config[const.RUN_RESULTS_PATH] = self.run_results_path
 
 	def setup_logger(self, log_to_file):
 		"""Initializes logging for different modules within the application."""
 		log_filename = pjoin(self.run_results_path, self.config[const.FILENAME_LOG_OUTPUT]) if log_to_file else None
 		if MLUtil.debugger_is_active():
-			# TODO save model
 			log_request_dict = {
 				const.LOGGER_TRAINING:		{logging_helper.LEVEL_CONSOLE: logging.DEBUG, 	logging_helper.LEVEL_FILE: logging.DEBUG},
 				const.LOGGER_PREPROCESSING:	{logging_helper.LEVEL_CONSOLE: logging.INFO,	logging_helper.LEVEL_FILE: logging.INFO},
