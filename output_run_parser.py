@@ -6,6 +6,8 @@ from MLHelper.constants import *
 
 folder = "./runs/"
 
+blacklist = ["run1"]
+
 def list_sub_folders(folder_path):
     return next(os.walk(folder_path))[1]
 
@@ -58,8 +60,8 @@ def query_and_delete_folders(sub_folders, base_folder, stats):
     print("Options:")
     print("1: Delete all folders except today's")
     print("2: Delete folders where no metrics file is found")
-    print("4: Delete folders with more than 10 model files")
-    print("5: Exit")
+    print("3: Delete folders with more than 10 model files")
+    print("4: Exit")
     choice = input("Enter your choice: ")
 
     if choice == '1':
@@ -73,20 +75,20 @@ def query_and_delete_folders(sub_folders, base_folder, stats):
             sub_folder_path = os.path.join(base_folder, sub_folder)
             if FILENAME_METRICS_VALUE not in os.listdir(sub_folder_path):
                 folders_to_delete.append(sub_folder_path)
-    elif choice == '4':
+    elif choice == '3':
         for sub_folder in sub_folders:
             sub_folder_path = os.path.join(base_folder, MODELS_FOLDER_NAME, sub_folder)
             if os.path.exists(sub_folder_path):
                 pt_files = [f for f in os.listdir(sub_folder_path) if f.endswith(MODEL_FILE_EXTENSION)]
                 if len(pt_files) > 10:
                     folders_to_delete.append(sub_folder_path)
-    elif choice == '5':
+    elif choice == '4':
         print("Exiting.")
         return
     else:
         print("Invalid choice.")
         return
-
+    folders_to_delete = [f for f in folders_to_delete if not any([b in f for b in blacklist])]
     confirm_and_delete_folders(folders_to_delete)
 
 # Statistics dictionary initialized
