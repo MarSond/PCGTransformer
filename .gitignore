@@ -117,3 +117,7 @@ runs/
 audio_example_images/
 
 .idea/
+
+roc_curve_class_1.png
+
+pr_curve_class_1.png
