@@ -1,6 +1,7 @@
+import matplotlib.pyplot as plt
+
 from MLHelper.constants import *
 from run import Run
-import matplotlib.pyplot as plt
 
 run1_name = "run1"
 
@@ -8,7 +9,8 @@ run1_name = "run1"
 # Extra config from the current update_dict is applied afterwards. Keep in mind!
 
 if __name__ == "__main__":
-	inference_base = {TASK_TYPE: INFERENCE, BATCH_SIZE: 1, EPOCHS: 1, TRAIN_FRAC: 0.0, L1_REGULATION_WEIGHT: 0.0, L2_REGULATION_WEIGHT: 0.0}
+	inference_base = {TASK_TYPE: INFERENCE, BATCH_SIZE: 1, EPOCHS: 1, \
+		TRAIN_FRAC: 0.0, L1_REGULATION_WEIGHT: 0.0, L2_REGULATION_WEIGHT: 0.0}
 	
 	inference_update_dict_1 = {	METADATA_FRAC: 0.1, \
 								INFERENCE_MODEL: {EPOCHS: 70, FOLD: 10}, \

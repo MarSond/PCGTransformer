@@ -1,21 +1,23 @@
-from .cnn_dataset import CNN_Dataset
-import torch
-from torch.utils.data import DataLoader
-import pandas as pd
-from MLHelper.constants import *
-from MLHelper.metrics.loss import FocalLoss
-import torch.optim as optim
-from data.dataset import AudioDataset
-from torch.cuda.amp.grad_scaler import GradScaler
-from run import Run
-from MLHelper.ml_loop import ML_Loop
 import logging
 
+import torch.optim as optim
+from torch.cuda.amp.grad_scaler import GradScaler
+from torch.utils.data import DataLoader
 
-class CNN_Training(ML_Loop):
+import MLHelper.constants as const
+from data.dataset import AudioDataset
+from MLHelper.ml_loop import ML_Loop
+from run import Run
+
+from .cnn_dataset import CNN_Dataset
+
+
+class CNNTraining(ML_Loop):
 
 	def __init__(self, run: Run, dataset: AudioDataset) -> None:
 		super().__init__(run, dataset, pytorch_dataset_class=CNN_Dataset)
+		self.cnn_params = None
+
 
 	def num_worker_test(self, logger: logging.Logger):
 		from time import time
@@ -36,35 +38,41 @@ class CNN_Training(ML_Loop):
 				end - start, num_workers))
 
 
-	def start_training_task(self, start_model, start_epoch=0):
+	def start_training_task(self, start_model, optimizer, scheduler, scaler, start_epoch=0):
+		""" model is either a new model or a checkpointed model
+		start_epoch is the epoch to start at. 
+		The loop beginns from start but skeips training untill start_epoch
+		"""
 		self.model = start_model
-		"""
-		model is either a new model or a checkpointed model
-		start_epoch is the epoch to start at. The loop beginns from start but skeips training untill start_epoch
-		"""
+		self.optimizer = optimizer
+		self.scheduler = scheduler
+		self.scaler = scaler
 		self.kfold_loop(start_epoch=start_epoch)
 
-	def prepare_optimizer_scheduler(self):
-		if self.cnn_params[OPTIMIZER] == OPTIMIZER_ADAM:
-			self.optimizer = optim.Adam(filter(lambda p: p.requires_grad, self.model.parameters()), \
-				lr = self.run.config[LEARNING_RATE], weight_decay=self.cnn_params[L2_REGULATION_WEIGHT])
-		elif self.cnn_params[OPTIMIZER] == OPTIMIZER_SGD:
-			self.optimizer = optim.SGD(filter(lambda p: p.requires_grad, self.model.parameters()), \
-				lr = self.cnn_params[LEARNING_RATE], momentum=0.9, weight_decay=self.cnn_params[L2_REGULATION_WEIGHT])
-		self.scaler = GradScaler()
-		if self.cnn_params[SHEDULER] == SHEDULER_PLATEAU :
-			self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, mode='min', factor=0.2, patience=10, verbose=True)
-		elif self.cnn_params[SHEDULER] == SHEDULER_STEP:
-			self.scheduler = optim.lr_scheduler.StepLR(self.optimizer, step_size=10, gamma=0.2)
-		elif self.cnn_params[SHEDULER] == SHEDULER_COSINE:
-			self.scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=40, eta_min=0)
-			# TODO sheduler param 1 ,2 
 
 	def prepare_kfold_run(self):
-		# model = self.get_model() # TODO get from task (new or checkpointed) TODO Log table optionally
-		"""if self.logger.isEnabledFor(logging.DEBUG):
-			self.logger.debug(MLUtil.get_model_table(self.model))
-			#MLUtil.(self.model, (self.base_config['batchsize'], 1, 72, 157)) """
-		self.cnn_params = self.run.config[CNN_PARAMS]
-		
-		
+		self.cnn_params = self.run.config[const.CNN_PARAMS]
+
+	@staticmethod
+	def prepare_optimizer_scheduler(config: dict, model) -> None:
+		cnn_params = config[const.CNN_PARAMS]
+		if cnn_params[const.OPTIMIZER] == const.OPTIMIZER_ADAM:
+			assert model is not None, "Model is None. Required for Adam optimizer"
+			optimizer = optim.Adam(filter(lambda p: p.requires_grad, \
+				model.parameters()), lr = config[const.LEARNING_RATE], \
+				weight_decay=cnn_params[const.L2_REGULATION_WEIGHT])
+		elif cnn_params[const.OPTIMIZER] == const.OPTIMIZER_SGD:
+			optimizer = optim.SGD(filter(lambda p: p.requires_grad, model.parameters()), \
+				lr = cnn_params[const.LEARNING_RATE], momentum=0.9, \
+					weight_decay=cnn_params[const.L2_REGULATION_WEIGHT])
+		scaler = GradScaler()
+		if cnn_params[const.SHEDULER] == const.SHEDULER_PLATEAU :
+			scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', \
+				factor=0.2, patience=10, verbose=True)
+		elif cnn_params[const.SHEDULER] == const.SHEDULER_STEP:
+			scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.2)
+		elif cnn_params[const.SHEDULER] == const.SHEDULER_COSINE:
+			scheduler = optim.lr_scheduler.CosineAnnealingLR( \
+				optimizer, T_max=40, eta_min=0)
+			# TODO sheduler param 1 ,2
+		return optimizer, scheduler, scaler

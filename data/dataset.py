@@ -98,8 +98,8 @@ class AudioDataset:
 				valid_list = self.chunk_list.iloc[val_index]
 				fold_entry = self._get_kfold_entry(fold_number=current_fold_number, train_list=train_list, valid_list=valid_list)
 				self.kfold_split_data.append(fold_entry)
-		self.run.log(f"Prepared {self.kfold_splits} K-fold splits.", logger_name=LOGGER_METADATA, level=logging.WARNING)
-		self.run.log(f"K-fold split data: {self.kfold_split_data}", logger_name=LOGGER_METADATA, level=logging.DEBUG)
+		self.run.log(f"Prepared {self.kfold_splits} K-fold splits.", name=LOGGER_METADATA, level=logging.WARNING)
+		self.run.log(f"K-fold split data: {self.kfold_split_data}", name=LOGGER_METADATA, level=logging.DEBUG)
 
 	def get_dataloaders(self, num_split: int, Torch_Dataset_Class: Dataset) -> tuple[DataLoader, DataLoader, dict]:
 		"""
@@ -169,13 +169,13 @@ class AudioDataset:
 
 		self.file_list = pd.read_csv(file_path, index_col=META_ID, encoding='utf-8')
 		if self.run is not None:
-			self.run.log(f"Loaded {len(self.file_list)} files from {file_path}", logger_name=LOGGER_TRAINING, level=logging.INFO)
+			self.run.log(f"Loaded {len(self.file_list)} files from {file_path}", name=LOGGER_TRAINING, level=logging.INFO)
 		else:
 			print(f"Loaded {len(self.file_list)} files from {file_path}")
 		self.file_list = self.file_list.sample(frac=self.run.config[METADATA_FRAC], random_state=SEED_VALUE).reset_index(drop=True)
 		if self.run is not None:
 			self.run.log(f"Count after fractionating with {self.run.config[METADATA_FRAC]} : {len(self.file_list)}", \
-				logger_name=LOGGER_TRAINING, level=logging.WARNING)
+				name=LOGGER_TRAINING, level=logging.WARNING)
 		else:
 			print(f"Count after fractionating with {self.run.config[METADATA_FRAC]} : {len(self.file_list)}")
 		self.file_list[META_HEARTCYCLES] = self.file_list[META_HEARTCYCLES].apply(json.loads)
