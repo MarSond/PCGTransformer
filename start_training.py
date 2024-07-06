@@ -1,6 +1,8 @@
+import matplotlib.pyplot as plt
+
 from MLHelper.constants import *
 from run import Run
-import matplotlib.pyplot as plt
+
 
 def do_run(config: dict):
 	run = Run(config_update_dict=config)
@@ -27,9 +29,17 @@ if __name__ == "__main__":
 	run3_dict.update({TRAIN_DATASET: PHYSIONET_2022, RUN_NAME_SUFFIX: "run2022", CHUNK_DURATION: 4.0})
 
 	run4_dict = train_update_dict.copy()
-	run4_dict.update({TRAIN_DATASET: PHYSIONET_2022, RUN_NAME_SUFFIX: "run2022-nofilter", CNN_PARAMS: {SIGNAL_FILTER: None}})
-	do_run(run1_dict)
-	do_run(run2_dict)
+	run4_dict.update({TRAIN_DATASET: PHYSIONET_2022, RUN_NAME_SUFFIX: "run2022-nofilter", \
+						CNN_PARAMS: {SIGNAL_FILTER: None}})
+
+	run_loop_test_dict = train_update_dict.copy()
+	run_loop_test_dict.update({ \
+		TRAIN_DATASET: PHYSIONET_2022, KFOLD_SPLITS: 3, EPOCHS: 4, METADATA_FRAC: 0.05})
+
+	#do_run(run1_dict)
+	#do_run(run2_dict)
 	#do_run(run3_dict)
-	do_run(run4_dict)
+	#do_run(run4_dict)
+
+	do_run(run_loop_test_dict)
 	plt.show()

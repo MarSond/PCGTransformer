@@ -3,7 +3,8 @@ import logging
 import random
 import string
 from abc import ABC, abstractmethod
-from os.path import join as pjoin
+from pathlib import Path
+from typing import Optional
 
 import torch
 
@@ -14,7 +15,7 @@ from MLHelper.tools.utils import FileUtils, MLUtil
 
 
 class Run:
-	def __init__(self, config_update_dict: dict) -> None:
+	def __init__(self, config_update_dict: Optional[dict] = None) -> None:
 		self.config = Config()  # Base config with barebones
 		self.setup_config(config_update_dict)
 		self.setup_run_name(config_update_dict)
@@ -46,7 +47,7 @@ class Run:
 		"""
 		Returns the result directory path of the run with the provided name
 		"""
-		return pjoin(self.config[const.RUN_FOLDER], run_name)
+		return Path(self.config[const.RUN_FOLDER]) / run_name
 
 	def setup_run_results_path(self):
 		"""
@@ -61,8 +62,8 @@ class Run:
 
 	def setup_logger(self, log_to_file):
 		"""Initializes logging for different modules within the application."""
-		log_filename = pjoin(self.run_results_path, \
-			self.config[const.FILENAME_LOG_OUTPUT]) if log_to_file else None
+		log_filename = Path(self.run_results_path) / self.config[const.FILENAME_LOG_OUTPUT] \
+			if log_to_file else None
 		if MLUtil.debugger_is_active():
 			log_request_dict = {
 				const.LOGGER_TRAINING: \
@@ -126,7 +127,7 @@ class Run:
 
 	def save_config(self):
 		"""Saves the current configuration to a YAML file and logs the operation."""
-		config_save_path = pjoin(self.run_results_path, self.config[const.FILENAME_RUN_CONFIG])
+		config_save_path = Path(self.run_results_path) / self.config[const.FILENAME_RUN_CONFIG]
 		self.log_training(f"Saving configuration to {config_save_path}", level=logging.INFO)
 		self.config.save_config_dict(config_save_path)
 
@@ -134,8 +135,8 @@ class Run:
 		"""
 		Loads and returns the Config of the TrainingAndEvaluation run with the provided name
 		"""
-		current_path = pjoin(self._get_run_results_path(self.run_name), \
-			self.config[const.FILENAME_RUN_CONFIG])
+		current_path = Path(self._get_run_results_path(self.run_name)) /  \
+			self.config[const.FILENAME_RUN_CONFIG]
 		return Config(project_config_path=current_path)
 
 	def setup_config(self, config_update: dict):
@@ -151,20 +152,20 @@ class Run:
 			update_dict = project_config.project_config.copy()
 		except Exception as e:
 			update_dict = None
-			print(f"Could not import project_config.py. Exception: {e}")
+			print(f"Could not import project_config.py. Exception: {e}")  # noqa: T201
 
 		self.config = Config(update_dict=update_dict)
 		if config_update is not None and \
 				config_update.get(const.LOAD_PREVIOUS_RUN_NAME) is not None:
 			run_config_path = \
-				pjoin(self._get_run_results_path(config_update[const.LOAD_PREVIOUS_RUN_NAME]), \
-				self.config[const.FILENAME_RUN_CONFIG])
+				Path(self._get_run_results_path(config_update[const.LOAD_PREVIOUS_RUN_NAME])) / \
+				self.config[const.FILENAME_RUN_CONFIG]
 			self.config.update_config_yaml(run_config_path)
-			print(f"Updating config from {self.config[const.LOAD_PREVIOUS_RUN_NAME]}")
+			print(f"Updating config from {self.config[const.LOAD_PREVIOUS_RUN_NAME]}") # noqa: T201
 		if config_update is not None:
 			# Still apply the update dict after the run config, even if extra loaded from file
 			self.config.update_config_dict(config_update)
-			print(f"Config updated with provided dictionary")
+			print(f"Config updated with provided dictionary") # noqa: T201
 
 	def setup_task(self):
 		"""Setup the task based on the configuration."""
@@ -200,11 +201,10 @@ class TaskBase(ABC):
 		if model_type == const.CNN:
 			from cnn_classifier import cnn_training
 			return cnn_training.CNNTraining(run=run, dataset=dataset)
-		elif model_type == const.BEATS:
+		if model_type == const.BEATS:
 			return None
-		else:
-			self.run.log_training(f"Unknown model type {model_type}", level=logging.ERROR)
-			raise ValueError(f"Unknown model type {model_type}")
+		self.run.log_training(f"Unknown model type {model_type}", level=logging.ERROR)
+		raise ValueError(f"Unknown model type {model_type}")
 
 	def get_inferencer(self, run: Run, dataset):
 		"""Retrieves the inferencer class based on the model type in configuration."""
@@ -212,11 +212,10 @@ class TaskBase(ABC):
 		if model_type == const.CNN:
 			from cnn_classifier import cnn_inference
 			return cnn_inference.CNN_Inference(run=run, dataset=dataset)
-		elif model_type == const.BEATS:
+		if model_type == const.BEATS:
 			return None  # Placeholder for BEATS inferencer
-		else:
-			self.run.log_training(f"Unknown model type {model_type}", level=logging.ERROR)
-			raise ValueError(f"Unknown model type {model_type}")
+		self.run.log_training(f"Unknown model type {model_type}", level=logging.ERROR)
+		raise ValueError(f"Unknown model type {model_type}")
 
 
 	def get_dataset(self):
@@ -243,6 +242,7 @@ class TaskBase(ABC):
 			dataset.prepare_chunks()
 			dataset.prepare_kfold_splits()
 			return dataset
+		raise ValueError(f"Unknown task type {task_type}")
 
 	@staticmethod
 	def create_new_model(run: Run) -> torch.nn.Module:
@@ -252,10 +252,9 @@ class TaskBase(ABC):
 		if model_type == const.CNN:
 			from cnn_classifier import cnn_models
 			return cnn_models.get_model(run)
-		elif model_type == const.BEATS:
+		if model_type == const.BEATS:
 			return None
-		else:
-			raise ValueError(f"Unknown model type {model_type}")
+		raise ValueError(f"Unknown model type {model_type}")
 
 	@abstractmethod
 	def setup_task(self):
@@ -364,9 +363,7 @@ class InferenceTask(TaskBase):
 		model_filename = const.get_model_filename(
 			self.config[const.MODEL_METHOD_TYPE], model_selection[const.EPOCHS], \
 			model_selection[const.FOLD])
-		model_path = pjoin(self.run._get_run_results_path(
-			self.config[const.LOAD_PREVIOUS_RUN_NAME]), const.MODEL_FOLDER, model_filename)
-		return model_path
+		return FileUtils.join(self.run._get_run_results_path(self.config[const.LOAD_PREVIOUS_RUN_NAME]), const.MODEL_FOLDER, model_filename)
 
 	def start_task(self):
 		"""Executes the inference pipeline, using the loaded model and dataset."""

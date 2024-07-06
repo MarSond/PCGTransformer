@@ -20,8 +20,8 @@ class CNNTraining(ML_Loop):
 
 
 	def num_worker_test(self, logger: logging.Logger):
-		from time import time
 		import multiprocessing as mp
+		from time import time
 		self.run_config = self.base_config
 		train_list, valid_list = self._get_train_valid_list(None, None)
 		dataset = CNN_Dataset(datalist=train_list, run=self.run)
@@ -30,17 +30,16 @@ class CNNTraining(ML_Loop):
 			train_loader = DataLoader(
 				dataset, shuffle=True, num_workers=num_workers, batch_size=64, drop_last=True)
 			dl_it = iter(train_loader)
-			for epoch in range(1, 5):
-				for _, (data_batch, labels) in enumerate(dl_it):
+			for _ in range(1, 5):
+				for _, (_data_batch, _labels) in enumerate(dl_it):
 					pass
 			end = time()
-			logger.error("Finish with:{} second, num_workers={}".format(
-				end - start, num_workers))
+			logger.error(f"Finish with:{end - start} second, num_workers={num_workers}")
 
 
 	def start_training_task(self, start_model, optimizer, scheduler, scaler, start_epoch=0):
 		""" model is either a new model or a checkpointed model
-		start_epoch is the epoch to start at. 
+		start_epoch is the epoch to start at.
 		The loop beginns from start but skeips training untill start_epoch
 		"""
 		self.model = start_model
@@ -67,7 +66,7 @@ class CNNTraining(ML_Loop):
 					weight_decay=cnn_params[const.L2_REGULATION_WEIGHT])
 		scaler = GradScaler()
 		if cnn_params[const.SHEDULER] == const.SHEDULER_PLATEAU :
-			scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', \
+			scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="min", \
 				factor=0.2, patience=10, verbose=True)
 		elif cnn_params[const.SHEDULER] == const.SHEDULER_STEP:
 			scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.2)

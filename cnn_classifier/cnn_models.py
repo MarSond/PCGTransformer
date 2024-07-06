@@ -1,18 +1,19 @@
 import torch.nn as nn
+
 import MLHelper.constants as const
-from run import Run
 from MLHelper.tools.utils import MLUtil
+from run import Run
+
 
 def get_model(run: Run):
 	type = run.config[const.CNN_PARAMS][const.MODEL_SUB_TYPE]
 	if type == 1:
 		return CNN_Model_1(run)
-	elif type == 2:
+	if type == 2:
 		return CNN_Model_2(run)
-	elif type == 3:
+	if type == 3:
 		return CNN_Model_3(run)
-	else:
-		raise ValueError(f"Model type {type} not found")
+	raise ValueError(f"Model type {type} not found")
 
 class CNN_Base(nn.Module):
 	def __init__(self, run: Run):
@@ -28,13 +29,14 @@ class CNN_Base(nn.Module):
 		if cnn_config[const.ACTIVATION] == const.ACTIVATION_RELU:
 			self.activation = nn.ReLU(inplace=True)
 		elif cnn_config[const.ACTIVATION] == const.ACTIVATION_L_RELU:
-			self.activation = nn.LeakyReLU(inplace=True)	
+			self.activation = nn.LeakyReLU(inplace=True)
 		elif cnn_config[const.ACTIVATION] == const.ACTIVATION_SILU:
 			self.activation = nn.SiLU(inplace=True)
-		else: raise ValueError(f"Activation {cnn_config[const.ACTIVATION]} not found in YAMNET Model list")
+		else:
+			raise ValueError(f"Activation {cnn_config[const.ACTIVATION]} not found in YAMNET Model list")
 		self.softmax = nn.Softmax(dim=1)
 		self.tensor_logger = run.logger_dict[const.LOGGER_TENSOR]
-	
+
 	def initialize(self):
 		MLUtil.reset_weights(self)
 		self._initialize_weights()
@@ -45,7 +47,7 @@ class CNN_Base(nn.Module):
 		self.batchsize = x.shape[0]
 		if len(x.shape) == 3: # missing channel dimension
 			x = x.unsqueeze(1)
-	
+
 		self.tensor_logger.info(f"Modified Forward INIT Input shape: {x.shape}")
 		return x
 
@@ -66,13 +68,13 @@ class CNN_Model_1(CNN_Base):
 	def __init__(self, run_config):
 		super().__init__(run_config)
 		conv_layers = []
-		
+
 		# First Convolutional Block
 		self.conv1 = nn.Conv2d(in_channels=1, out_channels=8, kernel_size=(3, 3))
 		self.bn1 = nn.BatchNorm2d(8)
 		self.maxpool2d1 = nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2))
 		conv_layers += [self.conv1, self.bn1, self.activation, self.maxpool2d1]
-		
+
 		# Second Convolutional Block
 		self.conv2 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=(3, 3))
 		self.bn2 = nn.BatchNorm2d(16)
@@ -90,7 +92,7 @@ class CNN_Model_1(CNN_Base):
 		self.bn4 = nn.BatchNorm2d(64)
 		self.maxpool2d4 = nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2))
 		conv_layers += [self.conv4, self.bn4, self.activation, self.maxpool2d4]
-		
+
 		self.ap = nn.AdaptiveAvgPool2d(output_size=(8,8))
 
 		# Flatten the output of the convolutional layers
@@ -122,22 +124,22 @@ class CNN_Model_1(CNN_Base):
 		x = self.ap(x)
 		x = self.flatten(x)
 		self.tensor_logger.debug(f"shape after flatten: {x.shape}")
-		x = self.fc1_block(x)	
+		x = self.fc1_block(x)
 		x = self.fc2_block(x)
-		x = self.fc3(x)	
+		x = self.fc3(x)
 		return x
-	
+
 class CNN_Model_3(CNN_Base):
 	def __init__(self, run_config):
 		super().__init__(run_config)
 		conv_layers = []
-		
+
 		# First Convolutional Block
 		self.conv1 = nn.Conv2d(in_channels=1, out_channels=8, kernel_size=(3, 3))
 		self.bn1 = nn.BatchNorm2d(8)
 		self.maxpool2d1 = nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2))
 		conv_layers += [self.conv1, self.bn1, self.activation, self.maxpool2d1]
-		
+
 		# Second Convolutional Block
 		self.conv2 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=(3, 3))
 		self.bn2 = nn.BatchNorm2d(16)
@@ -155,7 +157,7 @@ class CNN_Model_3(CNN_Base):
 		self.bn4 = nn.BatchNorm2d(64)
 		self.maxpool2d4 = nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2))
 		conv_layers += [self.conv4, self.bn4, self.activation, self.maxpool2d4]
-		
+
 		self.ap = nn.AdaptiveAvgPool2d(output_size=(8,8))
 
 		# Flatten the output of the convolutional layers
@@ -179,81 +181,79 @@ class CNN_Model_3(CNN_Base):
 		x = self.conv(x)
 		x = self.ap(x)
 		x = self.flatten(x)
-		x = self.fc1_block(x)	
-		x = self.fc3(x)	
+		x = self.fc1_block(x)
+		x = self.fc3(x)
 		return x
-	
+
 
 class CNN_Model_2(CNN_Base):
 	def __init__(self, run_config):
 		super().__init__(run_config)
-		
+
 		self.drop0 = self.pDrop0
 		self.drop1 = self.pDrop1
-		
+
 		# First Convolutional Block
 		self.conv1 = nn.Conv2d(in_channels=1, out_channels=8, kernel_size=(3, 3))
 		self.bn1 = nn.BatchNorm2d(8)
 		self.maxpool1 = nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2))
-		
+
 		# Second Convolutional Block
 		self.conv2 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=(3, 3))
 		self.bn2 = nn.BatchNorm2d(16)
 		self.maxpool2 = nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2))
-		
+
 		# Third Convolutional Block
 		self.conv3 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=(3, 3))
 		self.bn3 = nn.BatchNorm2d(32)
-		self.maxpool3 = nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2))
-		
+
 		# Adaptive Pooling
 		self.ap = nn.AdaptiveAvgPool2d(output_size=(16, 16))  # Adjusted size
-		
+
 		# Flatten Layer
 		self.flatten = nn.Flatten()
-		
+
 		# First Fully-Connected Layer
 		self.fc1 = nn.Linear(in_features=8192, out_features=1024)  # Adjusted input size
 		self.bn4 = nn.BatchNorm1d(1024)
 		self.fc1_block = nn.Sequential(self.fc1, self.bn4, self.activation)
 		if self.pDrop0 > 0:
-			self.fc1_block.add_module('dropout0', nn.Dropout(p=self.pDrop0))
-		
+			self.fc1_block.add_module("dropout0", nn.Dropout(p=self.pDrop0))
+
 		# Second Fully-Connected Layer
 		self.fc2 = nn.Linear(in_features=1024, out_features=128)
 		self.bn5 = nn.BatchNorm1d(128)
 		self.fc2_block = nn.Sequential(self.fc2, self.bn5, self.activation)
 		if self.pDrop1 > 0:
-			self.fc2_block.add_module('dropout1', nn.Dropout(p=self.pDrop1))
-		
+			self.fc2_block.add_module("dropout1", nn.Dropout(p=self.pDrop1))
+
 		# Output Layer
 		self.fc3 = nn.Linear(in_features=128, out_features=self.num_classes)
-		
+
 	def forward(self, x):
 		x = super().forward(x)
 		x = self.conv1(x)
 		x = self.bn1(x)
 		x = self.activation(x)
 		x = self.maxpool1(x)
-		
+
 		x = self.conv2(x)
 		x = self.bn2(x)
 		x = self.activation(x)
 		x = self.maxpool2(x)
-		
+
 		x = self.conv3(x)
 		x = self.bn3(x)
 		x = self.activation(x)
 		x = self.maxpool3(x)
-		
+
 		x = self.ap(x)
-		
+
 		x = self.flatten(x)
-		
+
 		x = self.fc1_block(x)
 		x = self.fc2_block(x)
-		
-		x = self.fc3(x)
-		
-		return x
 
+		x = self.fc3(x)
+
+		return x
