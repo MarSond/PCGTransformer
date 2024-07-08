@@ -11,6 +11,12 @@ def do_run(config: dict):
 
 
 if __name__ == "__main__":
+	"""
+	TODO verify checkpointing works. Current run1 checkpoint has bad performance in training
+	In standalone inference it works well.
+	Thesis: it doesnt work well because LR sheduler and scaler,
+	which are used in training werent saved in the model
+	"""
 
 	train_update_dict = {	TASK_TYPE: TRAINING, METADATA_FRAC: 0.8, \
 							CNN_PARAMS: {}, EPOCHS: 72, \

@@ -168,7 +168,7 @@ class AudioDataset:
 	def load_file_list(self, mode=TASK_TYPE_TRAINING) -> pd.DataFrame:
 		if mode == TASK_TYPE_TRAINING:
 			file_path = self.meta_file_train
-		elif mode == "test":
+		elif mode == TEST:
 			file_path = self.meta_file_test
 		else:
 			raise ValueError(f"Unknown mode {mode} for loading dataset")
