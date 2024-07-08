@@ -4,7 +4,7 @@ import random
 import string
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Tuple
 
 import torch
 
@@ -43,17 +43,18 @@ class Run:
 			f"{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_{self.run_name_suffix}"
 		self.config[const.RUN_NAME] = self.run_name
 
-	def _get_run_results_path(self, run_name):
+	@staticmethod
+	def _get_run_results_path(config, run_name):
 		"""
 		Returns the result directory path of the run with the provided name
 		"""
-		return Path(self.config[const.RUN_FOLDER]) / run_name
+		return Path(config[const.RUN_FOLDER]) / run_name
 
 	def setup_run_results_path(self):
 		"""
 		Creates the run results directory and sets run_results_path and feature_statistics_path
 		"""
-		self.run_results_path = self._get_run_results_path(self.run_name)
+		self.run_results_path = Run._get_run_results_path(self.config, self.run_name)
 		directory_status = FileUtils.safe_path_create(self.run_results_path)
 		if directory_status is not True:
 			raise Exception(f"Could not create run results directory" \
@@ -135,7 +136,7 @@ class Run:
 		"""
 		Loads and returns the Config of the TrainingAndEvaluation run with the provided name
 		"""
-		current_path = Path(self._get_run_results_path(self.run_name)) /  \
+		current_path = Path(Run._get_run_results_path(self.config, self.run_name)) /  \
 			self.config[const.FILENAME_RUN_CONFIG]
 		return Config(project_config_path=current_path)
 
@@ -158,7 +159,7 @@ class Run:
 		if config_update is not None and \
 				config_update.get(const.LOAD_PREVIOUS_RUN_NAME) is not None:
 			run_config_path = \
-				Path(self._get_run_results_path(config_update[const.LOAD_PREVIOUS_RUN_NAME])) / \
+				Path(Run._get_run_results_path(self.config, config_update[const.LOAD_PREVIOUS_RUN_NAME])) / \
 				self.config[const.FILENAME_RUN_CONFIG]
 			self.config.update_config_yaml(run_config_path)
 			print(f"Updating config from {self.config[const.LOAD_PREVIOUS_RUN_NAME]}") # noqa: T201
@@ -194,6 +195,8 @@ class TaskBase(ABC):
 		self.run = run
 		self.config = run.config
 		self.dataset = None
+		self.start_epoch = 1
+		self.start_fold = 1
 
 	def get_trainer(self, run: Run, dataset):
 		"""Retrieves the trainer class based on the model type in configuration."""
@@ -256,6 +259,28 @@ class TaskBase(ABC):
 			return None
 		raise ValueError(f"Unknown model type {model_type}")
 
+	@staticmethod
+	def _get_checkpoint_path(config: dict) -> str:
+		checkpoint = config.get(const.TRAINING_CHECKPOINT)
+		assert checkpoint is not None, "Checkpoint not set"
+		type = config[const.MODEL_METHOD_TYPE]
+		model_name = const.get_model_filename(type=type, \
+			epoch=checkpoint[const.EPOCH], fold=checkpoint[const.FOLD])
+		return FileUtils.join(Run._get_run_results_path( \
+			config=config, run_name=checkpoint[const.RUN_NAME]), const.MODEL_FOLDER, model_name)
+
+	@staticmethod
+	def get_checkpoint(config: dict) -> Tuple[int, int, str]:
+		"""
+		Get the checkpoint epoch, fold, and path from the configuration.
+		Returns None if no checkpoint is set.
+		"""
+		checkpoint = config.get(const.TRAINING_CHECKPOINT)
+		if checkpoint is None:
+			return None, None, None
+		return checkpoint[const.EPOCH], checkpoint[const.FOLD], \
+			TaskBase._get_checkpoint_path(config)
+
 	@abstractmethod
 	def setup_task(self):
 		pass
@@ -298,6 +323,8 @@ class TrainTask(TaskBase):
 			from cnn_classifier.cnn_training import CNNTraining
 			optimizer, sheduler, scaler = \
 				CNNTraining.prepare_optimizer_scheduler(config=self.config, model=model)
+		else:
+			raise ValueError(f"Unknown model type {self.config[const.MODEL_METHOD_TYPE]}")
 		return model, optimizer, sheduler, scaler
 
 	def load_model_for_training(self) -> torch.nn.Module:
@@ -363,7 +390,8 @@ class InferenceTask(TaskBase):
 		model_filename = const.get_model_filename(
 			self.config[const.MODEL_METHOD_TYPE], model_selection[const.EPOCHS], \
 			model_selection[const.FOLD])
-		return FileUtils.join(self.run._get_run_results_path(self.config[const.LOAD_PREVIOUS_RUN_NAME]), const.MODEL_FOLDER, model_filename)
+		return FileUtils.join(Run._get_run_results_path(self.config, \
+			self.config[const.LOAD_PREVIOUS_RUN_NAME]), const.MODEL_FOLDER, model_filename)
 
 	def start_task(self):
 		"""Executes the inference pipeline, using the loaded model and dataset."""

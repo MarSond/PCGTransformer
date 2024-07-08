@@ -36,17 +36,21 @@ class CNNTraining(ML_Loop):
 			end = time()
 			logger.error(f"Finish with:{end - start} second, num_workers={num_workers}")
 
-
-	def start_training_task(self, start_model, optimizer, scheduler, scaler, start_epoch=0):
-		""" model is either a new model or a checkpointed model
-		start_epoch is the epoch to start at.
-		The loop beginns from start but skeips training untill start_epoch
-		"""
+	def set_training_utilities(self, start_model, optimizer, scheduler, scaler):
 		self.model = start_model
 		self.optimizer = optimizer
 		self.scheduler = scheduler
 		self.scaler = scaler
-		self.kfold_loop(start_epoch=start_epoch)
+
+	def start_training_task(self, start_epoch=1, start_fold=1):
+		""" model is either a new model or a checkpointed model
+		start_epoch is the epoch to start at.
+		The loop beginns from start but skeips training untill start_epoch
+		"""
+		assert self.model is not None, "Model is None. Required for training"
+		assert self.optimizer is not None, "Optimizer is None. Required for training"
+		assert start_epoch >= 1, "Start epoch must be greater or equal to 0"
+		self.kfold_loop(start_epoch=start_epoch, start_fold=start_fold)
 
 
 	def prepare_kfold_run(self):
