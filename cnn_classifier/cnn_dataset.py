@@ -75,20 +75,22 @@ class CNN_Dataset(Dataset):
 
 		if self.mode == const.DEMO:
 			# return raw waveform, filtered waveform, raw spectrogram, filtered spectrogram
-			sgram_raw = self._get_mel(raw_audio, file_sr)
-			sgram_filtered = self._get_mel(normalized_audio, file_sr)
-			audio_augmented = _audio_augmentation(samples=normalized_audio, sample_rate=file_sr)
-			sgram_processed = self._get_mel(audio_augmented, file_sr)
+			sgram_raw = self._get_mel(raw_audio, data_sr)
+			sgram_filtered = self._get_mel(normalized_audio, data_sr)
+			audio_augmented = _audio_augmentation(samples=normalized_audio, sample_rate=data_sr)
+			sgram_processed = self._get_mel(audio_augmented, data_sr)
 			sgram_augmented = _sgram_augmentation(magnitude_spectrogram=sgram_processed)
 			sgram_final = sgram_augmented
 
+			row_dict = current_row.to_dict()
+			row_dict[const.META_AUDIO_PATH] = str(row_dict[const.META_AUDIO_PATH])
 			return (
 				raw_audio,
 				normalized_audio,
 				sgram_raw,
 				sgram_filtered,
 				sgram_augmented,
-				current_row.to_dict(),
+				row_dict,
 				chunk_name
 			)
 

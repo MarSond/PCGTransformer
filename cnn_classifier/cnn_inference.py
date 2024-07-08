@@ -1,6 +1,6 @@
 import torch
 
-from data.dataset import AudioDataset
+from MLHelper.dataset import AudioDataset
 from MLHelper import constants as const
 from MLHelper.ml_loop import ML_Loop, validation_epoch_hook
 from run import Run

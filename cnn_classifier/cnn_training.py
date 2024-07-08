@@ -5,7 +5,7 @@ from torch.cuda.amp.grad_scaler import GradScaler
 from torch.utils.data import DataLoader
 
 import MLHelper.constants as const
-from data.dataset import AudioDataset
+from MLHelper.dataset import AudioDataset
 from MLHelper.ml_loop import ML_Loop
 from run import Run
 

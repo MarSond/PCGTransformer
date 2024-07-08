@@ -11,7 +11,7 @@ from mpl_toolkits.axes_grid1 import ImageGrid
 from tqdm.auto import tqdm
 
 import MLHelper.constants as const
-from data.dataset import AudioDataset, Physionet2016, Physionet2022
+from MLHelper.dataset import AudioDataset, Physionet2016, Physionet2022
 from run import Run
 
 # ruff: noqa: T201
@@ -76,8 +76,9 @@ def get_file_metadata_human_ph2016(
 		const.META_AUDIO_PATH: str(Path(path).relative_to(dataset_object.dataset_path)),
 		const.META_PATIENT_ID: id,
 		# const.META_FILENAME: Path(path).name,
-		const.META_DATASET: dataset_object.folder_name + "-" + dataset_name,
 		const.META_DIAGNOSIS: diagnosis,
+		const.META_DATASET: const.PHYSIONET_2016,
+		const.META_DATASET_SUBSET: dataset_name,
 		const.META_QUALITY: int(quality),
 		const.META_HEARTCYCLES: _get_heartcycle_indicies_2016(path),
 		const.META_LABEL_1: dataclass
@@ -91,7 +92,7 @@ def parse_physionet2016():
 	"""
 	Parse the folder structure of the Physionet 2016 dataset and create meta files
 	"""
-	dataset = Physionet2016()
+	dataset = Physionet2016(Run())
 	train_data = list(Path(dataset.train_audio_base_folder).rglob(dataset.train_audio_search_pattern))
 	train_data = [Path(path).resolve() for path in train_data]
 	dataset_names = ["training-a", "training-b", "training-c", "training-d", "training-e", "training-f"]
@@ -236,8 +237,9 @@ def get_file_metadata_human_ph2022(path: str, anno: pd.DataFrame, dataset_object
 		const.META_AUDIO_PATH: str(Path(path).relative_to(dataset_path)),
 		const.META_PATIENT_ID: patient_id,
 		const.META_FILENAME: file_name,
-		const.META_DATASET: f"physionet2022-{dataset_object.folder_name}",
-		const.META_DIAGNOSIS: "not-supported-in-dataset",
+		const.META_DATASET: const.PHYSIONET_2022,
+		const.META_DATASET_SUBSET: f"{dataset_object.folder_name}",
+		const.META_DIAGNOSIS: None,
 		const.META_QUALITY: 1,
 		const.META_HEARTCYCLES: _get_heartcycle_indicies_2022(file_path=path),
 		const.META_LABEL_1: dataclass
@@ -252,8 +254,7 @@ def get_file_metadata_human_ph2022(path: str, anno: pd.DataFrame, dataset_object
 def parse_physionet2022():
 	# https://moody-challenge.physionet.org/2022/#data-table
 	print("Start parsing Physionet 2022")
-	dataset = Physionet2022()
-	dataset.set_run(Run())
+	dataset = Physionet2022(Run())
 	annotation = pd.read_csv(Path(dataset.dataset_path) / "training_data.csv", index_col="Patient ID")
 	print(annotation.head())
 	print("Annotation types", annotation.dtypes)
@@ -284,7 +285,6 @@ def parse_physionet2022():
 
 
 def dataset_statistics(dataset: AudioDataset):
-	dataset.set_run(Run())
 	train_data = dataset.load_file_list()
 	print("Train data count", len(train_data))
 	print("\n")
@@ -398,7 +398,6 @@ def calculate_bpm(data):
 
 
 def plot_statistics(dataset: AudioDataset):
-	dataset.set_run(Run())
 	data = dataset.load_file_list()
 	p_size = 12
 	font_size = 26
@@ -518,13 +517,13 @@ def start_parse():
 
 
 def start_statistics():
-	dataset_statistics(Physionet2016())
-	dataset_statistics(Physionet2022())
+	dataset_statistics(Physionet2016(Run()))
+	dataset_statistics(Physionet2022(Run()))
 
 
 def start_plot():
-	plot_statistics(Physionet2016())
-	plot_statistics(Physionet2022())
+	plot_statistics(Physionet2016(Run()))
+	plot_statistics(Physionet2022(Run()))
 
 
 if __name__ == "__main__":

@@ -232,15 +232,17 @@ class TaskBase(ABC):
 				const.TRAIN_DATASET if task_type == const.TASK_TYPE_TRAINING \
 				else const.INFERENCE_DATASET)
 			if dataset_mode == const.PHYSIONET_2016:
-				from data.dataset import Physionet2016
-				dataset = Physionet2016()
+				from MLHelper.dataset import Physionet2016
+				dataset = Physionet2016(self.run)
 			elif dataset_mode == const.PHYSIONET_2022:
-				from data.dataset import Physionet2022
-				dataset = Physionet2022()
+				from MLHelper.dataset import Physionet2022
+				dataset = Physionet2022(self.run)
+			elif dataset_mode == const.PHYSIONET_2016_2022:
+				from MLHelper.dataset import Physionet2016_2022
+				dataset = Physionet2016_2022(self.run)
 			else:
 				self.run.log_training(f"Unknown dataset {dataset_mode}", level=logging.ERROR)
 				raise ValueError(f"Unknown dataset {dataset_mode}")
-			dataset.set_run(self.run)
 			dataset.load_file_list()
 			dataset.prepare_chunks()
 			dataset.prepare_kfold_splits()
