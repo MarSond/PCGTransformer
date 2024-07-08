@@ -328,17 +328,22 @@ class TrainTask(TaskBase):
 		return model, optimizer, sheduler, scaler
 
 	def load_model_for_training(self) -> torch.nn.Module:
-		model, optimizer, sheduler, scaler = self.prepare_training_utilities()
+		model, optimizer, scheduler, scaler = self.prepare_training_utilities()
 		# check if TRAINING_CHECKPOINT is set and load that model
-		checkpoint = self.config[const.TRAINING_CHECKPOINT]
-		if checkpoint is not None:
-			assert const.EPOCH in checkpoint, "Epoch not set in checkpoint"
-			assert const.RUN_NAME in checkpoint, "Run name not set in checkpoint"
-
-			self.run.log_training("Loading model from checkpoint.", level=logging.DEBUG)
+		checkpoint_epoch, checkpoint_fold, checkpoint_path = self.get_checkpoint(self.config)
+		if checkpoint_epoch is not None:
+			assert checkpoint_fold is not None, "Fold not set in checkpoint"
+			assert checkpoint_path is not None, "Path not set in checkpoint"
+			self.start_epoch = checkpoint_epoch + 1 # start at next epoch
+			self.start_fold = checkpoint_fold
 			model, optimizer, sheduler, scaler = MLUtil.load_model( \
-				model=model, path=self.config[const.TRAINING_CHECKPOINT], \
-				run=self.run, logger=self.run.train_logger)
+				model=model, device=self.run.device, optimizer=optimizer, scheduler=scheduler, scaler=scaler, \
+				path=checkpoint_path, logger=self.run.train_logger)
+			self.run.log_training("Loaded model and utils from checkpoint.", level=logging.DEBUG)
+		#model = model.to(self.run.device)
+
+		model, optimizer, scheduler, scaler = MLUtil.ensure_device( \
+			self.run.device, model, optimizer, scheduler, scaler)
 		return model, optimizer, sheduler, scaler
 
 	def setup_task(self):
@@ -350,16 +355,18 @@ class TrainTask(TaskBase):
 
 		model, optimizer, sheduler, scaler = self.load_model_for_training()
 		self.start_model = model.to(self.run.device)
-		self.optimizer = optimizer
-		self.scheduler = sheduler
-		self.scaler = scaler
+		self.optimizer = optimizer#.to(self.run.device)
+		self.scheduler = sheduler#.to(self.run.device)
+		self.scaler = scaler#.to(self.run.device)
+		self.run.log_training(f"Moved model and utils to {self.run.device}", level=logging.INFO)
 		self.run.log_training("Loaded all needed things for training", level=logging.WARNING)
 
 	def start_task(self):
 		"""Starts the training process."""
 		self.run.log_training("Starting training pipeline.", level=logging.INFO)
-		self.trainer_class.start_training_task(start_model=self.start_model, \
+		self.trainer_class.set_training_utilities(start_model=self.start_model, \
 			optimizer=self.optimizer, scheduler=self.scheduler, scaler=self.scaler)
+		self.trainer_class.start_training_task(start_epoch=self.start_epoch, start_fold=self.start_fold)
 		self.run.log_training("Training complete.", level=logging.CRITICAL)
 
 
@@ -378,9 +385,9 @@ class InferenceTask(TaskBase):
 		self.run.log_training("Setting up inference task.", level=logging.DEBUG)
 		self.dataset = self.get_dataset()
 		model = TaskBase.create_new_model(self.run)
-		model, _, _, _ = MLUtil.load_model(model=model, \
+		model, _, _, _ = MLUtil.load_model(model=model, device=self.run.device, \
 			path=self._get_inference_model_path(), logger=self.run.train_logger)
-		self.inference_model = model.to(self.run.device)
+		self.inference_model = MLUtil.ensure_device(self.run.device, model)
 		self.inferencer_class = self.get_inferencer(run=self.run, dataset=self.dataset)
 		self.run.log_training("Loaded all needed things for inference", level=logging.WARNING)
 

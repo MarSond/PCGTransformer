@@ -1,6 +1,6 @@
 import logging
 
-import torch.optim as optim
+from torch import optim
 from torch.cuda.amp.grad_scaler import GradScaler
 from torch.utils.data import DataLoader
 

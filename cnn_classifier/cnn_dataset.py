@@ -101,8 +101,7 @@ class CNN_Dataset(Dataset):
 
 		if self.mode == const.VALIDATION:
 			# Validation uses no augmentation but signal filtering
-			sgram_augmented = self._get_mel(normalized_audio, file_sr)
-			sgram_final = sgram_augmented
+			sgram_final = self._get_mel(normalized_audio, file_sr)
 
 		######## after processing
 

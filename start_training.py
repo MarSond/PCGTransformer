@@ -12,10 +12,10 @@ def do_run(config: dict):
 
 if __name__ == "__main__":
 
-	train_update_dict = {	TASK_TYPE: TRAINING, METADATA_FRAC: 0.8,
-							CNN_PARAMS: {}, EPOCHS: 50,
-							SINGLE_BATCH_MODE: False, TRAIN_FRAC: 0.8, KFOLD_SPLITS: 1, \
-							# TRAINING_CHECKPOINT: {EPOCH: 10, RUN_NAME: "run1_name"}, \
+	train_update_dict = {	TASK_TYPE: TRAINING, METADATA_FRAC: 0.8, \
+							CNN_PARAMS: {}, EPOCHS: 72, \
+							SINGLE_BATCH_MODE: False, TRAIN_FRAC: 0.8, KFOLD_SPLITS: 10, \
+							TRAINING_CHECKPOINT: {EPOCH: 70, RUN_NAME: "run1", FOLD: 6}, \
 							CHUNK_DURATION: 7.0, CHUNK_METHOD: CHUNK_METHOD_FIXED, \
                       }
 
@@ -33,8 +33,8 @@ if __name__ == "__main__":
 						CNN_PARAMS: {SIGNAL_FILTER: None}})
 
 	run_loop_test_dict = train_update_dict.copy()
-	run_loop_test_dict.update({ \
-		TRAIN_DATASET: PHYSIONET_2022, KFOLD_SPLITS: 3, EPOCHS: 4, METADATA_FRAC: 0.05})
+	#run_loop_test_dict.update({ \
+	#	TRAIN_DATASET: PHYSIONET_2022, KFOLD_SPLITS: 3, EPOCHS: 4, METADATA_FRAC: 0.05})
 
 	#do_run(run1_dict)
 	#do_run(run2_dict)
