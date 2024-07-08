@@ -42,7 +42,7 @@ class CNN_Dataset(Dataset):
 		chunk_name = audio_filename.name + "#" + str(frame_start) + "-" + str(frame_end)
 		# print("file and class: ", audio_file, class_id)
 		raw_audio, file_sr = AudioUtil.Loading.load_audiofile(audio_filename, start_frame=frame_start, \
-			end_frame=frame_end, target_length=self.config[const.CHUNK_DURATION])
+			end_frame=frame_end, target_length=self.config[const.CHUNK_DURATION], pad_method=self.config[const.AUDIO_LENGTH_NORM])
 		if file_sr != self.target_samplerate:
 			raw_audio = preprocessing.resample(raw_audio, file_sr, self.target_samplerate)
 
@@ -51,7 +51,7 @@ class CNN_Dataset(Dataset):
 			filtered_audio = preprocessing.Filter.butter_bandpass_filter( \
 				raw_audio, lowcut=self.cnn_config[const.BUTTERPASS_LOW], \
 				highcut=self.cnn_config[const.BUTTERPASS_HIGH], \
-				fs=file_sr, order=self.cnn_config[const.BUTTERPASS_ORDER])
+				fs=self.target_samplerate, order=self.cnn_config[const.BUTTERPASS_ORDER])
 		else:
 			filtered_audio = raw_audio
 
@@ -75,10 +75,10 @@ class CNN_Dataset(Dataset):
 
 		if self.mode == const.DEMO:
 			# return raw waveform, filtered waveform, raw spectrogram, filtered spectrogram
-			sgram_raw = self._get_mel(raw_audio, data_sr)
-			sgram_filtered = self._get_mel(normalized_audio, data_sr)
-			audio_augmented = _audio_augmentation(samples=normalized_audio, sample_rate=data_sr)
-			sgram_processed = self._get_mel(audio_augmented, data_sr)
+			sgram_raw = self._get_mel(raw_audio, self.target_samplerate)
+			sgram_filtered = self._get_mel(normalized_audio, self.target_samplerate)
+			audio_augmented = _audio_augmentation(samples=normalized_audio, sample_rate=self.target_samplerate)
+			sgram_processed = self._get_mel(audio_augmented, self.target_samplerate)
 			sgram_augmented = _sgram_augmentation(magnitude_spectrogram=sgram_processed)
 			sgram_final = sgram_augmented
 

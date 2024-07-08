@@ -31,7 +31,7 @@ if __name__ == "__main__":
 	run2_dict.update({LOAD_PREVIOUS_RUN_NAME: run1_name, INFERENCE_DATASET: PHYSIONET_2022})
 
 
-	#do_run(run1_dict)
-	do_run(run2_dict)
+	do_run(run1_dict)
+	#do_run(run2_dict)
 
 	plt.show()
