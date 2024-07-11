@@ -1,4 +1,4 @@
-import torch.nn as nn
+from torch import nn, zeros
 
 import MLHelper.constants as const
 from MLHelper.tools.utils import MLUtil
@@ -13,6 +13,8 @@ def get_model(run: Run):
 		return CNN_Model_2(run)
 	if type == 3:
 		return CNN_Model_3(run)
+	if type == 4:
+		return CNN_Model_4(run)
 	raise ValueError(f"Model type {type} not found")
 
 class CNN_Base(nn.Module):
@@ -129,19 +131,21 @@ class CNN_Model_1(CNN_Base):
 		x = self.fc3(x)
 		return x
 
-class CNN_Model_3(CNN_Base):
+
+# nur padding und kernel
+class CNN_Model_2(CNN_Base):
 	def __init__(self, run_config):
 		super().__init__(run_config)
 		conv_layers = []
 
 		# First Convolutional Block
-		self.conv1 = nn.Conv2d(in_channels=1, out_channels=8, kernel_size=(3, 3))
+		self.conv1 = nn.Conv2d(in_channels=1, out_channels=8, kernel_size=(7, 7), padding=1)
 		self.bn1 = nn.BatchNorm2d(8)
 		self.maxpool2d1 = nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2))
 		conv_layers += [self.conv1, self.bn1, self.activation, self.maxpool2d1]
 
 		# Second Convolutional Block
-		self.conv2 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=(3, 3))
+		self.conv2 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=(5, 5), padding=1)
 		self.bn2 = nn.BatchNorm2d(16)
 		self.maxpool2d2 = nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2))
 		conv_layers += [self.conv2, self.bn2, self.activation, self.maxpool2d2]
@@ -164,96 +168,172 @@ class CNN_Model_3(CNN_Base):
 		self.flatten = nn.Flatten()
 
 		# First Fully-Connected (Linear) Layer
-		self.fc1 = nn.Linear(in_features=4096, out_features=128)
-		self.bn5 = nn.BatchNorm1d(128)
+		self.fc1 = nn.Linear(in_features=4096, out_features=1024)
+		self.bn5 = nn.BatchNorm1d(1024)
 		fc1_layers = [self.fc1, self.bn5, self.activation]
 		if self.pDrop0 > 0.0:
 			fc1_layers += [nn.Dropout(p=self.pDrop0)]
 
-		# Second Fully-Connected (Linear) Layer - Last layer with 2 outputs
+		self.fc2 = nn.Linear(in_features=1024, out_features=128)
+		self.bn6 = nn.BatchNorm1d(128)
+		fc2_layers = [self.fc2, self.bn6, self.activation]
+		if self.pDrop1 > 0.0:
+			fc2_layers += [nn.Dropout(p=self.pDrop1)]
+
+		# Third Fully-Connected (Linear) Layer - Last layer with 2 outputs
 		self.fc3 = nn.Linear(in_features=128, out_features=self.num_classes)
 
 		self.conv = nn.Sequential(*conv_layers)
 		self.fc1_block = nn.Sequential(*fc1_layers)
+		self.fc2_block = nn.Sequential(*fc2_layers)
 
 	def forward(self, x):
 		x = super().forward(x)
 		x = self.conv(x)
 		x = self.ap(x)
 		x = self.flatten(x)
+		self.tensor_logger.debug(f"shape after flatten: {x.shape}")
 		x = self.fc1_block(x)
+		x = self.fc2_block(x)
 		x = self.fc3(x)
 		return x
 
 
-class CNN_Model_2(CNN_Base):
+# mehr dimensionen
+class CNN_Model_3(CNN_Base):
 	def __init__(self, run_config):
 		super().__init__(run_config)
-
-		self.drop0 = self.pDrop0
-		self.drop1 = self.pDrop1
+		conv_layers = []
 
 		# First Convolutional Block
 		self.conv1 = nn.Conv2d(in_channels=1, out_channels=8, kernel_size=(3, 3))
 		self.bn1 = nn.BatchNorm2d(8)
-		self.maxpool1 = nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2))
+		self.maxpool2d1 = nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2))
+		conv_layers += [self.conv1, self.bn1, self.activation, self.maxpool2d1]
 
 		# Second Convolutional Block
 		self.conv2 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=(3, 3))
 		self.bn2 = nn.BatchNorm2d(16)
-		self.maxpool2 = nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2))
+		self.maxpool2d2 = nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2))
+		conv_layers += [self.conv2, self.bn2, self.activation, self.maxpool2d2]
 
 		# Third Convolutional Block
-		self.conv3 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=(3, 3))
-		self.bn3 = nn.BatchNorm2d(32)
+		self.conv3 = nn.Conv2d(in_channels=16, out_channels=64, kernel_size=(3, 3))
+		self.bn3 = nn.BatchNorm2d(64)
+		self.maxpool2d3 = nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2))
+		conv_layers += [self.conv3, self.bn3, self.activation, self.maxpool2d3]
 
-		# Adaptive Pooling
-		self.ap = nn.AdaptiveAvgPool2d(output_size=(16, 16))  # Adjusted size
+		# Fourth Convolutional Block
+		self.conv4 = nn.Conv2d(in_channels=64, out_channels=128, kernel_size=(3, 3))
+		self.bn4 = nn.BatchNorm2d(128)
+		self.maxpool2d4 = nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2))
+		conv_layers += [self.conv4, self.bn4, self.activation, self.maxpool2d4]
 
-		# Flatten Layer
+		self.conv = nn.Sequential(*conv_layers)
+
+		self.ap = nn.AdaptiveAvgPool2d(output_size=(8,8))
+
+		# Flatten the output of the convolutional layers
 		self.flatten = nn.Flatten()
 
-		# First Fully-Connected Layer
-		self.fc1 = nn.Linear(in_features=8192, out_features=1024)  # Adjusted input size
-		self.bn4 = nn.BatchNorm1d(1024)
-		self.fc1_block = nn.Sequential(self.fc1, self.bn4, self.activation)
-		if self.pDrop0 > 0:
-			self.fc1_block.add_module("dropout0", nn.Dropout(p=self.pDrop0))
+		# Berechne die Eingabegröße für die erste Fully Connected Layer
+		dummy_input = zeros(1, 1, self.n_mels, int(self.target_samplerate * self.seconds))
+		conv_out = self.conv(dummy_input)
+		ap_out = self.ap(conv_out)
+		fc_input_size = self.flatten(ap_out).shape[1]
 
-		# Second Fully-Connected Layer
+		# First Fully-Connected (Linear) Layer
+		self.fc1 = nn.Linear(in_features=fc_input_size, out_features=1024)
+		self.bn5 = nn.BatchNorm1d(1024)
+		fc1_layers = [self.fc1, self.bn5, self.activation]
+		if self.pDrop0 > 0.0:
+			fc1_layers += [nn.Dropout(p=self.pDrop0)]
+
 		self.fc2 = nn.Linear(in_features=1024, out_features=128)
-		self.bn5 = nn.BatchNorm1d(128)
-		self.fc2_block = nn.Sequential(self.fc2, self.bn5, self.activation)
-		if self.pDrop1 > 0:
-			self.fc2_block.add_module("dropout1", nn.Dropout(p=self.pDrop1))
+		self.bn6 = nn.BatchNorm1d(128)
+		fc2_layers = [self.fc2, self.bn6, self.activation]
+		if self.pDrop1 > 0.0:
+			fc2_layers += [nn.Dropout(p=self.pDrop1)]
 
-		# Output Layer
+		# Third Fully-Connected (Linear) Layer - Last layer with 2 outputs
 		self.fc3 = nn.Linear(in_features=128, out_features=self.num_classes)
+
+		self.fc1_block = nn.Sequential(*fc1_layers)
+		self.fc2_block = nn.Sequential(*fc2_layers)
 
 	def forward(self, x):
 		x = super().forward(x)
-		x = self.conv1(x)
-		x = self.bn1(x)
-		x = self.activation(x)
-		x = self.maxpool1(x)
-
-		x = self.conv2(x)
-		x = self.bn2(x)
-		x = self.activation(x)
-		x = self.maxpool2(x)
-
-		x = self.conv3(x)
-		x = self.bn3(x)
-		x = self.activation(x)
-		x = self.maxpool3(x)
-
+		x = self.conv(x)
 		x = self.ap(x)
-
 		x = self.flatten(x)
-
+		self.tensor_logger.debug(f"shape after flatten: {x.shape}")
 		x = self.fc1_block(x)
 		x = self.fc2_block(x)
-
 		x = self.fc3(x)
+		return x
 
+# mehr FC
+class CNN_Model_4(CNN_Base):
+	def __init__(self, run_config):
+		super().__init__(run_config)
+		conv_layers = []
+
+		# First Convolutional Block
+		self.conv1 = nn.Conv2d(in_channels=1, out_channels=8, kernel_size=(3, 3))
+		self.bn1 = nn.BatchNorm2d(8)
+		self.maxpool2d1 = nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2))
+		conv_layers += [self.conv1, self.bn1, self.activation, self.maxpool2d1]
+
+		# Second Convolutional Block
+		self.conv2 = nn.Conv2d(in_channels=8, out_channels=16, kernel_size=(3, 3))
+		self.bn2 = nn.BatchNorm2d(16)
+		self.maxpool2d2 = nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2))
+		conv_layers += [self.conv2, self.bn2, self.activation, self.maxpool2d2]
+
+		# Third Convolutional Block
+		self.conv3 = nn.Conv2d(in_channels=16, out_channels=64, kernel_size=(3, 3))
+		self.bn3 = nn.BatchNorm2d(64)
+		self.maxpool2d3 = nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2))
+		conv_layers += [self.conv3, self.bn3, self.activation, self.maxpool2d3]
+
+		# Fourth Convolutional Block
+		self.conv4 = nn.Conv2d(in_channels=64, out_channels=128, kernel_size=(3, 3))
+		self.bn4 = nn.BatchNorm2d(128)
+		self.maxpool2d4 = nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2))
+		conv_layers += [self.conv4, self.bn4, self.activation, self.maxpool2d4]
+
+		self.ap = nn.AdaptiveAvgPool2d(output_size=(4,4))
+
+		# Flatten the output of the convolutional layers
+		self.flatten = nn.Flatten()
+
+		# First Fully-Connected (Linear) Layer
+		self.fc1 = nn.Linear(in_features=4096, out_features=2048)
+		self.bn5 = nn.BatchNorm1d(2048)
+		fc1_layers = [self.fc1, self.bn5, self.activation]
+		if self.pDrop0 > 0.0:
+			fc1_layers += [nn.Dropout(p=self.pDrop0)]
+
+		self.fc2 = nn.Linear(in_features=2048, out_features=512)
+		self.bn6 = nn.BatchNorm1d(512)
+		fc2_layers = [self.fc2, self.bn6, self.activation]
+		if self.pDrop1 > 0.0:
+			fc2_layers += [nn.Dropout(p=self.pDrop1)]
+
+		# Third Fully-Connected (Linear) Layer - Last layer with 2 outputs
+		self.fc3 = nn.Linear(in_features=512, out_features=self.num_classes)
+
+		self.conv = nn.Sequential(*conv_layers)
+		self.fc1_block = nn.Sequential(*fc1_layers)
+		self.fc2_block = nn.Sequential(*fc2_layers)
+
+	def forward(self, x):
+		x = super().forward(x)
+		x = self.conv(x)
+		x = self.ap(x)
+		x = self.flatten(x)
+		self.tensor_logger.debug(f"shape after flatten: {x.shape}")
+		x = self.fc1_block(x)
+		x = self.fc2_block(x)
+		x = self.fc3(x)
 		return x
