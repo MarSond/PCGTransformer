@@ -17,7 +17,6 @@ class CNN_Dataset(Dataset):
 		self.run = run
 		self.config = run.config
 		self.cnn_config = run.config[const.CNN_PARAMS]
-		self.base_path = run.task.dataset.dataset_path
 		self.n_mels = self.cnn_config[const.N_MELS]
 		self.hop_length = self.cnn_config[const.HOP_LENGTH]
 		self.n_fft = self.cnn_config[const.N_FFT]
@@ -35,7 +34,7 @@ class CNN_Dataset(Dataset):
 		# Absolute file path of the audio file - concatenate the audio directory with
 		# the relative path
 		current_row = self.datalist.iloc[idx]
-		audio_filename = Path(self.base_path) / current_row[const.META_AUDIO_PATH]
+		audio_filename = current_row[const.META_AUDIO_PATH]
 		frame_start = current_row[const.CHUNK_RANGE_START]
 		frame_end = current_row[const.CHUNK_RANGE_END]
 		class_id = current_row[self.config[const.LABEL_NAME]]

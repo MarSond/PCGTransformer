@@ -206,6 +206,7 @@ class TaskBase(ABC):
 			return cnn_training.CNNTraining(run=run, dataset=dataset)
 		if model_type == const.BEATS:
 			return None
+		
 		self.run.log_training(f"Unknown model type {model_type}", level=logging.ERROR)
 		raise ValueError(f"Unknown model type {model_type}")
 
@@ -319,15 +320,15 @@ class TrainTask(TaskBase):
 		self.start_model = None
 
 	def prepare_training_utilities(self):
-		# create blank model, optimizer, sheduler, scaler
+		# create blank model, optimizer, scheduler, scaler
 		model = self.create_new_model(self.run)
 		if self.config[const.MODEL_METHOD_TYPE] == const.CNN:
 			from cnn_classifier.cnn_training import CNNTraining
-			optimizer, sheduler, scaler = \
+			optimizer, scheduler, scaler = \
 				CNNTraining.prepare_optimizer_scheduler(config=self.config, model=model)
 		else:
 			raise ValueError(f"Unknown model type {self.config[const.MODEL_METHOD_TYPE]}")
-		return model, optimizer, sheduler, scaler
+		return model, optimizer, scheduler, scaler
 
 	def load_model_for_training(self) -> torch.nn.Module:
 		model, optimizer, scheduler, scaler = self.prepare_training_utilities()
@@ -338,7 +339,7 @@ class TrainTask(TaskBase):
 			assert checkpoint_path is not None, "Path not set in checkpoint"
 			self.start_epoch = checkpoint_epoch + 1 # start at next epoch
 			self.start_fold = checkpoint_fold
-			model, optimizer, sheduler, scaler = MLUtil.load_model( \
+			model, optimizer, scheduler, scaler = MLUtil.load_model( \
 				model=model, device=self.run.device, optimizer=optimizer, scheduler=scheduler, scaler=scaler, \
 				path=checkpoint_path, logger=self.run.train_logger)
 			self.run.log_training("Loaded model and utils from checkpoint.", level=logging.DEBUG)
@@ -346,7 +347,7 @@ class TrainTask(TaskBase):
 
 		model, optimizer, scheduler, scaler = MLUtil.ensure_device( \
 			self.run.device, model, optimizer, scheduler, scaler)
-		return model, optimizer, sheduler, scaler
+		return model, optimizer, scheduler, scaler
 
 	def setup_task(self):
 		"""Set up the training task, including loading models, datasets, and other resources."""
@@ -355,10 +356,10 @@ class TrainTask(TaskBase):
 		self.trainer_class = self.get_trainer(run=self.run, dataset=self.dataset)
 		# check if TRAINING_CHECKPOINT is set and pass it to training loop TODO
 
-		model, optimizer, sheduler, scaler = self.load_model_for_training()
+		model, optimizer, scheduler, scaler = self.load_model_for_training()
 		self.start_model = model.to(self.run.device)
 		self.optimizer = optimizer#.to(self.run.device)
-		self.scheduler = sheduler#.to(self.run.device)
+		self.scheduler = scheduler#.to(self.run.device)
 		self.scaler = scaler#.to(self.run.device)
 		self.run.log_training(f"Moved model and utils to {self.run.device}", level=logging.INFO)
 		self.run.log_training("Loaded all needed things for training", level=logging.WARNING)

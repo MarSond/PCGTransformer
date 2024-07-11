@@ -25,7 +25,7 @@ if __name__ == "__main__":
 	inference_update_dict_1.update(inference_base)
 
 	run1_dict = inference_update_dict_1.copy()
-	run1_dict.update({LOAD_PREVIOUS_RUN_NAME: run1_name, INFERENCE_DATASET: PHYSIONET_2016})
+	run1_dict.update({LOAD_PREVIOUS_RUN_NAME: run1_name, INFERENCE_DATASET: PHYSIONET_2016_2022})
 
 	run2_dict = inference_update_dict_1.copy()
 	run2_dict.update({LOAD_PREVIOUS_RUN_NAME: run1_name, INFERENCE_DATASET: PHYSIONET_2022})
