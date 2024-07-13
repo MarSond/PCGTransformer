@@ -59,7 +59,8 @@ class Run:
 		if directory_status is not True:
 			raise Exception(f"Could not create run results directory" \
 							f"{self.run_results_path}.")
-		self.config[const.RUN_RESULTS_PATH] = self.run_results_path
+		# path as pure string
+		self.config[const.RUN_RESULTS_PATH] = str(self.run_results_path)
 
 	def setup_logger(self, log_to_file):
 		"""Initializes logging for different modules within the application."""
