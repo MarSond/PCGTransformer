@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 import torch
@@ -39,6 +40,7 @@ class CNN_Dataset(Dataset):
 		frame_end = current_row[const.CHUNK_RANGE_END]
 		class_id = current_row[self.config[const.LABEL_NAME]]
 		chunk_name = audio_filename.name + "#" + str(frame_start) + "-" + str(frame_end)
+		self.run.log(f"Loading {chunk_name}", name=const.LOGGER_METADATA, level=logging.INFO)
 		# print("file and class: ", audio_file, class_id)
 		raw_audio, file_sr = AudioUtil.Loading.load_audiofile(audio_filename, start_frame=frame_start, \
 			end_frame=frame_end, target_length=self.config[const.CHUNK_DURATION], pad_method=self.config[const.AUDIO_LENGTH_NORM])

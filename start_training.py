@@ -45,7 +45,7 @@ if __name__ == "__main__":
 	run5_5c_5s = train_update_dict.copy()
 	run5_5c_5s.update({TRAIN_DATASET: PHYSIONET_2022, CHUNK_METHOD: CHUNK_METHOD_CYCLES, CHUNK_DURATION: 5.0, \
 		CHUNK_HEARTCYCLE_COUNT: 5, AUDIO_LENGTH_NORM: LENGTH_NORM_STRETCH, RUN_NAME_SUFFIX: "cycles-5"})
-	#do_run(run5_5c_5s)
+	do_run(run5_5c_5s)
 
 
 	# Experiment 6: Adjust mel spectrogram parameters
