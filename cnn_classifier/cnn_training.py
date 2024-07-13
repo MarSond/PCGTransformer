@@ -67,11 +67,11 @@ class CNNTraining(ML_Loop):
 		elif cnn_params[const.OPTIMIZER] == const.OPTIMIZER_SGD:
 			optimizer = optim.SGD(filter(lambda p: p.requires_grad, model.parameters()), \
 				lr = cnn_params[const.LEARNING_RATE], momentum=0.9, \
-					weight_decay=cnn_params[const.L2_REGULATION_WEIGHT])
+					weight_decay=cnn_params[const.L2_REGULATION_WEIGHT], nesterov=True)
 		scaler = GradScaler()
 		if cnn_params[const.SCHEDULER] == const.SCHEDULER_PLATEAU :
 			scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="min", \
-				factor=0.2, patience=10, verbose=True)
+				factor=0.1, patience=8, verbose=True)
 		elif cnn_params[const.SCHEDULER] == const.SCHEDULER_STEP:
 			scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.2)
 		elif cnn_params[const.SCHEDULER] == const.SCHEDULER_COSINE:
