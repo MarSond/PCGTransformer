@@ -14,19 +14,17 @@ def do_run(config: dict):
 
 
 if __name__ == "__main__":
-	"""
-	TODO verify checkpointing works. Current run1 checkpoint has bad performance in training
-	In standalone inference it works well.
-	Thesis: it doesnt work well because LR scheduler and scaler,
-	which are used in training werent saved in the model
-	"""
 
 	train_update_dict = {	TASK_TYPE: TRAINING, METADATA_FRAC: 0.8, \
-							CNN_PARAMS: {}, EPOCHS: 25, \
+							CNN_PARAMS: {}, EPOCHS: 30, \
 							SINGLE_BATCH_MODE: False, TRAIN_FRAC: 0.8, KFOLD_SPLITS: 1, \
 							# TRAINING_CHECKPOINT: {EPOCH: 70, RUN_NAME: "run1", FOLD: 6}, \
 							CHUNK_DURATION: 7.0, CHUNK_METHOD: CHUNK_METHOD_FIXED, \
                       }
+
+	cycle_base = train_update_dict.copy()
+	cycle_base.update({TRAIN_DATASET: PHYSIONET_2022, CHUNK_METHOD: CHUNK_METHOD_CYCLES, \
+		AUDIO_LENGTH_NORM: LENGTH_NORM_STRETCH})
 
 	run_2022 = train_update_dict.copy()
 	run_2022.update({TRAIN_DATASET: PHYSIONET_2022, RUN_NAME_SUFFIX: "run2022"})
@@ -36,17 +34,120 @@ if __name__ == "__main__":
 
 	run2016_2022 = train_update_dict.copy()
 	run2016_2022.update({TRAIN_DATASET: PHYSIONET_2016_2022, RUN_NAME_SUFFIX: "run2022-2016"})
+	###
 
-	run_10c_7s = train_update_dict.copy()
-	run_10c_7s.update({TRAIN_DATASET: PHYSIONET_2022, CHUNK_METHOD: CHUNK_METHOD_CYCLES, CHUNK_DURATION: 7.0, \
-		CHUNK_HEARTCYCLE_COUNT: 10, AUDIO_LENGTH_NORM: LENGTH_NORM_STRETCH, RUN_NAME_SUFFIX: "cycles-10"})
-	do_run(run_10c_7s)
 
-	run5_5c_5s = train_update_dict.copy()
-	run5_5c_5s.update({TRAIN_DATASET: PHYSIONET_2022, CHUNK_METHOD: CHUNK_METHOD_CYCLES, CHUNK_DURATION: 5.0, \
-		CHUNK_HEARTCYCLE_COUNT: 5, AUDIO_LENGTH_NORM: LENGTH_NORM_STRETCH, RUN_NAME_SUFFIX: "cycles-5"})
-	do_run(run5_5c_5s)
+	run_10c_7s = cycle_base.copy()
+	run_10c_7s.update({CHUNK_DURATION: 7.0, CHUNK_HEARTCYCLE_COUNT: 10, RUN_NAME_SUFFIX: "cycles-10"})
+	#do_run(run_10c_7s)
 
+	run5_5c_5s = cycle_base.copy()
+	run5_5c_5s.update({CHUNK_DURATION: 5.0, CHUNK_HEARTCYCLE_COUNT: 5, RUN_NAME_SUFFIX: "cycles-5"})
+	#do_run(run5_5c_5s)
+
+
+	run_5c_3s = cycle_base.copy()
+	run_5c_3s.update({
+		RUN_NAME_SUFFIX: "5c-3s",
+		CHUNK_DURATION: 3.0,
+		CNN_PARAMS: {
+			MODEL_SUB_TYPE: 3,
+		}
+	})
+	#do_run(run_5c_3s)
+
+	# besser
+	run_5c_7s = cycle_base.copy()
+	run_5c_7s.update({
+		RUN_NAME_SUFFIX: "5c-7s",
+		CHUNK_DURATION: 7.0,
+		CNN_PARAMS: {
+			MODEL_SUB_TYPE: 3,
+		}
+	})
+	#do_run(run_5c_7s)
+
+	run_5c_5s_low = cycle_base.copy()
+	run_5c_5s_low.update({
+		RUN_NAME_SUFFIX: "5c-5s-low",
+		CHUNK_DURATION: 5.0,
+		CHUNK_HEARTCYCLE_COUNT: 5,
+		CNN_PARAMS: {
+			N_MELS: 64,
+			HOP_LENGTH: 16,
+			N_FFT: 512,
+			MODEL_SUB_TYPE: 3,
+		}
+	})
+	#do_run(run_5c_5s_low)
+
+	run_8c_7s_m2 = cycle_base.copy()
+	run_8c_7s_m2.update({
+		RUN_NAME_SUFFIX: "8c_7s_m2",
+		CHUNK_DURATION: 7.0,
+		CHUNK_HEARTCYCLE_COUNT: 8,
+		CNN_PARAMS: {
+			MODEL_SUB_TYPE: 2,
+		}
+	})
+	#do_run(run_8c_7s_m2)
+
+
+	run_5c_5s_m3 = cycle_base.copy()
+	run_5c_5s_m3.update({
+		RUN_NAME_SUFFIX: "5c_5s_m3_long",
+		CHUNK_DURATION: 5.0,
+		CHUNK_HEARTCYCLE_COUNT: 5,
+		EPOCHS: 80,
+		LEARNING_RATE: 0.001,
+		CNN_PARAMS: {
+			MODEL_SUB_TYPE: 3,
+		}
+	})
+	#do_run(run_5c_5s_m3)
+
+
+	run_5c_7s_silu_kai = cycle_base.copy()
+	run_5c_7s_silu_kai.update({
+		RUN_NAME_SUFFIX: "5c-7s-silu-kai",
+		CHUNK_DURATION: 7.0,
+		CNN_PARAMS: {
+			MODEL_SUB_TYPE: 3,
+			ACTIVATION: ACTIVATION_SILU,
+		}
+	})
+	do_run(run_5c_7s_silu_kai)
+
+	run_5c_7s_relu = cycle_base.copy()
+	run_5c_7s_relu.update({
+		RUN_NAME_SUFFIX: "5c-7s-relu",
+		CHUNK_DURATION: 7.0,
+		CNN_PARAMS: {
+			MODEL_SUB_TYPE: 3,
+			ACTIVATION: ACTIVATION_RELU,
+		}
+	})
+	do_run(run_5c_7s_relu)
+
+
+	run_10c_5s_m2 = cycle_base.copy()
+	run_10c_5s_m2.update({
+		RUN_NAME_SUFFIX: "10c_5s_m2_long",
+		CHUNK_DURATION: 5.0,
+		CHUNK_HEARTCYCLE_COUNT: 10,
+		EPOCHS: 80,
+		LEARNING_RATE: 0.001,
+		CNN_PARAMS: {
+			L1_REGULATION_WEIGHT: 0.001,
+			L2_REGULATION_WEIGHT: 0.001,
+			OPTIMIZER: OPTIMIZER_SGD,
+			SCHEDULER: SCHEDULER_STEP,
+			MODEL_SUB_TYPE: 2,
+		}
+	})
+	do_run(run_10c_5s_m2)
+
+	##################
 
 	# Experiment 6: Adjust mel spectrogram parameters
 	run6_dict = run_2022.copy()
@@ -59,17 +160,6 @@ if __name__ == "__main__":
 		}
 	})
 
-	# Experiment 7: Modify signal filtering
-	run7_dict = run_2022.copy()
-	run7_dict.update({
-		RUN_NAME_SUFFIX: "differentsignal_filter",
-		CNN_PARAMS: {
-			SIGNAL_FILTER: BUTTERPASS,
-			BUTTERPASS_LOW: 20,
-			BUTTERPASS_HIGH: 800,
-			BUTTERPASS_ORDER: 3,
-		}
-	})
 
 	# Experiment 8: Adjust learning rate and optimizer
 	run8_dict = run_2022.copy()

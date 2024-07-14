@@ -1,4 +1,6 @@
-from torch import nn, zeros
+import math
+
+from torch import nn, zeros, no_grad
 
 import MLHelper.constants as const
 from MLHelper.tools.utils import MLUtil
@@ -35,14 +37,13 @@ class CNN_Base(nn.Module):
 		elif cnn_config[const.ACTIVATION] == const.ACTIVATION_SILU:
 			self.activation = nn.SiLU(inplace=True)
 		else:
-			raise ValueError(f"Activation {cnn_config[const.ACTIVATION]} not found in YAMNET Model list")
+			raise ValueError(f"Activation {cnn_config[const.ACTIVATION]} not supported")
 		self.softmax = nn.Softmax(dim=1)
 		self.tensor_logger = run.logger_dict[const.LOGGER_TENSOR]
 
 	def initialize(self):
 		MLUtil.reset_weights(self)
-		self._initialize_weights()
-
+		self.apply(self.init_weights)
 
 	def forward(self, x):
 		self.tensor_logger.debug(f"Raw Forward Input shape: {x.shape}")
@@ -53,18 +54,28 @@ class CNN_Base(nn.Module):
 		self.tensor_logger.info(f"Modified Forward INIT Input shape: {x.shape}")
 		return x
 
-	def _initialize_weights(self):
-		for m in self.modules():
-			if isinstance(m, nn.Conv2d):
-				nn.init.xavier_uniform_(m.weight)
-				if m.bias is not None:
-					nn.init.constant_(m.bias, 0)
-			elif isinstance(m, nn.BatchNorm2d):
-				nn.init.constant_(m.weight, 1)
+	def kaiming_normal_silu(self, tensor, mode="fan_out"):
+		fan = nn.init._calculate_correct_fan(tensor, mode)
+		gain = 1.0  # Standardwert für lineare und die meisten anderen Aktivierungen
+		gain *= math.sqrt(3)  # Anpassung für SiLU
+		std = gain / math.sqrt(fan)
+		with no_grad():
+			return tensor.normal_(0, std)
+
+	def init_weights(self, m):
+		if isinstance(m, (nn.Conv2d, nn.Linear)):
+			if isinstance(getattr(m, "activation", None), nn.SiLU):
+				# Spezielle Initialisierung für SiLU
+				self.kaiming_normal_silu(m.weight, mode="fan_out")
+			else:
+				# Standard Kaiming-Initialisierung für andere Aktivierungen (z.B. ReLU)
+				nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
+
+			if m.bias is not None:
 				nn.init.constant_(m.bias, 0)
-			elif isinstance(m, nn.Linear):
-				nn.init.normal_(m.weight, 0, 0.01)
-				nn.init.constant_(m.bias, 0)
+		elif isinstance(m, nn.BatchNorm2d):
+			nn.init.constant_(m.weight, 1)
+			nn.init.constant_(m.bias, 0)
 
 class CNN_Model_1(CNN_Base):
 	def __init__(self, run_config):
