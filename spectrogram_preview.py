@@ -24,7 +24,7 @@ def compare_spectrograms(audio_file, params_list):
 		S_dB = librosa.power_to_db(S, ref=8000)
 
 		img = librosa.display.specshow(S_dB, x_axis="time", y_axis="mel", sr=sr,
-									   hop_length=params["hop_length"], ax=axes[i])
+										hop_length=params["hop_length"], ax=axes[i])
 		axes[i].set_title(f"n_fft={params["n_fft"]}, hop_length={params["hop_length"]}, n_mels={params["n_mels"]}")
 
 	plt.tight_layout()

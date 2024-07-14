@@ -1,0 +1,17 @@
+Root folder: /
+run.py - Main class to run the program, holds the task, config, all settings
+start_training|inference.py - creates a config overwrite and creates, runs a Run object. Main starting point
+project_config.py - holds the project configuration, baseline standard config values
+
+/runs/: output directory of runs, each run gets own folder
+
+/data/: main data directory
+physionet2016, physionet2022 folders
+each contains train_list.csv 
+/MLHelper/dataset.py defines how the audio is accessed and in which folders
+
+/cnn_classifier/ and /beats_classifier/ contain the models and training scripts for the CNN and the beat classifier
+example: cnn_training.py, cnn_model.py, cnn_dataset.py, cnn_inference.py
+
+/MLHelper/ contains the most methods that are universal and used in the project aswell
+dataset.py which loads the dataset from file and creates a csv file with the data

@@ -1,0 +1,704 @@
+File structure:
+/
+  * build_dataset.py
+  * output_run_parser.py
+  * plot_audio_signal.py
+  * project_config.py
+  * run.py
+  * spectrogram_preview.py
+  * start_inference.py
+  * start_looptest.py
+  * start_training.py
+  * __init__.py
+  * audio_example_images
+    * merge.py
+  * beats_classifier
+    * beats_dataset.py
+  * beats_classifier
+    * beats_training.py
+  * beats_classifier
+    * __init__.py
+  * beats_classifier
+    * BEATs
+      * backbone.py
+  * beats_classifier
+    * BEATs
+      * BEATs.py
+  * beats_classifier
+    * BEATs
+      * modules.py
+  * beats_classifier
+    * BEATs
+      * quantizer.py
+  * beats_classifier
+    * BEATs
+      * Tokenizers.py
+  * beats_classifier
+    * BEATs
+      * __init__.py
+  * cnn_classifier
+    * cnn_dataset.py
+  * cnn_classifier
+    * cnn_inference.py
+  * cnn_classifier
+    * cnn_models.py
+  * cnn_classifier
+    * cnn_training.py
+  * cnn_classifier
+    * __init__.py
+  * documents
+    * extract_structure.py
+  * MLHelper
+    * config.py
+  * MLHelper
+    * constants.py
+  * MLHelper
+    * dataset.py
+  * MLHelper
+    * ml_loop.py
+  * MLHelper
+    * RunMetricsParser.py
+  * MLHelper
+    * __init__.py
+  * MLHelper
+    * audio
+      * audioutils.py
+  * MLHelper
+    * audio
+      * augmentation.py
+  * MLHelper
+    * audio
+      * preprocessing.py
+  * MLHelper
+    * audio
+      * __init__.py
+  * MLHelper
+    * metrics
+      * loss.py
+  * MLHelper
+    * metrics
+      * metrics.py
+  * MLHelper
+    * metrics
+      * __init__.py
+  * MLHelper
+    * tests
+      * audio_test.py
+  * MLHelper
+    * tests
+      * logging_helper_test.py
+  * MLHelper
+    * tests
+      * metric_helper_test.py
+  * MLHelper
+    * tests
+      * __init__.py
+  * MLHelper
+    * tools
+      * cudatest.py
+  * MLHelper
+    * tools
+      * logging_helper.py
+  * MLHelper
+    * tools
+      * utils.py
+  * MLHelper
+    * tools
+      * __init__.py
+
+/build_dataset.py:
+  def save_training_data_to_csv(metadata, dataset)
+  def get_base_metadata(path)
+  def _get_heartcycle_indicies_2016(file_path: str)
+  def get_file_metadata_human_ph2016(path: str, anno: pd.DataFrame, data_classes: pd.DataFrame, dataset_object: Physionet2016)
+  def parse_physionet2016()
+  def _get_heartcycle_indicies_2022(file_path: str)
+  def get_file_metadata_human_ph2022(path: str, anno: pd.DataFrame, dataset_object: Physionet2022)
+  def parse_physionet2022()
+  def dataset_statistics(dataset: AudioDataset)
+  def calculate_bpm(data)
+  def plot_statistics(dataset: AudioDataset)
+  def start_parse()
+  def start_statistics()
+  def start_plot()
+  def make_plots(plot_data, dataset: AudioDataset, name)
+
+/output_run_parser.py:
+  def list_sub_folders(folder_path)
+  def update_stats(sub_folder_path, stats)
+  def delete_folder(folder_path)
+  def folder_date(folder_name)
+  def confirm_and_delete_folders(folders_to_delete)
+  def query_and_delete_folders(sub_folders, base_folder, stats)
+
+/plot_audio_signal.py:
+  class RunMetricsParser:
+    def __init__(self)
+    def create_table(self)
+    def load_runs(self)
+    def parse_runs(self)
+    def update_tables(self)
+    def update_single_table(self, table, data, run_type)
+    def delete_selected(self)
+    def show_plots(self, item)
+  def path_constructor(loader, node)
+
+/project_config.py:
+  File has no methods or classes, but is not empty
+
+/run.py:
+  class Run:
+    def __init__(self, config_update_dict: Optional[dict])
+    def setup_run_name(self, config_update_dict: dict)
+    def _get_run_results_path(config, run_name)
+    def setup_run_results_path(self)
+    def setup_logger(self, log_to_file)
+    def log(self, message, name, level)
+    def log_training(self, message, level)
+    def log_loop(self, message, level)
+    def save_config(self)
+    def load_config(self)
+    def setup_config(self, config_update: dict)
+    def setup_task(self)
+    def start_task(self)
+  class TaskBase:
+    def __init__(self, run: Run)
+    def get_trainer(self, run: Run, dataset)
+    def get_inferencer(self, run: Run, dataset)
+    def get_dataset(self)
+    def create_new_model(run: Run)
+    def _get_checkpoint_path(config: dict)
+    def get_checkpoint(config: dict)
+    def setup_task(self)
+    def start_task(self)
+  class DemoTask:
+    def __init__(self, run: Run)
+    def setup_task(self)
+    def start_task(self)
+  class TrainTask:
+    def __init__(self, run: Run)
+    def prepare_training_utilities(self)
+    def load_model_for_training(self)
+    def setup_task(self)
+    def start_task(self)
+  class InferenceTask:
+    def __init__(self, run: Run)
+    def setup_task(self)
+    def _get_inference_model_path(self)
+    def start_task(self)
+
+/spectrogram_preview.py:
+  File has no methods or classes, but is not empty
+
+/start_inference.py:
+  def do_run(config: dict)
+
+/start_looptest.py:
+  def do_run(config: dict)
+
+/start_training.py:
+  def do_run(config: dict)
+
+/__init__.py:
+  File is empty
+
+/audio_example_images/merge.py:
+  File has no methods or classes, but is not empty
+
+/beats_classifier/beats_dataset.py:
+  class BeatsDataset:
+    def __init__(self, root_dir, data_frame, num_samples, transform)
+    def __len__(self)
+    def __getitem__(self, idx)
+    def pad_audio(self, audio)
+    def crop_audio(self, audio)
+  class BEATsDataset:
+    def __init__(self, root_dir: str, csv_file: str, batch_size: int, split_ratio, transform)
+    def prepare_data(self)
+    def setup(self)
+    def train_dataloader(self)
+    def val_dataloader(self)
+
+/beats_classifier/beats_training.py:
+  class BeatsTraining:
+    def __init__(self, run: Run, dataset: AudioDataset)
+    def _build_model(self)
+    def forward(self, x, padding_mask)
+    def loss(self, lprobs, labels)
+    def training_step(self, batch, batch_idx)
+    def validation_step(self, batch, batch_idx)
+    def configure_optimizers(self)
+
+/beats_classifier/__init__.py:
+  File is empty
+
+/beats_classifier/BEATs/backbone.py:
+  class TransformerEncoder:
+    def __init__(self, args)
+    def forward(self, x, padding_mask, layer)
+    def extract_features(self, x, padding_mask, tgt_layer)
+  class TransformerSentenceEncoderLayer:
+    def __init__(self, embedding_dim: float, ffn_embedding_dim: float, num_attention_heads: float, dropout: float, attention_dropout: float, activation_dropout: float, activation_fn: str, layer_norm_first: bool, deep_norm: bool, has_relative_attention_bias: bool, num_buckets: int, max_distance: int, rescale_init: bool, gru_rel_pos: bool, encoder_layers: int)
+    def forward(self, x: torch.Tensor, self_attn_mask: torch.Tensor, self_attn_padding_mask: torch.Tensor, need_weights: bool, pos_bias)
+  class MultiheadAttention:
+    def __init__(self, embed_dim, num_heads, kdim, vdim, dropout, bias, add_bias_kv, add_zero_attn, self_attention, encoder_decoder_attention, q_noise, qn_block_size, has_relative_attention_bias, num_buckets, max_distance, gru_rel_pos, rescale_init)
+    def reset_parameters(self)
+    def _relative_positions_bucket(self, relative_positions, bidirectional)
+    def compute_bias(self, query_length, key_length)
+    def forward(self, query, key: Optional[Tensor], value: Optional[Tensor], key_padding_mask: Optional[Tensor], incremental_state: Optional[Dict[str, Dict[str, Optional[Tensor]]]], need_weights: bool, static_kv: bool, attn_mask: Optional[Tensor], before_softmax: bool, need_head_weights: bool, position_bias: Optional[Tensor])
+    def _append_prev_key_padding_mask(key_padding_mask: Optional[Tensor], prev_key_padding_mask: Optional[Tensor], batch_size: int, src_len: int, static_kv: bool)
+    def _get_input_buffer(self, incremental_state: Optional[Dict[str, Dict[str, Optional[Tensor]]]])
+    def _set_input_buffer(self, incremental_state: Dict[str, Dict[str, Optional[Tensor]]], buffer: Dict[str, Optional[Tensor]])
+    def apply_sparse_mask(self, attn_weights, tgt_len: int, src_len: int, bsz: int)
+  def init_bert_params(module)
+  def normal_(data)
+
+/beats_classifier/BEATs/BEATs.py:
+  class BEATsConfig:
+    def __init__(self, cfg)
+    def update(self, cfg: dict)
+  class BEATs:
+    def __init__(self, cfg: BEATsConfig)
+    def forward_padding_mask(self, features: torch.Tensor, padding_mask: torch.Tensor)
+    def preprocess(self, source: torch.Tensor, fbank_mean: float, fbank_std: float)
+    def extract_features(self, source: torch.Tensor, padding_mask: Optional[torch.Tensor], fbank_mean: float, fbank_std: float)
+
+/beats_classifier/BEATs/modules.py:
+  class GradMultiply:
+    def forward(ctx, x, scale)
+    def backward(ctx, grad)
+  class SamePad:
+    def __init__(self, kernel_size, causal)
+    def forward(self, x)
+  class Swish:
+    def __init__(self)
+    def forward(self, x)
+  class GLU_Linear:
+    def __init__(self, input_dim, output_dim, glu_type, bias_in_glu)
+    def forward(self, x)
+  def gelu_accurate(x)
+  def gelu(x: torch.Tensor)
+  def get_activation_fn(activation: str)
+  def quant_noise(module, p, block_size)
+  def _forward_pre_hook(mod, input)
+
+/beats_classifier/BEATs/quantizer.py:
+  class EmbeddingEMA:
+    def __init__(self, num_tokens, codebook_dim, decay, eps, kmeans_init, codebook_init_path)
+    def init_embed_(self, data)
+    def forward(self, embed_id)
+    def cluster_size_ema_update(self, new_cluster_size)
+    def embed_avg_ema_update(self, new_embed_avg)
+    def weight_update(self, num_tokens)
+  class NormEMAVectorQuantizer:
+    def __init__(self, n_embed, embedding_dim, beta, decay, eps, statistic_code_usage, kmeans_init, codebook_init_path)
+    def reset_cluster_size(self, device)
+    def forward(self, z)
+  def l2norm(t)
+  def ema_inplace(moving_avg, new, decay)
+  def sample_vectors(samples, num)
+  def kmeans(samples, num_clusters, num_iters, use_cosine_sim)
+  def norm_ema_inplace(moving_avg, new, decay)
+
+/beats_classifier/BEATs/Tokenizers.py:
+  class TokenizersConfig:
+    def __init__(self, cfg)
+    def update(self, cfg: dict)
+  class Tokenizers:
+    def __init__(self, cfg: TokenizersConfig)
+    def forward_padding_mask(self, features: torch.Tensor, padding_mask: torch.Tensor)
+    def preprocess(self, source: torch.Tensor, fbank_mean: float, fbank_std: float)
+    def extract_labels(self, source: torch.Tensor, padding_mask: Optional[torch.Tensor], fbank_mean: float, fbank_std: float)
+
+/beats_classifier/BEATs/__init__.py:
+  File is empty
+
+/cnn_classifier/cnn_dataset.py:
+  class CNN_Dataset:
+    def __init__(self, datalist, run: Run)
+    def __len__(self)
+    def __getitem__(self, idx)
+    def _get_mel(self, audio, file_sr)
+    def set_mode(self, mode)
+
+/cnn_classifier/cnn_inference.py:
+  class CNN_Inference:
+    def __init__(self, run: Run, dataset: AudioDataset)
+    def prepare_kfold_run(self)
+    def plot_batch(self, data, target)
+    def validation_epoch_loop(self, epoch: int, fold: int)
+    def start_inference_task(self, model: torch.nn.Module)
+
+/cnn_classifier/cnn_models.py:
+  class CNN_Base:
+    def __init__(self, run: Run)
+    def initialize(self)
+    def forward(self, x)
+    def kaiming_normal_silu(self, tensor, mode)
+    def init_weights(self, m)
+  class CNN_Model_1:
+    def __init__(self, run_config)
+    def forward(self, x)
+  class CNN_Model_2:
+    def __init__(self, run_config)
+    def forward(self, x)
+  class CNN_Model_3:
+    def __init__(self, run_config)
+    def forward(self, x)
+  class CNN_Model_4:
+    def __init__(self, run_config)
+    def forward(self, x)
+  def get_model(run: Run)
+
+/cnn_classifier/cnn_training.py:
+  class CNNTraining:
+    def __init__(self, run: Run, dataset: AudioDataset)
+    def num_worker_test(self, logger: logging.Logger)
+    def set_training_utilities(self, start_model, optimizer, scheduler, scaler)
+    def start_training_task(self, start_epoch, start_fold)
+    def prepare_kfold_run(self)
+    def prepare_optimizer_scheduler(config: dict, model)
+
+/cnn_classifier/__init__.py:
+  File is empty
+
+/documents/extract_structure.py:
+  def load_and_summarize_json(file_path)
+
+/MLHelper/config.py:
+  class Config:
+    def __init__(self, project_config_path, update_dict)
+    def _extend_config_keys_from_yaml(self, project_config_path)
+    def update_config_kv(self, key, value)
+    def update_config_dict(self, update_dict)
+    def update_config_yaml(self, project_config_path: Path)
+    def get_dict(self)
+    def update(self, update_dict: dict)
+    def get(self, key)
+    def save_config_dict(self, path)
+    def __getitem__(self, key)
+    def __setitem__(self, key, value)
+    def __repr__(self)
+    def __str__(self)
+    def __len__(self)
+    def __iter__(self)
+    def __contains__(self, key)
+    def keys(self)
+    def values(self)
+    def items(self)
+  def setup_environment(config)
+
+/MLHelper/constants.py:
+  def get_model_filename(type, epoch, fold)
+
+/MLHelper/dataset.py:
+  class AudioDataset:
+    def __init__(self, run: Run)
+    def _self_asserts_for_training(self)
+    def _get_kfold_entry(self, fold_number: int, train_list, valid_list)
+    def prepare_kfold_splits(self)
+    def get_dataloaders(self, num_split: int, dataset_class: Dataset)
+    def prepare_chunks(self)
+    def load_file_list(self, mode)
+    def frac_list(self, file_list: pd.DataFrame, frac: float)
+  class Physionet2016:
+    def __init__(self, run: Run)
+  class Physionet2022:
+    def __init__(self, run: Run)
+  class Physionet2016_2022:
+    def __init__(self, run: Run)
+    def load_file_list(self, mode)
+  def seed_worker(worker_id)
+
+/MLHelper/ml_loop.py:
+  class ML_Loop:
+    def __init__(self, run: Run, dataset: AudioDataset, pytorch_dataset_class: Dataset)
+    def predict_step(self, model, inputs: torch.Tensor, labels: torch.Tensor)
+    def prepare_kfold_run(self)
+    def _scheduler_step(self, loss, validation)
+    def save_model(self, epoch, fold)
+    def check_early_stop(self, epoch_metrics, epoch)
+    def _optimizer_step(self, loss)
+    def _save_metric_plots(self, epoch_metrics, epoch, fold, validation)
+    def training_step(self, inputs: torch.Tensor, labels: torch.Tensor)
+    def start_training_step(self, inputs: torch.Tensor, labels: torch.Tensor)
+    def end_training_step(self, loss: torch.Tensor, probabilities: torch.Tensor, labels: torch.Tensor)
+    def validation_step(self, inputs: torch.Tensor, labels: torch.Tensor)
+    def start_validation_step(self, inputs: torch.Tensor, labels: torch.Tensor)
+    def end_validation_step(self, loss: torch.Tensor, probabilities: torch.Tensor, labels: torch.Tensor)
+    def training_epoch_loop(self, epoch: int, fold: int)
+    def start_training_epoch(self, epoch: int)
+    def end_training_epoch(self)
+    def validation_epoch_loop(self, epoch: int, fold: int)
+    def start_validation_epoch(self, epoch: int)
+    def end_validation_epoch(self)
+    def epoch_loop(self, epoch: int, fold_idx: int)
+    def start_epoch(self, epoch: int, fold_idx: int)
+    def end_epoch(self, epoch: int, fold_idx: int)
+    def fold_loop(self, fold_idx: int, start_epoch: int)
+    def start_fold(self, fold_idx: int)
+    def end_fold(self, fold_idx: int)
+    def prepare_fold(self, fold_idx: int)
+    def kfold_loop(self, start_epoch: int, start_fold: int)
+    def start_kfold(self)
+    def end_kfold(self)
+  def training_step_hook(func)
+  def validation_step_hook(func)
+  def training_epoch_hook(func)
+  def validation_epoch_hook(func)
+  def epoch_hook(func)
+  def fold_hook(func)
+  def kfold_hook(func)
+  def wrapper(self)
+  def wrapper(self)
+  def wrapper(self)
+  def wrapper(self)
+  def wrapper(self)
+  def wrapper(self, fold_idx, start_epoch)
+  def wrapper(self)
+
+/MLHelper/RunMetricsParser.py:
+  class SafeLoaderIgnoreUnknown:
+    def ignore_unknown(self, node)
+  class RunDataModel:
+    def __init__(self, data)
+    def data(self, index, role)
+    def rowCount(self, index)
+    def columnCount(self, index)
+    def headerData(self, section, orientation, role)
+  class RunMetricsParser:
+    def __init__(self)
+    def create_table(self)
+    def load_runs(self)
+    def parse_runs(self)
+    def get_epoch_count(self, metrics)
+    def get_last_metric_value(self, metrics, metric_name)
+    def update_tables(self)
+    def update_single_table(self, table, data, run_type)
+    def reload_data(self)
+    def delete_selected(self)
+    def show_selected_run_info(self)
+    def show_config(self, run_data)
+    def show_metrics(self, run_data)
+    def show_plots(self, run_data)
+  def safe_load_yaml(file_path)
+
+/MLHelper/__init__.py:
+  File is empty
+
+/MLHelper/audio/audioutils.py:
+  class AudioUtil:
+  class Loading:
+    def get_audio_chunk_list_fixed_length(datalist: pd.DataFrame, target_sr: float, duration: float, logger: logging.Logger, padding_threshold)
+    def get_audio_chunk_list_heartcycle(datalist: pd.DataFrame, logger: logging.Logger, chunk_heartcycle_count: int)
+    def handle_audiolength(waveform, target_samplecount, method)
+    def load_audiofile(path, start_frame, end_frame, target_length, pad_method)
+  class SignalFeatures:
+    def get_mfcc(waveform, sr, n_mfcc, n_fft, hop_length)
+    def get_melspectrogram(waveform, sr, n_fft, n_mels, top_db, hop_length)
+  class SignalPlotting:
+    def compute_mel_spectrogram(samples, sample_rate)
+    def show_mel_spectrogram(mel_spectogram, samplerate, raw, ax, top_db)
+    def show_signal(samples: list, samplerate, raw, ax, cycle_marker: Optional[list])
+    def get_mel_spectrogram_image(mel_spectogram, samplerate, top_db, ax)
+
+/MLHelper/audio/augmentation.py:
+  class AudioAugmentation:
+    def get_audio_augmentation(p)
+    def get_spectrogram_augmentation(p)
+  class SpecTimeMask:
+    def __init__(self, min_mask_fraction: float, max_mask_fraction: float, fill_mode: str, fill_constant: float, p: float)
+    def randomize_parameters(self, magnitude_spectrogram)
+    def apply(self, magnitude_spectrogram)
+
+/MLHelper/audio/preprocessing.py:
+  class Filter:
+    def butterworth_low_pass_filter(data, order, cutoff, fs)
+    def butterworth_high_pass_filter(data, order, cutoff, fs)
+    def butter_bandpass_filter(data, lowcut, highcut, fs, order)
+  def resample(audio, orig_sr: int, target_sr: int)
+  def spec_min_max_normalisation(spec, min_max, new_min_max)
+  def trim_audio_seconds(waveform, sr, start_seconds, end_seconds)
+  def max_abs_normalization(data)
+  def zscore_normalization(data)
+  def pad_audio(audio, target_length: int)
+  def repeat_audio(audio, target_length: int)
+  def stretch_audio(audio, target_length: int)
+
+/MLHelper/audio/__init__.py:
+  File is empty
+
+/MLHelper/metrics/loss.py:
+  class FocalLoss:
+    def __init__(self, alpha, gamma, reduction)
+    def forward(self, inputs, targets)
+  def get_criterion(config, class_weights)
+
+/MLHelper/metrics/metrics.py:
+  class MetricsInterface:
+    def __init__(self, num_classes, device, do_fake_updates, training)
+    def calculate_and_store_curves(self, labels, probabilities)
+    def calculate_curve_metrics(self, y_true, y_score, class_index, num_points)
+    def calculate_overall_auroc_pr(self, curve_data)
+    def _get_fake_update_data(self, num_classes)
+    def check_if_use_fake_data(self, probabilities: Union[Tensor, np.ndarray, list], labels: Union[Tensor, np.ndarray, list], loss: float)
+    def _verify_type(self, object, target_tensor, on_device)
+    def check_data_form(self, probabilities, labels, loss, predictions)
+    def update_averages(self, all_epoch_data: List[Dict[str, Any]])
+    def _calculate_complex_stats(self, values)
+    def update(self, probabilities, labels, loss)
+    def compute(self)
+    def common_metrics_calculation(self, metrics, probabilities, labels)
+    def reset(self)
+    def reset_fake_updates(self)
+  class SKLearnMetricsAdapter:
+    def __init__(self, num_classes, device, do_fake_updates, training: bool)
+    def update(self, probabilities, labels, loss)
+    def compute(self)
+    def reset(self)
+  class TorchMetricsAdapter:
+    def __init__(self, num_classes, device, do_fake_updates, training: bool)
+    def update(self, probabilities, labels, loss)
+    def compute(self)
+    def reset(self)
+  class MetricsTracker:
+    def __init__(self, config: dict, num_classes, metrics_class, device, logger)
+    def update_step(self, validation, probabilities, labels, loss)
+    def prepare_new_epoch(self, validation: bool)
+    def save_epoch_metrics(self, validation: bool, epoch, lr)
+    def update_averages(self, mode)
+    def finish_fold(self)
+    def _round_floats(self, x, precision)
+    def _get_value(self, metrics, metric_name)
+    def _round_curve_data(self, metrics)
+    def _get_dict(self, metrics: dict)
+    def get_last_validation_postfix(self)
+    def save_metrics(self)
+    def plot_metrics(self)
+    def print_last_epoch(self)
+    def print_epoch(self, epoch: int, validation: bool)
+    def _get_metric_data_from_averages(self, mode: str, metric: str)
+    def print_average_metrics_table(self)
+    def print_end_summary(self)
+
+/MLHelper/metrics/__init__.py:
+  File is empty
+
+/MLHelper/tests/audio_test.py:
+  class AudioTest:
+    def test_pad_audio(self)
+    def test_max_abs_normalization(self)
+    def test_zscore_normalization(self)
+    def test_resample(self)
+    def test_butter_bandpass_filter(self)
+
+/MLHelper/tests/logging_helper_test.py:
+  class TestLoggingHelper:
+    def setUp(self)
+    def test_TqdmLoggingHandler_emit_with_tqdm(self)
+    def test_TqdmLoggingHandler_emit_without_tqdm(self)
+    def test_AlwaysWriteFileHandler_handle(self)
+    def test_get_logger(self)
+    def test_MyLogFormatter_format(self)
+
+/MLHelper/tests/metric_helper_test.py:
+  class TestSKLearnMetricsAdapter:
+    def _get_binary_single_metrics(self)
+    def _get_multiclass_single_metrics(self)
+    def test_fake_metrics_setup(self)
+    def test_roc_data_format(self)
+    def test_binary_classification_accuracy(self)
+    def test_multiclass_classification_accuracy(self)
+    def test_binary_classification_confusion_matrix(self)
+    def test_confusion_matrix_multiclass(self)
+    def test_batches_format(self)
+    def test_complex_form_bin(self)
+  class FakeTracker:
+    def __init__(self, num_classes)
+    def single_update(self)
+    def perform_batches(self, num_batches)
+
+/MLHelper/tests/__init__.py:
+  File is empty
+
+/MLHelper/tools/cudatest.py:
+  File has no methods or classes, but is not empty
+
+/MLHelper/tools/logging_helper.py:
+  class TqdmLoggingHandler:
+    def __init__(self, level)
+    def emit(self, record)
+  class AlwaysWriteFileHandler:
+    def __init__(self)
+    def handle(self, record)
+  class MyLogFormatter:
+    def __init__(self, fmt)
+    def format(self, record)
+  def isEnabledFor(logger, level: int)
+  def get_logger_dict(logger_map, sub_name, to_console, log_filename)
+  def get_logger(base_name, level_console, level_file, child_name, to_console, log_filename)
+
+/MLHelper/tools/utils.py:
+  class FileUtils:
+    def validate_filename(filename)
+    def join()
+    def safe_path_create(path, filename)
+    def remove_file(path)
+  class MLModelInfo:
+    def extract_epoch_and_fold(filename)
+    def find_max_epoch(filenames)
+    def print_model_summary(model, input_size)
+    def model_data_with_hook(model, input_tensor)
+    def get_model_table(model: torch.nn.Module)
+    def model_summary(model, input_data, logger: Optional[logging.Logger])
+  class DataTools:
+  class MLUtil:
+    def debugger_is_active()
+    def log(msg: str, logger: Optional[logging.Logger], level, print_fallback)
+    def ensure_device(device: torch.device)
+    def load_model(path: Union[Path, str], model: torch.nn.Module, device: torch.device, optimizer: Optional[torch.optim.Optimizer], scheduler: Optional[torch.optim.lr_scheduler.LRScheduler], scaler: Optional[GradScaler], logger: Optional[logging.Logger])
+    def save_model(path: str, model: torch.nn.Module, optimizer: Optional[Optimizer], scheduler: Optional[torch.optim.lr_scheduler.LRScheduler], scaler: Optional[torch.cuda.amp.GradScaler], logger: Optional[logging.Logger])
+    def get_class_weights(label_list)
+    def convert_classweights(class_weights: np.array)
+    def log_class_balance(data, logger, extra_info, level)
+    def reset_weights(m, logger)
+  class Plotting:
+    def plot_binary_confusion_matrix(conf_matrix: Union[Dict[str, float], None], tp: Optional[float], fp: Optional[float], fn: Optional[float], tn: Optional[float], std_tp: Optional[float], std_fp: Optional[float], std_fn: Optional[float], std_tn: Optional[float], title: str, save_path: Optional[str])
+    def create_confusion_matrix(cm: list, title, cmap)
+    def show_save(obj, save_path, show)
+    def _plot_tensorimage(tensor, index)
+    def show_tensor_image(tensor)
+    def show_tensor_input_image(tensor, logger: logging.Logger)
+  class MLPbar:
+    def __init__(self)
+    def prepare_bar(self, name, total, position, desc)
+    def prepare_all_bars(self, total_folds, total_epochs, total_train_batches, total_valid_batches)
+    def reset_all(self)
+    def reset_bar(self, bar_name)
+    def update_total(self, bar_name, total)
+    def increment(self, bar_name, n, postfix)
+    def close_all(self)
+    def close_bar(self, bar_name)
+  class MathTools:
+    def truncate_floats(x, precision)
+    def divide_chunks(data, size)
+  class NumpyJsonEncoder:
+    def default(self, o)
+  class CurvePlotter:
+    def generate_avg_roc_curve(metrics_data: List[Dict[str, Union[int, Dict, List[Dict]]]], target_epoch: int, validation: bool)
+    def create_all_curve_plots(curve_data, mode, fold, epoch)
+    def create_roc(roc_data: Dict, class_index: int, title: str)
+    def create_pr(pr_data: Dict, class_index: int, title: str)
+    def _plot_curve(ax, x, y, class_index, auc, curve_type)
+    def _finish_plot(ax, xlabel, ylabel, title)
+  class DimensionReduction:
+    def show_umap2d(embeddings, label, n_neighbors, min_dist)
+    def show_umap3d(embeddings, label, n_neighbors, min_dist)
+    def show_tsne2d(embeddings, p, label)
+    def show_tsne3d(embeddings, p, label)
+  def hook_fn(module, input_data, output, layers_info)
+  def register_hooks(model)
+
+/MLHelper/tools/__init__.py:
+  File is empty
+
