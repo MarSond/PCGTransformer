@@ -75,7 +75,7 @@ def get_file_metadata_human_ph2016(
 	meta = {
 		const.META_AUDIO_PATH: str(Path(path).relative_to(dataset_object.dataset_path)),
 		const.META_PATIENT_ID: id,
-		# const.META_FILENAME: Path(path).name,
+		const.META_FILENAME: Path(path).name,
 		const.META_DIAGNOSIS: diagnosis,
 		const.META_DATASET: const.PHYSIONET_2016,
 		const.META_DATASET_SUBSET: dataset_name,
@@ -386,7 +386,7 @@ def dataset_statistics(dataset: AudioDataset):
 			"%")
 		plt.show()
 
-
+# TODO list files with more than 160 BPM
 def calculate_bpm(data):
 	# Extrahiert den ersten und letzten Timestamp der Herzzyklen
 	if len(data) > 1:
@@ -529,5 +529,6 @@ def start_plot():
 if __name__ == "__main__":
 	# parse folder structure and create meta files
 	start_parse()
-	start_statistics()
-	start_plot()
+	#start_statistics()
+	# TODO save plots in subfolder
+	#start_plot()
