@@ -85,7 +85,7 @@ class Run:
 						logging_helper.LEVEL_FILE: logging.DEBUG},
 
 				const.LOGGER_TENSOR: \
-					{	logging_helper.LEVEL_CONSOLE: logging.DEBUG, \
+					{	logging_helper.LEVEL_CONSOLE: logging.WARNING, \
 						logging_helper.LEVEL_FILE: logging.ERROR},
 			}
 		else:
@@ -206,8 +206,9 @@ class TaskBase(ABC):
 			from cnn_classifier import cnn_training
 			return cnn_training.CNNTraining(run=run, dataset=dataset)
 		if model_type == const.BEATS:
-			return None
-		
+			from beats_classifier import beats_training
+			return beats_training.BeatsTraining(run=run, dataset=dataset)
+
 		self.run.log_training(f"Unknown model type {model_type}", level=logging.ERROR)
 		raise ValueError(f"Unknown model type {model_type}")
 
@@ -218,7 +219,7 @@ class TaskBase(ABC):
 			from cnn_classifier import cnn_inference
 			return cnn_inference.CNN_Inference(run=run, dataset=dataset)
 		if model_type == const.BEATS:
-			return None  # Placeholder for BEATS inferencer
+			raise NotImplementedError("BEATS inference not implemented")
 		self.run.log_training(f"Unknown model type {model_type}", level=logging.ERROR)
 		raise ValueError(f"Unknown model type {model_type}")
 

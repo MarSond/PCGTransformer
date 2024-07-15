@@ -1,206 +1,265 @@
-import sys
-import json
-import yaml
-from pathlib import Path, WindowsPath
-from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
-                             QHBoxLayout, QPushButton, QTableWidget, 
-                             QTableWidgetItem, QFileDialog, QMessageBox,
-                             QTabWidget, QLabel, QScrollArea)
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QPixmap
+"""
+Task is to create an overview of all audio files in the dataset.
+"""
+from pathlib import Path
 
-# Import constants
-from MLHelper.constants import *
+import matplotlib.gridspec as gridspec
+import matplotlib.pyplot as plt
+from torch import Tensor
 
-def path_constructor(loader, node):
-    return WindowsPath(loader.construct_scalar(node))
+import MLHelper.constants as const
+from cnn_classifier.cnn_dataset import CNN_Dataset
+from MLHelper.audio import preprocessing
+from MLHelper.audio.audioutils import AudioUtil
+from run import Run
 
-yaml.add_constructor('!WindowsPath', path_constructor)
 
-class RunMetricsParser(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("Run Metrics Parser")
-        self.setGeometry(100, 100, 1200, 800)
+class DataAnalysis:
+	def __init__(self, dataset_name: str):
+		self.demo_task = const.TASK_TYPE_INFERENCE # with augmentation or not
+		self.run = Run()
+		self.run.config[const.TASK_TYPE] = const.TASK_TYPE_DEMO
+		self.run.config[const.INFERENCE_DATASET] = dataset_name
+		self.run.config[const.KFOLD_SPLITS] = 1
+		self.run.config[const.METADATA_FRAC] = 1.0
+		self.run.config[const.BATCH_SIZE] = 1
+		self.run.config[const.AUGMENTATION_RATE] = 0.0
+		
+		"""
+		self.run.config[const.AUDIO_LENGTH_NORM] = const.LENGTH_NORM_STRETCH
+		self.run.config[const.CHUNK_METHOD] = const.CHUNK_METHOD_CYCLES
+		self.run.config[const.CHUNK_PADDING_THRESHOLD] = 0.0
+		self.run.config[const.CHUNK_DURATION] = 12
+		self.run.config[const.CHUNK_HEARTCYCLE_COUNT] = 6
+		"""
 
-        self.central_widget = QWidget()
-        self.setCentralWidget(self.central_widget)
-        self.layout = QVBoxLayout(self.central_widget)
+		self.run.config[const.AUDIO_LENGTH_NORM] = const.LENGTH_NORM_PADDING
+		self.run.config[const.CHUNK_METHOD] = const.CHUNK_METHOD_FIXED
+		self.run.config[const.CHUNK_PADDING_THRESHOLD] = 0.65
+		self.run.config[const.CHUNK_DURATION] = 15
 
-        self.button_layout = QHBoxLayout()
-        self.load_button = QPushButton("Load Runs")
-        self.load_button.clicked.connect(self.load_runs)
-        self.reload_button = QPushButton("Reload")
-        self.reload_button.clicked.connect(self.load_runs)
-        self.delete_button = QPushButton("Delete Selected")
-        self.delete_button.clicked.connect(self.delete_selected)
-        self.button_layout.addWidget(self.load_button)
-        self.button_layout.addWidget(self.reload_button)
-        self.button_layout.addWidget(self.delete_button)
+		if self.demo_task == const.TASK_TYPE_TRAINING:
+			self.run.config[const.TRAIN_FRAC] = 1.0
+		else:
+			self.run.config[const.TRAIN_FRAC] = 0.0
 
-        self.layout.addLayout(self.button_layout)
+		self.run.setup_task()
+		self.run.task.dataset.load_file_list()
+		self.run.task.dataset.prepare_chunks()
+		self.run.task.dataset.prepare_kfold_splits()
+		train_loader, valid_loader = self.get_dataloaders()
+		self.demo_loader = train_loader if self.demo_task == const.TASK_TYPE_TRAINING else valid_loader
 
-        self.tab_widget = QTabWidget()
-        self.layout.addWidget(self.tab_widget)
+	def get_dataloaders(self):
+		train_loader, valid_loader, _ = \
+			self.run.task.dataset.get_dataloaders(num_split=1, dataset_class=CNN_Dataset)
+		return train_loader, valid_loader
 
-        self.training_table = self.create_table()
-        self.validation_table = self.create_table()
-        self.inference_table = self.create_table()
-        self.error_table = self.create_table()
+	def make_singlefile_plot(self, raw_audio, filtered_audio, full_audio, sgram_raw, sgram_filtered, \
+							sgram_augmented, meta_row, audio_file_name, ax=None, final_only=False):
+		class_id = meta_row[const.META_LABEL_1]
+		# get sr from file meta_row[const.META_SAMPELRATE] and compare to sr target
+		sr_factor = self.run.task.dataset.target_samplerate / meta_row[const.META_SAMPLERATE]
+		sr = meta_row[const.META_SAMPLERATE] * sr_factor
+		cycle_marker = meta_row[const.META_HEARTCYCLES]
+		#cycle_marker = [marker * sr_factor for marker in cycle_marker]
 
-        self.tab_widget.addTab(self.training_table, "Training")
-        self.tab_widget.addTab(self.inference_table, "Inference")
-        self.tab_widget.addTab(self.error_table, "Errors")
+		cnn_config = self.run.config[const.CNN_PARAMS]
+		config = self.run.config
+		frame_start = meta_row[const.CHUNK_RANGE_START]
+		frame_end = meta_row[const.CHUNK_RANGE_END]
 
-        self.plot_scroll_area = QScrollArea()
-        self.plot_scroll_area.setWidgetResizable(True)
-        self.plot_widget = QWidget()
-        self.plot_layout = QVBoxLayout(self.plot_widget)
-        self.plot_scroll_area.setWidget(self.plot_widget)
+		# Berechnen der relativen Position der cycle_marker im Ausschnitt
+		relative_cycle_markers = [marker for marker in cycle_marker \
+			if frame_start <= marker*meta_row[const.META_SAMPLERATE] <= frame_end]
+		#remove markers outside of the frame
+		audio_length = len(full_audio)
+		relative_cycle_markers = [marker for marker in relative_cycle_markers \
+				if 0 <= marker*meta_row[const.META_SAMPLERATE] <= audio_length]
+		relative_cycle_markers = \
+			[marker - frame_start/meta_row[const.META_SAMPLERATE] for marker in relative_cycle_markers]
 
-        self.splitter = QHBoxLayout()
-        self.splitter.addWidget(self.tab_widget, 2)
-        self.splitter.addWidget(self.plot_scroll_area, 1)
-        self.layout.addLayout(self.splitter)
+		if final_only:
+			if ax is not None:
+				ax3, ax6, ax_text = ax
+			else:
+				# only plot text, full audio and final mel
+				_ = plt.figure(figsize=(15, 10))
+				# Die vierte Zeile ist 0.2 mal so hoch wie die anderen
+				gs = gridspec.GridSpec(3, 1, height_ratios=[1, 1, 0.2])
+				ax3 = plt.subplot(gs[0, 0]) # full audio
+				ax6 = plt.subplot(gs[1, 0])
+				ax_text = plt.subplot(gs[2, :])
+		else:
+				gs = gridspec.GridSpec(4, 2, height_ratios=[1, 1, 1, 0.2])
+				ax1 = plt.subplot(gs[0, 0]) # raw
+				ax2 = plt.subplot(gs[0, 1]) # filtered
+				ax3 = plt.subplot(gs[1, 0]) # full audio
+				ax4 = plt.subplot(gs[1, 1]) # raw mel
+				ax5 = plt.subplot(gs[2, 0]) # filtered mel
+				ax6 = plt.subplot(gs[2, 1]) # augmented mel
+				ax_text = plt.subplot(gs[3, :])
 
-        self.runs_dir = Path("./runs/")
-        self.run_data = {"training": [], "inference": [], "error": []}
+		if class_id == 1:
+			ax3.set_title(f"Full Audio Class ID: {class_id}", color="red")
+		elif class_id == 0:
+			ax3.set_title(f"Full Audio Class ID: {class_id}", color="green")
+		else:
+			ax3.set_title(f"Raw Audio Class ID: {class_id}")
 
-    def create_table(self):
-        table = QTableWidget()
-        table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
-        table.setSortingEnabled(True)
-        table.itemClicked.connect(self.show_plots)
-        return table
+		if not final_only:
 
-    def load_runs(self):
-        if not self.runs_dir.exists():
-            reply = QMessageBox.question(
-                self, "Directory Not Found",
-                f"The default directory '{self.runs_dir}' doesn't exist. Do you want to select a different directory?",
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-            )
-            if reply == QMessageBox.StandardButton.Yes:
-                self.runs_dir = Path(QFileDialog.getExistingDirectory(self, "Select Runs Directory"))
-            else:
-                return
 
-        if self.runs_dir.exists():
-            self.parse_runs()
-        else:
-            QMessageBox.warning(self, "Error", "Selected directory does not exist.")
+			# Erster Subplot für das rohe Audiosignal
+			AudioUtil.SignalPlotting.show_signal( \
+				raw_audio, samplerate=sr, raw=True, ax=ax1, cycle_marker=relative_cycle_markers)
+			# red if class is 1, green on class 0
 
-    def parse_runs(self):
-        self.run_data = {"training": [], "validation": [], "inference": [], "error": []}
-        for run_dir in self.runs_dir.iterdir():
-            if run_dir.is_dir():
-                metrics_file = run_dir / FILENAME_METRICS_VALUE
-                config_file = run_dir / FILENAME_RUN_CONFIG_VALUE
-                if metrics_file.exists() and config_file.exists():
-                    try:
-                        with open(metrics_file, "r") as f:
-                            metrics = json.load(f)
-                        with open(config_file, "r") as f:
-                            config = yaml.safe_load(f)
-                        
-                        run_type = config.get(TASK_TYPE, "unknown")
-                        if run_type == TASK_TYPE_TRAINING:
-                            self.run_data["training"].append({"name": run_dir.name, "metrics": metrics, "config": config})
-                        elif run_type == TASK_TYPE_VALIDATION:
-                            self.run_data["validation"].append({"name": run_dir.name, "metrics": metrics, "config": config})
-                        elif run_type == TASK_TYPE_INFERENCE:
-                            self.run_data["inference"].append({"name": run_dir.name, "metrics": metrics, "config": config})
-                        else:
-                            self.run_data["error"].append({"name": run_dir.name, "error": f"Unknown task type: {run_type}"})
-                    except (json.JSONDecodeError, yaml.YAMLError) as e:
-                        self.run_data["error"].append({"name": run_dir.name, "error": f"Error parsing files: {str(e)}"})
-                else:
-                    self.run_data["error"].append({"name": run_dir.name, "error": "Missing metrics or config file"})
-        
-        self.update_tables()
+			# Zweiter Subplot für das bearbeitete Audiosignal
+			AudioUtil.SignalPlotting.show_signal(filtered_audio, samplerate=sr, \
+				raw=True, ax=ax2, cycle_marker=relative_cycle_markers)
+			ax2.set_title("Filtered Audio")
 
-    def update_tables(self):
-        for run_type, table in [("training", self.training_table),
-                                ("inference", self.inference_table),
-                                ("error", self.error_table)]:
-            self.update_single_table(table, self.run_data[run_type], run_type)
+			# Vierter Subplot für das rohe Mel-Spektrogramm
+			AudioUtil.SignalPlotting.show_mel_spectrogram(sgram_raw, samplerate=sr, raw=True, ax=ax4)
+			ax4.set_title("Raw Mel Spectrogram")
 
-    def update_single_table(self, table, data, run_type):
-        table.setRowCount(len(data))
-        if run_type == "error":
-            table.setColumnCount(2)
-            table.setHorizontalHeaderLabels([RUN_NAME, "Error"])
-            for row, run in enumerate(data):
-                table.setItem(row, 0, QTableWidgetItem(run["name"]))
-                table.setItem(row, 1, QTableWidgetItem(run["error"]))
-        else:
-            table.setColumnCount(6)
-            table.setHorizontalHeaderLabels([RUN_NAME, METRICS_ACCURACY, METRICS_F1, METRICS_PRECISION, METRICS_RECALL, METRICS_MCC])
-            for row, run in enumerate(data):
-                table.setItem(row, 0, QTableWidgetItem(run["name"]))
-                try:
-                    validation_metrics = run["metrics"][AVERAGES][VALIDATION]
-                    for col, metric in enumerate([METRICS_ACCURACY, METRICS_F1, METRICS_PRECISION, METRICS_RECALL, METRICS_MCC], start=1):
-                        if metric in validation_metrics and validation_metrics[metric]:
-                            value = validation_metrics[metric][-1][MEAN]
-                            table.setItem(row, col, QTableWidgetItem(f"{value:.4f}"))
-                        else:
-                            table.setItem(row, col, QTableWidgetItem("N/A"))
-                except (KeyError, TypeError, IndexError) as e:
-                    print(f"Error in run {run['name']}: {str(e)}")
-                    for col in range(1, 6):
-                        table.setItem(row, col, QTableWidgetItem("Error"))
 
-        table.resizeColumnsToContents()
+			# Fünfter Subplot für das bearbeitete Mel-Spektrogramm
+			AudioUtil.SignalPlotting.show_mel_spectrogram(sgram_filtered, samplerate=sr, raw=True, ax=ax5)
+			ax5.set_title("Filtered Mel Spectrogram")
 
-    def delete_selected(self):
-        current_tab = self.tab_widget.currentWidget()
-        selected_rows = set(index.row() for index in current_tab.selectedIndexes())
-        if not selected_rows:
-            return
+		# Dritter Subplot für das komplette Audiosignal
+		AudioUtil.SignalPlotting.show_signal( \
+			full_audio, samplerate=sr, raw=True, ax=ax3, cycle_marker=meta_row[const.META_HEARTCYCLES])
+		ax3.set_title("Full length Audio")
+		# markieren der aktuellen Position im full audio
+		ax3.axvspan(frame_start / meta_row[const.META_SAMPLERATE], \
+			frame_end / meta_row[const.META_SAMPLERATE], color="red", alpha=0.05)
 
-        reply = QMessageBox.question(self, "Confirm Deletion", 
-                                     "Are you sure you want to delete the selected runs?",
-                                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
 
-        if reply == QMessageBox.StandardButton.Yes:
-            run_type = self.tab_widget.tabText(self.tab_widget.currentIndex()).lower()
-            for row in sorted(selected_rows, reverse=True):
-                run_path = self.runs_dir / self.run_data[run_type][row]["name"]
-                try:
-                    for file in run_path.glob("*"):
-                        file.unlink()
-                    run_path.rmdir()
-                    del self.run_data[run_type][row]
-                except Exception as e:
-                    QMessageBox.warning(self, "Deletion Error", f"Error deleting {run_path}: {str(e)}")
+		# Sechster Subplot für das augmentierte Mel-Spektrogramm
+		AudioUtil.SignalPlotting.show_mel_spectrogram(sgram_augmented, samplerate=sr, raw=True, ax=ax6)
+		ax6.set_title("Augmented final Mel Spectrogram")
 
-            self.update_tables()
+		# Letzter, flacher Subplot für den Text  # Nimmt beide Spalten ein
+		ax_text.axis("off")  # Keine Achsen für diesen Subplot
+		text_content = f"Raw Audio: {raw_audio.min():.4f} - {raw_audio.max():.4f}\n" \
+						f"Processed Audio: {filtered_audio.min():.4f} - {filtered_audio.max():.4f}\n" \
+						f"Class ID: {class_id} | samplerate: {sr} | " \
+						f"chunk seconds: {config[const.CHUNK_DURATION]}\n" \
+						f"Butterworth: {cnn_config[const.BUTTERPASS_LOW]} - {cnn_config[const.BUTTERPASS_HIGH]} " \
+						f"- {cnn_config[const.BUTTERPASS_ORDER]}\n" \
+						f"Mel Spectrogramm: {sgram_raw.min():.4f} - {sgram_raw.max():.4f}\n" \
+						f"Filename: {audio_file_name}"
+		ax_text.text(0.5, 0.5, text_content, ha="center", va="center", fontsize=11, wrap=True)
 
-    def show_plots(self, item):
-        # Clear previous plots
-        for i in reversed(range(self.plot_layout.count())): 
-            self.plot_layout.itemAt(i).widget().setParent(None)
+		if final_only:
+			return ax3, ax6, ax_text
+		return ax1, ax2, ax3, ax4, ax5, ax6, ax_text
 
-        row = item.row()
-        current_tab = self.tab_widget.currentWidget()
-        run_type = self.tab_widget.tabText(self.tab_widget.currentIndex()).lower()
+	def plot_signal_stats(self, num_samples=10, offset=0, show=True, fig_file_name=None, final_only=False):
+		offset += 1 # offset starts with 1, depends on order in the loop and how skip is used
+		# loop train and valid loader back to back
+		loader_counter = 0
+		if num_samples == 0:
+			num_samples = len(self.demo_loader)
+		if num_samples + offset > len(self.demo_loader):
+			num_samples = len(self.demo_loader) - offset
+		num_gs = 3 if final_only else 7
+		fig = plt.figure(figsize=(5*num_gs, 4*num_samples))
+		gs = gridspec.GridSpec(num_samples, num_gs)  # 10 Reihen für die Samples, 5 Spalten für die Subplots
+		for raw_audio, filtered_audio, sgram_raw, sgram_filtered, sgram_augmented, metadata_row, audio_file_name in self.demo_loader:
+			audio_file_name = str(audio_file_name[0])
+			audio_path = Path(self.run.task.dataset.dataset_path) / metadata_row[const.META_AUDIO_PATH][0]
+			full_audio, full_sr = AudioUtil.Loading.load_audiofile(audio_path)
+			full_audio = preprocessing.resample(full_audio, full_sr, self.run.task.dataset.target_samplerate)
+			# check values in the dict metadata_row to see if they are tensors- > convert to numpy
+			if isinstance(metadata_row[const.META_SAMPLERATE], Tensor):
+				metadata_row[const.META_SAMPLERATE] = metadata_row[const.META_SAMPLERATE].numpy().item()
+				metadata_row[const.META_LABEL_1] = metadata_row[const.META_LABEL_1].numpy().item()
+				metadata_row[const.META_HEARTCYCLES] = \
+					[ x.numpy().item() for x in metadata_row[const.META_HEARTCYCLES]]
+				metadata_row[const.CHUNK_RANGE_START] = metadata_row[const.CHUNK_RANGE_START].numpy().item()
+				metadata_row[const.CHUNK_RANGE_END] = metadata_row[const.CHUNK_RANGE_END].numpy().item()
+			if isinstance(raw_audio, Tensor):
+				raw_audio = raw_audio.numpy()
+				filtered_audio = filtered_audio.numpy()
+				sgram_raw = sgram_raw.numpy()
+				sgram_filtered = sgram_filtered.numpy()
+				sgram_augmented = sgram_augmented.numpy()
+			if full_audio.ndim > 1:
+				full_audio = full_audio.squeeze()
+			loader_counter += 1
+			if loader_counter < offset:
+				continue
+			if loader_counter > num_samples + offset-1:
+				break
+			print(f"Audio filename: {audio_file_name} - Counter: - {loader_counter}")
+			row_index = loader_counter - offset - 1  # Zeilenindex für die Unterfiguren
 
-        if run_type in ["training", "inference"]:
-            run_name = self.run_data[run_type][row]["name"]
-            run_dir = self.runs_dir / run_name
-            plot_file = run_dir / FILENAME_METRIC_PLOTS_VALUE
+			if not final_only:
+				ax1 = plt.subplot(gs[row_index, 0])
+				ax2 = plt.subplot(gs[row_index, 1])
+				ax3 = plt.subplot(gs[row_index, 2])
+				ax4 = plt.subplot(gs[row_index, 3])
+				ax5 = plt.subplot(gs[row_index, 4])
+				ax6 = plt.subplot(gs[row_index, 5])
+				ax_text = plt.subplot(gs[row_index, 6])
+				try:
+					self.make_singlefile_plot(raw_audio, filtered_audio, full_audio, sgram_raw, \
+								sgram_filtered, sgram_augmented, metadata_row, audio_file_name, \
+								ax=(ax1, ax2, ax3, ax4, ax5, ax6, ax_text), final_only=final_only)
+				except Exception as e:
+					print(f"Error in display_sample {e}")
+					# fill ax blank
+					ax1.axis("off")
+					ax2.axis("off")
+					ax3.axis("off")
+					ax4.axis("off")
+					ax5.axis("off")
+					ax6.axis("off")
+					ax_text.axis("off")
+					continue
+			else:
+				ax3 = plt.subplot(gs[row_index, 0])
+				ax6 = plt.subplot(gs[row_index, 1])
+				ax_text = plt.subplot(gs[row_index, 2])
+				ax3, ax6, ax_text = self.make_singlefile_plot(raw_audio, filtered_audio, full_audio, \
+					sgram_raw, sgram_filtered, sgram_augmented, metadata_row, audio_file_name, \
+					ax=(ax3,ax6,ax_text),final_only=final_only)
 
-            if plot_file.exists():
-                pixmap = QPixmap(str(plot_file))
-                label = QLabel()
-                label.setPixmap(pixmap)
-                self.plot_layout.addWidget(label)
-            else:
-                self.plot_layout.addWidget(QLabel("No plots available for this run."))
+			#########
+		#plt.tight_layout()
+
+		if fig_file_name:
+			fig_file_name = f"audio_example_images/{fig_file_name}_{num_samples}_samples_{offset}_offset.png"
+			fig.savefig(fig_file_name)
+		if show:
+			plt.show()
+
+def multiple():
+	analysis = DataAnalysis(const.PHYSIONET_2022)
+	length = len(analysis.demo_loader)
+	max_per_run = 70
+	for i in range(0, length, max_per_run):
+		analysis.plot_signal_stats(num_samples=max_per_run, offset=i, show=False, \
+			fig_file_name="ph2022", final_only=True)
+		# release memory
+		plt.close("all")
+	# analysis2 = DataAnalysis(const.PHYSIONET_2016)
+	# length = len(analysis2.demo_loader)
+	# max_per_run = 50
+	# for i in range(0, length, max_per_run):
+	# 	analysis2.plot_signal_statistics(num_samples=max_per_run, offset=i, show=False, fig_file_name="ph2016")
+	# 	plt.close("all")
+
+
+def single():
+	analysis = DataAnalysis(const.PHYSIONET_2016)
+	analysis.plot_signal_stats(num_samples=5, offset=19, show=True, fig_file_name=None, final_only=True)
+
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = RunMetricsParser()
-    window.show()
-    sys.exit(app.exec())
+	#multiple()
+	single()
