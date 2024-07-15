@@ -15,7 +15,7 @@ def do_run(config: dict):
 
 if __name__ == "__main__":
 
-	train_update_dict = {	TASK_TYPE: TRAINING, METADATA_FRAC: 0.8, \
+	train_update_dict = {	TASK_TYPE: TRAINING, METADATA_FRAC: 1.0, \
 							CNN_PARAMS: {}, EPOCHS: 30, \
 							SINGLE_BATCH_MODE: False, TRAIN_FRAC: 0.8, KFOLD_SPLITS: 1, \
 							# TRAINING_CHECKPOINT: {EPOCH: 70, RUN_NAME: "run1", FOLD: 6}, \
@@ -28,12 +28,15 @@ if __name__ == "__main__":
 
 	run_2022 = train_update_dict.copy()
 	run_2022.update({TRAIN_DATASET: PHYSIONET_2022, RUN_NAME_SUFFIX: "run2022"})
+	do_run(run_2022)
 
 	run_2016 = train_update_dict.copy()
 	run_2016.update({TRAIN_DATASET: PHYSIONET_2016, RUN_NAME_SUFFIX: "run2016"})
+	do_run(run_2016)
 
 	run2016_2022 = train_update_dict.copy()
 	run2016_2022.update({TRAIN_DATASET: PHYSIONET_2016_2022, RUN_NAME_SUFFIX: "run2022-2016"})
+	do_run(run2016_2022)
 	###
 
 
@@ -48,24 +51,38 @@ if __name__ == "__main__":
 
 	run_5c_3s = cycle_base.copy()
 	run_5c_3s.update({
-		RUN_NAME_SUFFIX: "5c-3s",
+		RUN_NAME_SUFFIX: "5c-3s-m2",
 		CHUNK_DURATION: 3.0,
 		CNN_PARAMS: {
-			MODEL_SUB_TYPE: 3,
+			MODEL_SUB_TYPE: 2,
 		}
 	})
-	#do_run(run_5c_3s)
+	do_run(run_5c_3s)
 
 	# besser
 	run_5c_7s = cycle_base.copy()
 	run_5c_7s.update({
-		RUN_NAME_SUFFIX: "5c-7s",
+		RUN_NAME_SUFFIX: "5c-7s-m2",
 		CHUNK_DURATION: 7.0,
 		CNN_PARAMS: {
-			MODEL_SUB_TYPE: 3,
+			MODEL_SUB_TYPE: 2,
 		}
 	})
-	#do_run(run_5c_7s)
+	do_run(run_5c_7s)
+
+	run_6c_10s = cycle_base.copy()
+	run_6c_10s.update({
+		RUN_NAME_SUFFIX: "6c-10s-m3-l1l2",
+		CHUNK_DURATION: 7.0,
+		EPOCHS: 60,
+		CNN_PARAMS: {
+			MODEL_SUB_TYPE: 3,
+			L1_REGULATION_WEIGHT: 0.0001,
+			L2_REGULATION_WEIGHT: 0.0001,
+			SCHEDULER: SCHEDULER_STEP,
+		}
+	})
+	do_run(run_6c_10s)
 
 	run_5c_5s_low = cycle_base.copy()
 	run_5c_5s_low.update({
@@ -93,18 +110,20 @@ if __name__ == "__main__":
 	#do_run(run_8c_7s_m2)
 
 
-	run_5c_5s_m3 = cycle_base.copy()
-	run_5c_5s_m3.update({
+	run_5c_7s_m3 = cycle_base.copy()
+	run_5c_7s_m3.update({
 		RUN_NAME_SUFFIX: "5c_5s_m3_long",
 		CHUNK_DURATION: 5.0,
-		CHUNK_HEARTCYCLE_COUNT: 5,
-		EPOCHS: 80,
+		CHUNK_HEARTCYCLE_COUNT: 7,
+		EPOCHS: 100,
 		LEARNING_RATE: 0.001,
 		CNN_PARAMS: {
 			MODEL_SUB_TYPE: 3,
+			SCHEDULER: SCHEDULER_COSINE
 		}
 	})
-	#do_run(run_5c_5s_m3)
+	#do_run(run_5c_7s_m3)
+
 
 
 	run_5c_7s_silu_kai = cycle_base.copy()
@@ -116,7 +135,7 @@ if __name__ == "__main__":
 			ACTIVATION: ACTIVATION_SILU,
 		}
 	})
-	do_run(run_5c_7s_silu_kai)
+	#do_run(run_5c_7s_silu_kai)
 
 	run_5c_7s_relu = cycle_base.copy()
 	run_5c_7s_relu.update({
@@ -127,7 +146,7 @@ if __name__ == "__main__":
 			ACTIVATION: ACTIVATION_RELU,
 		}
 	})
-	do_run(run_5c_7s_relu)
+	#do_run(run_5c_7s_relu)
 
 
 	run_10c_5s_m2 = cycle_base.copy()
@@ -145,7 +164,7 @@ if __name__ == "__main__":
 			MODEL_SUB_TYPE: 2,
 		}
 	})
-	do_run(run_10c_5s_m2)
+	#do_run(run_10c_5s_m2)
 
 	##################
 
