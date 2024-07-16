@@ -68,6 +68,7 @@ class DataAnalysis:
 		config = self.run.config
 		frame_start = meta_row[const.CHUNK_RANGE_START]
 		frame_end = meta_row[const.CHUNK_RANGE_END]
+		hop_length = cnn_config[const.HOP_LENGTH]
 
 		# Berechnen der relativen Position der cycle_marker im Ausschnitt
 		relative_cycle_markers = [marker for marker in cycle_marker \
@@ -121,12 +122,12 @@ class DataAnalysis:
 			ax2.set_title("Filtered Audio")
 
 			# Vierter Subplot für das rohe Mel-Spektrogramm
-			AudioUtil.SignalPlotting.show_mel_spectrogram(sgram_raw, samplerate=sr, raw=True, ax=ax4)
+			AudioUtil.SignalPlotting.show_mel_spectrogram(sgram_raw, samplerate=sr, raw=True, ax=ax4, hop_length=hop_length)
 			ax4.set_title("Raw Mel Spectrogram")
 
 
 			# Fünfter Subplot für das bearbeitete Mel-Spektrogramm
-			AudioUtil.SignalPlotting.show_mel_spectrogram(sgram_filtered, samplerate=sr, raw=True, ax=ax5)
+			AudioUtil.SignalPlotting.show_mel_spectrogram(sgram_filtered, samplerate=sr, raw=True, ax=ax5, hop_length=hop_length)
 			ax5.set_title("Filtered Mel Spectrogram")
 
 		# Dritter Subplot für das komplette Audiosignal
@@ -139,7 +140,7 @@ class DataAnalysis:
 
 
 		# Sechster Subplot für das augmentierte Mel-Spektrogramm
-		AudioUtil.SignalPlotting.show_mel_spectrogram(sgram_augmented, samplerate=sr, raw=True, ax=ax6)
+		AudioUtil.SignalPlotting.show_mel_spectrogram(sgram_augmented, samplerate=sr, raw=True, ax=ax6, hop_length=hop_length)
 		ax6.set_title("Augmented final Mel Spectrogram")
 
 		# Letzter, flacher Subplot für den Text  # Nimmt beide Spalten ein

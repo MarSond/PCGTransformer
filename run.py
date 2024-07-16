@@ -243,7 +243,6 @@ class TaskBase(ABC):
 			elif dataset_mode == const.PHYSIONET_2016_2022:
 				from MLHelper.dataset import Physionet2016_2022
 				dataset = Physionet2016_2022(self.run)
-				# TODO config SR to test 4000 PH2022
 			else:
 				self.run.log_training(f"Unknown dataset {dataset_mode}", level=logging.ERROR)
 				raise ValueError(f"Unknown dataset {dataset_mode}")
