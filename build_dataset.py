@@ -2,14 +2,17 @@ import io
 import json
 from pathlib import Path
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import seaborn as sns
 import torchaudio
 from tqdm.auto import tqdm
 
 import MLHelper.constants as const
 from MLHelper.dataset import AudioDataset, Physionet2016, Physionet2022
 from run import Run
+
 
 def save_training_data_to_csv(metadata, dataset):
 	metadata_df = pd.DataFrame(metadata)
@@ -213,5 +216,179 @@ def start_parse():
 	parse_physionet2022()
 	print("Done parsing")
 
+	##########
+
+def create_output_directories(dataset):
+	base_path = Path(dataset.dataset_path)
+	stats_dir = base_path / "statistics"
+	stats_dir.mkdir(parents=True, exist_ok=True)
+	return stats_dir
+
+def calculate_bpm(data):
+	if len(data) > 1:
+		start_time = data[0]
+		end_time = data[-1]
+		duration_in_minutes = (end_time - start_time) / 60
+		return len(data) / duration_in_minutes if duration_in_minutes > 0 else None
+	return None
+
+def save_statistics(dataset: AudioDataset, stats_dir: Path):
+	train_data = dataset.load_file_list()
+	dataset_name = dataset.__class__.__name__
+	stats_file = stats_dir / f"{dataset_name}_statistics.txt"
+
+	with open(stats_file, "w") as f:
+		f.write(f"Statistics for {dataset_name}\n")
+		f.write(f"Total count: {len(train_data)}\n\n")
+
+		# Class distribution
+		class_counts = train_data[const.META_LABEL_1].value_counts()
+		f.write("Class distribution:\n")
+		f.write(class_counts.to_string())
+		f.write("\n\n")
+
+		# Length statistics
+		seconds = train_data[const.META_LENGTH] / dataset.target_samplerate
+		total_duration = seconds.sum()
+		f.write(f"Total duration: {total_duration:.2f} seconds ({total_duration/3600:.2f} hours)\n")
+		f.write(f"Average length (All): {seconds.mean():.2f} seconds\n")
+		f.write(f"Average length (Negative): {seconds[train_data[const.META_LABEL_1] == 0].mean():.2f} seconds\n")
+		f.write(f"Average length (Positive): {seconds[train_data[const.META_LABEL_1] == 1].mean():.2f} seconds\n")
+		f.write(f"Standard deviation (All): {seconds.std():.2f} seconds\n")
+		f.write(f"Standard deviation (Negative): {seconds[train_data[const.META_LABEL_1] == 0].std():.2f} seconds\n")
+		f.write(f"Standard deviation (Positive): {seconds[train_data[const.META_LABEL_1] == 1].std():.2f} seconds\n")
+		f.write(f"Median length: {seconds.median():.2f} seconds\n")
+		f.write(f"Minimum length: {seconds.min():.2f} seconds\n")
+		f.write(f"Maximum length: {seconds.max():.2f} seconds\n")
+		f.write(f"Correlation class<->length: {train_data[const.META_LABEL_1].corr(seconds):.4f}\n\n")
+
+		# Class percentages
+		f.write(f"Negative class percentage: {class_counts[0]/len(train_data)*100:.2f}%\n")
+		f.write(f"Positive class percentage: {class_counts[1]/len(train_data)*100:.2f}%\n\n")
+
+		# 10 longest and shortest files
+		f.write("10 längste Dateien:\n")
+		for idx, row in train_data.nlargest(10, const.META_LENGTH).iterrows():
+			filename = idx if const.META_FILENAME not in row else row[const.META_FILENAME]
+			f.write(f"{filename}: {row[const.META_LENGTH]/dataset.target_samplerate:.2f} Sekunden\n")
+		f.write("\n")
+		
+		f.write("10 kürzeste Dateien:\n")
+		for idx, row in train_data.nsmallest(10, const.META_LENGTH).iterrows():
+			filename = idx if const.META_FILENAME not in row else row[const.META_FILENAME]
+			f.write(f"{filename}: {row[const.META_LENGTH]/dataset.target_samplerate:.2f} Sekunden\n")
+		f.write("\n")
+
+		if isinstance(dataset, Physionet2022):
+			heartcycles = train_data[const.META_HEARTCYCLES]
+			heartcycles_lengths = heartcycles.apply(len)
+			f.write("Heartcycles statistics:\n")
+			f.write(f"Min: {heartcycles_lengths.min()}\n")
+			f.write(f"Max: {heartcycles_lengths.max()}\n")
+			f.write(f"Mean: {heartcycles_lengths.mean():.2f}\n")
+			f.write(f"Std: {heartcycles_lengths.std():.2f}\n")
+			f.write(f"Median: {heartcycles_lengths.median()}\n\n")
+
+			train_data["bpm"] = train_data[const.META_HEARTCYCLES].apply(calculate_bpm)
+			f.write("BPM statistics:\n")
+			f.write(train_data["bpm"].describe().to_string())
+			f.write("\n\n")
+
+			f.write("10 langsamste BPM Dateien:\n")
+			for idx, row in train_data.nsmallest(10, "bpm").iterrows():
+				filename = idx if const.META_FILENAME not in row else row[const.META_FILENAME]
+				f.write(f"{filename}: {row['bpm']:.2f} BPM\n")
+			f.write("\n")
+			
+			f.write("10 schnellste BPM Dateien:\n")
+			for idx, row in train_data.nlargest(10, "bpm").iterrows():
+				filename = idx if const.META_FILENAME not in row else row[const.META_FILENAME]
+				f.write(f"{filename}: {row['bpm']:.2f} BPM\n")
+			f.write("\n")
+
+	print(f"Statistics saved to {stats_file}")
+	return train_data
+
+def plot_statistics(dataset: AudioDataset, stats_dir: Path):
+	data = dataset.load_file_list()
+	dataset_name = dataset.__class__.__name__
+	
+	# Length distribution
+	plt.figure(figsize=(12, 8))
+	seconds = data[const.META_LENGTH] / dataset.target_samplerate
+	sns.histplot(data=seconds, kde=True)
+	plt.title(f"{dataset_name} - Audio Length Distribution")
+	plt.xlabel("Seconds")
+	plt.ylabel("Count")
+	plt.savefig(stats_dir / f"{dataset_name}_length_distribution.png")
+	plt.close()
+
+	# Class distribution (using the old plot style)
+	p_size = 12
+	font_size = 16
+	fig, axs = plt.subplots(1, 3, figsize=(p_size * 3, p_size))
+	
+	# Pie chart
+	class_counts = data[const.META_LABEL_1].value_counts()
+	axs[0].pie(class_counts, labels=["NORMAL", "ABNORMAL"], 
+			   autopct="%1.1f%%", colors=["green", "red"])
+	axs[0].set_title("Class Distribution", fontsize=font_size)
+
+	# Statistics text
+	text_content = f"Average length (Negative): {seconds[data[const.META_LABEL_1] == 0].mean():.2f}s\n"
+	text_content += f"Average length (Positive): {seconds[data[const.META_LABEL_1] == 1].mean():.2f}s\n"
+	text_content += f"Average length (All): {seconds.mean():.2f}s\n"
+	text_content += f"Standard deviation (Negative): {seconds[data[const.META_LABEL_1] == 0].std():.2f}s\n"
+	text_content += f"Standard deviation (Positive): {seconds[data[const.META_LABEL_1] == 1].std():.2f}s\n"
+	text_content += f"Standard deviation (All): {seconds.std():.2f}s\n"
+	text_content += f"Median length: {seconds.median():.2f}s\n"
+	text_content += f"Minimum length: {seconds.min():.2f}s\n"
+	text_content += f"Maximum length: {seconds.max():.2f}s\n"
+	text_content += f"Correlation class<->length: {data[const.META_LABEL_1].corr(seconds):.4f}\n"
+	text_content += f"Counts: neg.: {class_counts[0]} pos.: {class_counts[1]} total: {len(data)}"
+
+	axs[1].text(0, 0.5, text_content, fontsize=font_size-2, ha="left", va="center")
+	axs[1].axis("off")
+
+	# Length histogram
+	axs[2].hist(seconds, bins=100, color="blue", alpha=0.7)
+	axs[2].set_title("Length Histogram", fontsize=font_size)
+	axs[2].set_xlabel("Seconds", fontsize=font_size-2)
+	axs[2].set_ylabel("Count", fontsize=font_size-2)
+
+	plt.tight_layout()
+	plt.savefig(stats_dir / f"{dataset_name}_class_and_length_distribution.png")
+	plt.close()
+
+	if isinstance(dataset, Physionet2022):
+		data["bpm"] = data[const.META_HEARTCYCLES].apply(calculate_bpm)
+		plt.figure(figsize=(12, 8))
+		sns.histplot(data=data["bpm"].dropna(), kde=True)
+		plt.title(f"{dataset_name} - BPM Distribution")
+		plt.xlabel("Beats Per Minute")
+		plt.ylabel("Count")
+		plt.savefig(stats_dir / f"{dataset_name}_bpm_distribution.png")
+		plt.close()
+
+	plt.figure(figsize=(10, 8))
+	corr_data = data[[const.META_LABEL_1, const.META_LENGTH, const.META_SAMPLERATE, const.META_CHANNELS]]
+	sns.heatmap(corr_data.corr(), annot=True, cmap="coolwarm")
+	plt.title(f"{dataset_name} - Correlation Heatmap")
+	plt.savefig(stats_dir / f"{dataset_name}_correlation_heatmap.png")
+	plt.close()
+
+	print(f"Plots saved in {stats_dir}")
+
+def generate_statistics_and_plots(dataset: AudioDataset):
+	stats_dir = create_output_directories(dataset)
+	data = save_statistics(dataset, stats_dir)
+	plot_statistics(dataset, stats_dir)
+
+def start_statistics_and_plots():
+	generate_statistics_and_plots(Physionet2016(Run()))
+	generate_statistics_and_plots(Physionet2022(Run()))
+	print("Done generating statistics and plots")
+
 if __name__ == "__main__":
 	start_parse()
+	start_statistics_and_plots()

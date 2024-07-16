@@ -1,0 +1,47 @@
+Statistics for Physionet2016
+Total count: 3240
+
+Class distribution:
+label_1
+0    2575
+1     665
+
+Total duration: 72776.08 seconds (20.22 hours)
+Average length (All): 22.46 seconds
+Average length (Negative): 21.66 seconds
+Average length (Positive): 25.57 seconds
+Standard deviation (All): 12.39 seconds
+Standard deviation (Negative): 11.91 seconds
+Standard deviation (Positive): 13.67 seconds
+Median length: 20.83 seconds
+Minimum length: 5.31 seconds
+Maximum length: 122.00 seconds
+Correlation class<->length: 0.1275
+
+Negative class percentage: 79.48%
+Positive class percentage: 20.52%
+
+10 längste Dateien:
+c0031.wav: 122.00 Sekunden
+c0024.wav: 106.05 Sekunden
+e01313.wav: 101.67 Sekunden
+e01899.wav: 100.97 Sekunden
+e00860.wav: 99.20 Sekunden
+e01355.wav: 98.99 Sekunden
+e01777.wav: 97.02 Sekunden
+e01807.wav: 94.72 Sekunden
+e01449.wav: 93.76 Sekunden
+e01010.wav: 93.73 Sekunden
+
+10 kürzeste Dateien:
+b0033.wav: 5.31 Sekunden
+b0409.wav: 6.33 Sekunden
+d0001.wav: 6.61 Sekunden
+d0045.wav: 6.64 Sekunden
+b0037.wav: 6.85 Sekunden
+d0006.wav: 6.91 Sekunden
+b0031.wav: 6.99 Sekunden
+b0273.wav: 7.28 Sekunden
+b0151.wav: 7.36 Sekunden
+b0272.wav: 7.45 Sekunden
+

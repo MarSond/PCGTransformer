@@ -1,0 +1,88 @@
+Statistics for Physionet2022
+Total count: 3007
+
+Class distribution:
+label_1
+0    2391
+1     616
+
+Total duration: 137687.19 seconds (38.25 hours)
+Average length (All): 45.79 seconds
+Average length (Negative): 46.10 seconds
+Average length (Positive): 44.58 seconds
+Standard deviation (All): 14.60 seconds
+Standard deviation (Negative): 14.25 seconds
+Standard deviation (Positive): 15.82 seconds
+Median length: 42.98 seconds
+Minimum length: 10.30 seconds
+Maximum length: 129.02 seconds
+Correlation class<->length: -0.0421
+
+Negative class percentage: 79.51%
+Positive class percentage: 20.49%
+
+10 längste Dateien:
+50734_AV.wav: 129.02 Sekunden
+50734_PV.wav: 124.48 Sekunden
+50149_MV.wav: 123.68 Sekunden
+50734_TV.wav: 117.79 Sekunden
+50635_AV.wav: 117.50 Sekunden
+50734_MV.wav: 117.38 Sekunden
+50332_MV.wav: 111.71 Sekunden
+50321_AV_1.wav: 105.38 Sekunden
+50737_MV.wav: 101.98 Sekunden
+50048_MV.wav: 99.97 Sekunden
+
+10 kürzeste Dateien:
+50348_AV_1.wav: 10.30 Sekunden
+50321_MV_1.wav: 10.50 Sekunden
+50216_Phc_1.wav: 11.36 Sekunden
+68269_PV.wav: 11.90 Sekunden
+50782_MV_2.wav: 12.37 Sekunden
+68465_TV.wav: 12.70 Sekunden
+84853_TV.wav: 12.77 Sekunden
+68465_PV.wav: 13.18 Sekunden
+13918_TV.wav: 13.18 Sekunden
+68269_TV.wav: 13.18 Sekunden
+
+Heartcycles statistics:
+Min: 0
+Max: 94
+Mean: 20.83
+Std: 12.99
+Median: 17.0
+
+BPM statistics:
+count    3006.000000
+mean      112.109821
+std        23.400458
+min        25.490256
+25%        96.404912
+50%       109.449250
+75%       124.633946
+max       222.901660
+
+10 langsamste BPM Dateien:
+84713_TV.wav: 25.49 BPM
+85004_MV.wav: 31.58 BPM
+50277_TV.wav: 51.34 BPM
+50277_PV.wav: 52.23 BPM
+84749_TV.wav: 53.23 BPM
+85020_AV.wav: 55.34 BPM
+50277_MV.wav: 55.56 BPM
+50160_PV.wav: 58.41 BPM
+85154_MV.wav: 58.66 BPM
+50277_AV.wav: 59.47 BPM
+
+10 schnellste BPM Dateien:
+50285_MV.wav: 222.90 BPM
+49824_MV.wav: 212.77 BPM
+84876_AV.wav: 208.57 BPM
+49824_PV.wav: 208.14 BPM
+50652_AV.wav: 207.15 BPM
+50768_AV.wav: 204.69 BPM
+49987_MV.wav: 203.75 BPM
+49824_AV.wav: 203.47 BPM
+49987_AV.wav: 202.02 BPM
+50165_AV.wav: 199.02 BPM
+
