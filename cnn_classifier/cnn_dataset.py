@@ -29,12 +29,9 @@ class CNN_Dataset(Dataset):
 	def __len__(self):
 		return len(self.datalist)
 
-	# TODO implement streching to specific length for heartcycle normalization
-
-	def __getitem__(self, idx):
+	def handle_instance(self, current_row):
 		# Absolute file path of the audio file - concatenate the audio directory with
 		# the relative path
-		current_row = self.datalist.iloc[idx]
 		audio_filename = current_row[const.META_AUDIO_PATH]
 		frame_start = current_row[const.CHUNK_RANGE_START]
 		frame_end = current_row[const.CHUNK_RANGE_END]
@@ -111,6 +108,10 @@ class CNN_Dataset(Dataset):
 		if not isinstance(sgram_final, torch.Tensor):
 			sgram_final = tensor(sgram_final)
 		return sgram_final, class_id
+
+	def __getitem__(self, idx):
+		current_row = self.datalist.iloc[idx]
+		return self.handle_instance(current_row)
 
 	def _get_mel(self, audio, file_sr):
 		return AudioUtil.SignalFeatures.get_melspectrogram(audio, sr=file_sr, n_mels=self.n_mels, \
