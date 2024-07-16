@@ -46,14 +46,10 @@ class CNN_Inference(ML_Loop):
             if self.run.config[const.SINGLE_BATCH_MODE]:
                 break
 
-    @HookManager.hook_wrapper("kfold")
-    def kfold_loop(self, start_epoch: int = 1, start_fold: int = 1, **kwargs: Any) -> None:
-        for fold_idx in range(start_fold, self.kfold_splits + 1):
-            self.prepare_fold(fold_idx)
-            self.validation_epoch_loop(epoch=1, fold=fold_idx)
-
     def start_inference_task(self, model: torch.nn.Module) -> None:
         self.model = model
         self.model.eval()
+
+		self.kfold_loop(start_epoch=1)
 
         self.kfold_loop(start_epoch=1)
