@@ -126,3 +126,5 @@ pr_curve.png
 roc_curve.png
 
 MLHelper
+
+beats_classifier/extractors/BEATs_iter3_plus_AS2M.pt

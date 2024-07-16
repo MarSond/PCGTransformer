@@ -62,5 +62,7 @@ project_config = {
 	TRANSFORMER_PARAMS: {
 		FREEZE_ENCODER: False, #TODO not implemented
 		FREEZE_DECODER: False,
+		EXTRACTOR_FOLDER: f"beats_classifier/{EXTRACTOR_FOLDER_NAME}/",
+		EXTRACTOR_NAME: "BEATs_iter3_plus_AS2M.pt",
 	}
 }
