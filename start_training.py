@@ -28,15 +28,15 @@ if __name__ == "__main__":
 
 	run_2022 = train_update_dict.copy()
 	run_2022.update({TRAIN_DATASET: PHYSIONET_2022, RUN_NAME_SUFFIX: "run2022"})
-	do_run(run_2022)
+	#do_run(run_2022)
 
 	run_2016 = train_update_dict.copy()
 	run_2016.update({TRAIN_DATASET: PHYSIONET_2016, RUN_NAME_SUFFIX: "run2016"})
-	do_run(run_2016)
+	#do_run(run_2016)
 
 	run2016_2022 = train_update_dict.copy()
 	run2016_2022.update({TRAIN_DATASET: PHYSIONET_2016_2022, RUN_NAME_SUFFIX: "run2022-2016"})
-	do_run(run2016_2022)
+	#do_run(run2016_2022)
 	###
 
 
@@ -57,7 +57,7 @@ if __name__ == "__main__":
 			MODEL_SUB_TYPE: 2,
 		}
 	})
-	do_run(run_5c_3s)
+	#do_run(run_5c_3s)
 
 	# besser
 	run_5c_7s = cycle_base.copy()
@@ -68,21 +68,21 @@ if __name__ == "__main__":
 			MODEL_SUB_TYPE: 2,
 		}
 	})
-	do_run(run_5c_7s)
+	#do_run(run_5c_7s)
 
 	run_6c_10s = cycle_base.copy()
 	run_6c_10s.update({
 		RUN_NAME_SUFFIX: "6c-10s-m3-l1l2",
 		CHUNK_DURATION: 7.0,
 		EPOCHS: 60,
+		L1_REGULATION_WEIGHT: 0.0001,
+		L2_REGULATION_WEIGHT: 0.0001,
+		SCHEDULER: SCHEDULER_STEP,
 		CNN_PARAMS: {
 			MODEL_SUB_TYPE: 3,
-			L1_REGULATION_WEIGHT: 0.0001,
-			L2_REGULATION_WEIGHT: 0.0001,
-			SCHEDULER: SCHEDULER_STEP,
 		}
 	})
-	do_run(run_6c_10s)
+	#do_run(run_6c_10s)
 
 	run_5c_5s_low = cycle_base.copy()
 	run_5c_5s_low.update({
@@ -117,9 +117,9 @@ if __name__ == "__main__":
 		CHUNK_HEARTCYCLE_COUNT: 7,
 		EPOCHS: 100,
 		LEARNING_RATE: 0.001,
+		SCHEDULER: SCHEDULER_COSINE,
 		CNN_PARAMS: {
 			MODEL_SUB_TYPE: 3,
-			SCHEDULER: SCHEDULER_COSINE
 		}
 	})
 	#do_run(run_5c_7s_m3)
@@ -156,11 +156,11 @@ if __name__ == "__main__":
 		CHUNK_HEARTCYCLE_COUNT: 10,
 		EPOCHS: 80,
 		LEARNING_RATE: 0.001,
+		L1_REGULATION_WEIGHT: 0.001,
+		L2_REGULATION_WEIGHT: 0.001,
+		OPTIMIZER: OPTIMIZER_SGD,
+		SCHEDULER: SCHEDULER_STEP,
 		CNN_PARAMS: {
-			L1_REGULATION_WEIGHT: 0.001,
-			L2_REGULATION_WEIGHT: 0.001,
-			OPTIMIZER: OPTIMIZER_SGD,
-			SCHEDULER: SCHEDULER_STEP,
 			MODEL_SUB_TYPE: 2,
 		}
 	})
@@ -185,10 +185,8 @@ if __name__ == "__main__":
 	run8_dict.update({
 		RUN_NAME_SUFFIX: "lr_optimizer",
 		LEARNING_RATE: 0.001,
-		CNN_PARAMS: {
-			OPTIMIZER: OPTIMIZER_ADAM,
-			SCHEDULER: SCHEDULER_COSINE,
-		}
+		OPTIMIZER: OPTIMIZER_ADAM,
+		SCHEDULER: SCHEDULER_COSINE,
 	})
 
 	run10_dict = run_2022.copy()
@@ -213,18 +211,14 @@ if __name__ == "__main__":
 	run12_dict = run_2022.copy()
 	run12_dict.update({
 		RUN_NAME_SUFFIX: "l1regularization",
-		CNN_PARAMS: {
-			L1_REGULATION_WEIGHT: 0.0001,
-		},
+		L1_REGULATION_WEIGHT: 0.0001,
 	})
 
 	# Experiment 13: No filter
 	run13_dict = run_2022.copy()
 	run13_dict.update({
 		RUN_NAME_SUFFIX: "l2regularization",
-		CNN_PARAMS: {
-			L2_REGULATION_WEIGHT: 0.0001,
-		},
+		L2_REGULATION_WEIGHT: 0.0001,
 	})
 
 
@@ -236,17 +230,15 @@ if __name__ == "__main__":
 	})
 
 
-	# Experiment 15: 
+	# Experiment 15:
 	run15_dict = run_2022.copy()
 	run15_dict.update({
 		RUN_NAME_SUFFIX: "crossentropy",
-		CNN_PARAMS: {
-			LOSS_FUNCTION: LOSS_CROSS_ENTROPY,
-		}
+		LOSS_FUNCTION: LOSS_CROSS_ENTROPY,
 	})
 
 
-	# Experiment 16: 
+	# Experiment 16:
 	run16_dict = run_2022.copy()
 	run16_dict.update({
 		RUN_NAME_SUFFIX: "model2",
@@ -271,9 +263,9 @@ if __name__ == "__main__":
 		RUN_NAME_SUFFIX: "long-epoch-adam-cosine",
 		EPOCHS: 80,
 		LEARNING_RATE: 0.1,
+		OPTIMIZER: OPTIMIZER_ADAM,
+		SCHEDULER: SCHEDULER_PLATEAU,
 		CNN_PARAMS: {
-			OPTIMIZER: OPTIMIZER_ADAM,
-			SCHEDULER: SCHEDULER_PLATEAU,
 			MODEL_SUB_TYPE: 2,
 		}
 	})
@@ -285,15 +277,15 @@ if __name__ == "__main__":
 		EPOCHS: 80,
 		LEARNING_RATE: 0.01,
 		CHUNK_DURATION: 10.0,  # Längere Chunks für mehr Kontext
+		LOSS_FUNCTION: LOSS_FOCAL_LOSS,
+		L2_REGULATION_WEIGHT: 0.0001,
+		OPTIMIZER: OPTIMIZER_ADAM,
+		SCHEDULER: SCHEDULER_STEP,
 		CNN_PARAMS: {
 			MODEL_SUB_TYPE: 2,  # Neues erweitertes Modell
-			OPTIMIZER: OPTIMIZER_ADAM,
-			SCHEDULER: SCHEDULER_STEP,
 			N_MELS: 128,  # Erhöhte Mel-Spektrogramm-Auflösung
 			HOP_LENGTH: 128,
 			N_FFT: 1024,
-			LOSS_FUNCTION: LOSS_FOCAL_LOSS,
-			L2_REGULATION_WEIGHT: 0.0001,
 			SIGNAL_FILTER: BUTTERPASS,
 			BUTTERPASS_LOW: 20,
 			BUTTERPASS_HIGH: 600,
@@ -304,38 +296,19 @@ if __name__ == "__main__":
 	###
 
 	run_loop_test_dict = train_update_dict.copy()
-	run_loop_test_dict.update({ \
+	run_loop_test_dict.update({ MODEL_METHOD_TYPE: CNN ,\
 		TRAIN_DATASET: PHYSIONET_2022, KFOLD_SPLITS: 1, EPOCHS: 2, METADATA_FRAC: 0.05})
+	#do_run(run_loop_test_dict)
+
 
 	continue_test = {METADATA_FRAC: 0.05, TRAINING_CHECKPOINT: {EPOCH: 80, RUN_NAME: "2024-07-12_21-52-51_combined-optimized-2", FOLD: 1}, \
 		LOAD_PREVIOUS_RUN_NAME: "2024-07-12_21-52-51_combined-optimized-2" ,RUN_NAME_SUFFIX: "continue-test", EPOCHS: 82}
 
-	# do_run(run1_dict)
-	# do_run(run2_dict)
-	# do_run(run3_dict)
-	# do_run(run4_dict)
-	# do_run(run5_dict)
-
-	# do_run(run6_dict)
-	# do_run(run7_dict)
-	# do_run(run8_dict)
-	# do_run(run9_dict)
-	# do_run(run10_dict)
-
-	# do_run(run11_dict)
-	# do_run(run12_dict)
-	# do_run(run13_dict)
-	# do_run(run14_dict)
-	#do_run(run15_dict)
-	#do_run(run17_dict)
-
-	#do_run(run19_dict)
-	# do_run(run16_dict)
-	#do_run(run18_dict)
-
-	# do_run(continue_test)
 
 	# TODO test no downsampling of 2022
-	do_run(run_loop_test_dict)
+
+	beats_test = train_update_dict.copy()
+	beats_test.update({MODEL_METHOD_TYPE: BEATS })
+	do_run(beats_test)
 
 	plt.show()

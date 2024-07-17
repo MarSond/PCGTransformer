@@ -207,7 +207,7 @@ class TaskBase(ABC):
 			return cnn_training.CNNTraining(run=run, dataset=dataset)
 		if model_type == const.BEATS:
 			from beats_classifier import beats_training
-			return beats_training.BeatsTraining(run=run, dataset=dataset)
+			return beats_training.BEATsTraining(run=run, dataset=dataset)
 
 		self.run.log_training(f"Unknown model type {model_type}", level=logging.ERROR)
 		raise ValueError(f"Unknown model type {model_type}")
@@ -261,7 +261,8 @@ class TaskBase(ABC):
 			from cnn_classifier import cnn_models
 			return cnn_models.get_model(run)
 		if model_type == const.BEATS:
-			return None
+			from beats_classifier import beats_models
+			return beats_models.get_model(run)
 		raise ValueError(f"Unknown model type {model_type}")
 
 	@staticmethod
@@ -323,13 +324,8 @@ class TrainTask(TaskBase):
 
 	def prepare_training_utilities(self):
 		# create blank model, optimizer, scheduler, scaler
-		model = self.create_new_model(self.run)
-		if self.config[const.MODEL_METHOD_TYPE] == const.CNN:
-			from cnn_classifier.cnn_training import CNNTraining
-			optimizer, scheduler, scaler = \
-				CNNTraining.prepare_optimizer_scheduler(config=self.config, model=model)
-		else:
-			raise ValueError(f"Unknown model type {self.config[const.MODEL_METHOD_TYPE]}")
+		model = TaskBase.create_new_model(self.run)
+		optimizer, scheduler, scaler = MLUtil.get_sheduler_optimizer_scaler(config=self.config, model=model)
 		return model, optimizer, scheduler, scaler
 
 	def load_model_for_training(self) -> torch.nn.Module:
