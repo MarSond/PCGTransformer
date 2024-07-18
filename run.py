@@ -11,7 +11,7 @@ import torch
 import MLHelper.tools.logging_helper as logging_helper
 from MLHelper import constants as const
 from MLHelper.config import Config, setup_environment
-from MLHelper.tools.utils import FileUtils, MLUtil
+from MLHelper.tools.utils import FileUtils, MLUtil, MLModelInfo
 
 
 class Run:
@@ -85,8 +85,8 @@ class Run:
 						logging_helper.LEVEL_FILE: logging.DEBUG},
 
 				const.LOGGER_TENSOR: \
-					{	logging_helper.LEVEL_CONSOLE: logging.WARNING, \
-						logging_helper.LEVEL_FILE: logging.ERROR},
+					{	logging_helper.LEVEL_CONSOLE: logging.DEBUG, \
+						logging_helper.LEVEL_FILE: logging.DEBUG},
 			}
 		else:
 			log_request_dict = {
@@ -103,8 +103,8 @@ class Run:
 					{	logging_helper.LEVEL_CONSOLE: logging.WARNING,  \
 						logging_helper.LEVEL_FILE: logging.WARNING},
 				const.LOGGER_TENSOR: \
-					{	logging_helper.LEVEL_CONSOLE: logging.WARNING, \
-						logging_helper.LEVEL_FILE: logging.ERROR},
+					{	logging_helper.LEVEL_CONSOLE: logging.ERROR, \
+						logging_helper.LEVEL_FILE: logging.WARNING},
 			}
 		self.logger_dict = logging_helper.get_logger_dict(
 			logger_map=log_request_dict, sub_name=self.run_name, \
@@ -259,11 +259,16 @@ class TaskBase(ABC):
 		run.log_training(f"Creating new model of type {model_type}.", level=logging.INFO)
 		if model_type == const.CNN:
 			from cnn_classifier import cnn_models
-			return cnn_models.get_model(run)
-		if model_type == const.BEATS:
+			model = cnn_models.get_model(run)
+			demo_inputs = cnn_models.get_demo_input()
+		elif model_type == const.BEATS:
 			from beats_classifier import beats_models
-			return beats_models.get_model(run)
-		raise ValueError(f"Unknown model type {model_type}")
+			model = beats_models.get_model(run)
+			demo_inputs = beats_models.get_demo_input()
+		else:
+			raise ValueError(f"Unknown model type {model_type}")
+		MLModelInfo.print_model_summary(model, input_data=demo_inputs, logger=run.logger_dict[const.LOGGER_TENSOR])
+		return model
 
 	@staticmethod
 	def _get_checkpoint_path(config: dict) -> str:

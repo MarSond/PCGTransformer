@@ -11,6 +11,7 @@ def do_run(config: dict):
 		run.start_task()
 	except Exception as e:
 		print(e)
+		print("Failed to start training.")
 
 
 if __name__ == "__main__":
@@ -308,7 +309,7 @@ if __name__ == "__main__":
 	# TODO test no downsampling of 2022
 
 	beats_test = train_update_dict.copy()
-	beats_test.update({MODEL_METHOD_TYPE: BEATS })
+	beats_test.update({MODEL_METHOD_TYPE: BEATS , BATCH_SIZE: 16, METADATA_FRAC: 0.1})
 	do_run(beats_test)
 
 	plt.show()
