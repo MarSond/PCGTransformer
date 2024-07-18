@@ -45,11 +45,11 @@ class CNN_Dataset(Dataset):
 			raw_audio = preprocessing.resample(raw_audio, file_sr, self.target_samplerate)
 
 		######## Butter filter
-		if self.cnn_config[const.BUTTERPASS_LOW] != 0 and self.cnn_config[const.BUTTERPASS_HIGH] != 0:
+		if self.config[const.BUTTERPASS_LOW] != 0 and self.config[const.BUTTERPASS_HIGH] != 0:
 			filtered_audio = preprocessing.Filter.butter_bandpass_filter( \
-				raw_audio, lowcut=self.cnn_config[const.BUTTERPASS_LOW], \
-				highcut=self.cnn_config[const.BUTTERPASS_HIGH], \
-				fs=self.target_samplerate, order=self.cnn_config[const.BUTTERPASS_ORDER])
+				raw_audio, lowcut=self.config[const.BUTTERPASS_LOW], \
+				highcut=self.config[const.BUTTERPASS_HIGH], \
+				fs=self.target_samplerate, order=self.config[const.BUTTERPASS_ORDER])
 		else:
 			filtered_audio = raw_audio
 

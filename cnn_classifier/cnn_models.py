@@ -7,6 +7,9 @@ from MLHelper.tools.utils import MLUtil
 from run import Run
 
 
+def get_demo_input():
+	return zeros(1, 1, 128, 128)
+
 def get_model(run: Run):
 	type = run.config[const.CNN_PARAMS][const.MODEL_SUB_TYPE]
 	if type == 1:
