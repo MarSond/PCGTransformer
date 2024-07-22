@@ -5,7 +5,6 @@ from torch.utils.data import DataLoader
 import MLHelper.constants as const
 from MLHelper.dataset import AudioDataset
 from MLHelper.ml_loop import ML_Loop
-from MLHelper.tools.utils import MLUtil
 from run import Run
 
 from .cnn_dataset import CNN_Dataset
@@ -15,7 +14,7 @@ class CNNTraining(ML_Loop):
 
 	def __init__(self, run: Run, dataset: AudioDataset) -> None:
 		super().__init__(run, dataset, pytorch_dataset_class=CNN_Dataset)
-		self.cnn_params = None
+		self.cnn_params = self.run.config[const.CNN_PARAMS]
 
 
 	def num_worker_test(self, logger: logging.Logger):
@@ -50,7 +49,3 @@ class CNNTraining(ML_Loop):
 		assert self.optimizer is not None, "Optimizer is None. Required for training"
 		assert start_epoch >= 1, "Start epoch must be greater or equal to 0"
 		self.kfold_loop(start_epoch=start_epoch, start_fold=start_fold)
-
-
-	def prepare_kfold_run(self):
-		self.cnn_params = self.run.config[const.CNN_PARAMS]

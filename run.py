@@ -8,10 +8,10 @@ from typing import Optional, Tuple
 
 import torch
 
-import MLHelper.tools.logging_helper as logging_helper
 from MLHelper import constants as const
 from MLHelper.config import Config, setup_environment
-from MLHelper.tools.utils import FileUtils, MLUtil, MLModelInfo
+from MLHelper.tools import logging_helper
+from MLHelper.tools.utils import FileUtils, MLModelInfo, MLUtil
 
 
 class Run:
@@ -267,7 +267,8 @@ class TaskBase(ABC):
 			demo_inputs = beats_models.get_demo_input()
 		else:
 			raise ValueError(f"Unknown model type {model_type}")
-		MLModelInfo.print_model_summary(model, input_data=demo_inputs, logger=run.logger_dict[const.LOGGER_TENSOR])
+		MLModelInfo.print_model_summary(model, input_data=demo_inputs, \
+			logger=run.logger_dict[const.LOGGER_TENSOR])
 		return model
 
 	@staticmethod
@@ -343,7 +344,7 @@ class TrainTask(TaskBase):
 			self.start_epoch = checkpoint_epoch + 1 # start at next epoch
 			self.start_fold = checkpoint_fold
 			model, optimizer, scheduler, scaler = MLUtil.load_model( \
-				model=model, device=self.run.device, optimizer=optimizer, scheduler=scheduler, scaler=scaler, \
+				model=model, device=self.run.device, optimizer=optimizer, scheduler=scheduler, scaler=scaler,\
 				path=checkpoint_path, logger=self.run.train_logger)
 			self.run.log_training("Loaded model and utils from checkpoint.", level=logging.DEBUG)
 		#model = model.to(self.run.device)

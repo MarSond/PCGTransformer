@@ -2,8 +2,7 @@ import logging
 from pathlib import Path
 
 import torch
-import torch.nn as nn
-from torch import Tensor
+from torch import Tensor, nn
 
 from beats_classifier.BEATs.BEATs import BEATs, BEATsConfig
 from MLHelper import constants as const
@@ -29,7 +28,7 @@ class BEATsBase(nn.Module):
 		beats_config = BEATsConfig(checkpoint["cfg"])
 		beats_model = BEATs(beats_config, logger=self.tensor_logger)
 		beats_model.load_state_dict(checkpoint["model"])
-		beats_model.eval()
+
 		return beats_model
 
 	def initialize(self):
@@ -49,9 +48,10 @@ class BEATsModel(BEATsBase):
 		# Replace the final layer for our classification task
 		self.classifier = nn.Linear(self.beats.encoder.embedding_dim, self.num_classes)
 
-		if self.config[const.TRANSFORMER_PARAMS][const.FREEZE_ENCODER]:
+		if self.config[const.TRANSFORMER_PARAMS][const.FREEZE_EXTRACTOR]:
 			for param in self.beats.parameters():
 				param.requires_grad = False
+			self.beats.eval()
 
 	def forward(self, x: Tensor, padding_mask=None) -> Tensor:
 		x = super().forward(x)
@@ -66,6 +66,7 @@ class BEATsModel(BEATsBase):
 			x = x.mean(dim=1)
 		# Pass through the classifier
 		self.tensor_logger.debug(f"BEATsModel classifier input shape: {x.shape}")
+
 		x = self.classifier(x)
 
 		self.tensor_logger.info(f"BEATsModel classifier output shape: {x.shape}")
@@ -75,8 +76,12 @@ class BEATsModel(BEATsBase):
 def get_model(run: Run):
 	model_sub_type = run.config[const.TRANSFORMER_PARAMS][const.MODEL_SUB_TYPE]
 	if model_sub_type == 1:
-		return BEATsModel(run)
-	raise ValueError(f"Model sub type {model_sub_type} not supported.")
+		model = BEATsModel(run)
+	else:
+		raise ValueError(f"Model sub type {model_sub_type} not supported.")
+	#model = torch.compile(model)
+
+	return model
 
 def get_demo_input():
 	return torch.randn(1, 16000)

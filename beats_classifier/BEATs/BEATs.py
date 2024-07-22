@@ -16,6 +16,8 @@ import torchaudio.compliance.kaldi as ta_kaldi
 from torch import nn
 from torch.nn import LayerNorm
 
+from MLHelper.tools.utils import MLModelInfo
+
 from ..BEATs.backbone import (
 	TransformerEncoder,
 )
@@ -147,12 +149,13 @@ class BEATs(nn.Module):
 			source = source.squeeze(1)
 
 		fbanks = []
-		for waveform in source:
+		for idx, waveform in enumerate(source):
 			self.logger.debug(f"Waveform shape before unsqueeze: {waveform.shape}")
-			self.logger.debug(f"Waveform min max mean before: {waveform.min()} {waveform.max()} {waveform.mean()}")
+			if torch.isinf(waveform).any() or torch.isnan(waveform).any():
+				self.logger.error(f"Waveform {idx} contains inf or nan values")
+				continue
 			waveform = waveform.unsqueeze(0)  # Add channel dimension
-			# waveform = waveform * (2**15)
-			self.logger.debug(f"Waveform shape after unsqueeze: {waveform.shape}")
+			#waveform = waveform * (2**15)
 			self.logger.debug(f"Waveform min max mean after: {waveform.min()} {waveform.max()} {waveform.mean()}")
 			fbank = ta_kaldi.fbank(
 				waveform,
@@ -161,7 +164,11 @@ class BEATs(nn.Module):
 				frame_length=25,
 				frame_shift=10,
 			)
-			self.logger.debug(f"FBank shape: {fbank.shape}")
+			# check nan in the fbank
+			if torch.isnan(fbank).any():
+				self.logger.warning(f"fbank values for waveform {idx} contain NaN")
+				MLModelInfo.print_tensor_info(fbank, "fbank", logger=self.logger, count=-1)
+				continue
 			fbanks.append(fbank)
 		fbank = torch.stack(fbanks, dim=0)
 		self.logger.debug(f"FBank stack shape: {fbank.shape}")

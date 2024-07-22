@@ -54,7 +54,7 @@ class CNN_Dataset(Dataset):
 			filtered_audio = raw_audio
 
 		######## Normalization
-		if self.config[const.NORMALIZATION] == const.NORMALIZATION_MINMAX:
+		if self.config[const.NORMALIZATION] == const.NORMALIZATION_MAX_ABS:
 			normalized_audio = preprocessing.max_abs_normalization(filtered_audio)
 		elif self.config[const.NORMALIZATION] == const.NORMALIZATION_ZSCORE:
 			normalized_audio = preprocessing.zscore_normalization(filtered_audio)

@@ -1,15 +1,7 @@
-import numpy as np
-import torch
-import torch.nn as nn
-import torch.optim as optim
-from torch.optim import lr_scheduler
-
-from beats_classifier import beats_models
 from beats_classifier.beats_dataset import BEATsDataset
 from MLHelper import constants as const
 from MLHelper.dataset import AudioDataset
-from MLHelper.metrics import loss as loss_functions
-from MLHelper.ml_loop import ML_Loop
+from MLHelper.ml_loop import HookManager, ML_Loop
 from run import Run
 
 
@@ -20,8 +12,6 @@ class BEATsTraining(ML_Loop):
 		self.dataset = dataset
 		self.model = None
 		self.criterion = None
-
-	def prepare_kfold_run(self):
 		self.beats_params = self.run.config[const.TRANSFORMER_PARAMS]
 
 	def set_training_utilities(self, start_model, optimizer, scheduler, scaler):
@@ -35,3 +25,7 @@ class BEATsTraining(ML_Loop):
 		assert self.optimizer is not None, "Optimizer is None. Required for training"
 		assert start_epoch >= 1, "Start epoch must be greater or equal to 0"
 		self.kfold_loop(start_epoch=start_epoch, start_fold=start_fold)
+
+	# @HookManager.hook_decorator("end_training_step")
+	# def after_train_step(self, *args, **kwargs):
+	# 	self.run.log_training("Training step complete.", level=40)
