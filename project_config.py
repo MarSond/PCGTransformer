@@ -51,6 +51,9 @@ project_config = {
 	BUTTERPASS_LOW: 25,
 	BUTTERPASS_HIGH: 500,
 	BUTTERPASS_ORDER: 5,
+	USE_PROFILER: False,  # Schalter für das Profiling
+	PROFILER_EPOCHS: 1,   # Anzahl der Epochen, die profiliert werden sollen
+	PROFILER_STEPS: 100,  # Anzahl der Schritte pro Epoche, die profiliert werden sollen
 	CNN_PARAMS: {	# Values individual for CNN methods
 		DROP0: 0.5, # Dropout rate on position 0
 		DROP1: 0.2,	# Dropout rate on position 1
