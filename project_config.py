@@ -65,6 +65,8 @@ project_config = {
 	TRANSFORMER_PARAMS: {
 		FREEZE_EXTRACTOR: True, # Freeze the beats model
 		ACTIVATION: ACTIVATION_SILU,
+		DROP0: 0.5, # Dropout rate on position 0
+		DROP1: 0.3,	# Dropout rate on position 1
 		EXTRACTOR_FOLDER: f"beats_classifier/{EXTRACTOR_FOLDER_NAME}/",
 		EXTRACTOR_NAME: "BEATs_iter3_plus_AS2M.pt",	# Name of the model for extracting
 		MODEL_SUB_TYPE: 1, # Specific model impementation for BEATs type

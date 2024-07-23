@@ -99,10 +99,16 @@ if __name__ == "__main__":
 
 	###
 
-	beats_2016_7s = train_update_dict.copy()
-	beats_2016_7s.update({TRAIN_DATASET: PHYSIONET_2016, MODEL_METHOD_TYPE: BEATS , \
-		BATCH_SIZE: 16, CHUNK_DURATION: 7.0, EPOCHS: 50,RUN_NAME_SUFFIX: "beats-2016-7s-w", \
+	beats_2022_5c_5s_m2 = cycle_base.copy()
+	beats_2022_5c_5s_m2.update({MODEL_METHOD_TYPE: BEATS , \
+		BATCH_SIZE: 16, CHUNK_DURATION: 5.0, MODEL_SUB_TYPE:2, EPOCHS: 50, RUN_NAME_SUFFIX: "beats-2022-5c-5s-m2-long", \
 		OPTIMIZER: OPTIMIZER_ADAMW, LEARNING_RATE: 0.001})
-	do_run(beats_2016_7s)
+	do_run(beats_2022_5c_5s_m2)
+
+
+	beats_2022_5s_m2 = train_update_dict.copy()
+	beats_2022_5s_m2.update({TRAIN_DATASET: PHYSIONET_2022, MODEL_SUB_TYPE:2, MODEL_METHOD_TYPE: BEATS , \
+		BATCH_SIZE: 16, CHUNK_DURATION: 5.0, RUN_NAME_SUFFIX: "beats-2022-5s-model2"})
+	#do_run(beats_2022_5s_m2)
 
 	plt.show()
