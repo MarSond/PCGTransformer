@@ -7,7 +7,8 @@ from run import Run
 def do_run(config: dict):
 	run = Run(config_update_dict=config)
 	run.setup_task()
-	run.start_task()
+	result = run.start_task()
+	print(result)
 
 
 if __name__ == "__main__":
@@ -23,8 +24,11 @@ if __name__ == "__main__":
 
 	run_loop_test_dict = train_update_dict.copy()
 	run_loop_test_dict.update({ \
-		TRAIN_DATASET: PHYSIONET_2022, KFOLD_SPLITS: 3, EPOCHS: 2, METADATA_FRAC: 0.05})
+		TRAIN_DATASET: PHYSIONET_2022, KFOLD_SPLITS: 3, EPOCHS: 2, METADATA_FRAC: 0.03})
 
 	do_run(run_loop_test_dict)
 
 	plt.show()
+
+	# continue_test = {METADATA_FRAC: 0.05, TRAINING_CHECKPOINT: {EPOCH: 80, RUN_NAME: "2024-07-12_21-52-51_combined-optimized-2", FOLD: 1}, \
+	#	LOAD_PREVIOUS_RUN_NAME: "2024-07-12_21-52-51_combined-optimized-2" ,RUN_NAME_SUFFIX: "continue-test", EPOCHS: 82}

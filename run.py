@@ -186,7 +186,7 @@ class Run:
 	def start_task(self):
 		"""Starts the configured task."""
 		assert hasattr(self, "task"), "Task not set up"
-		self.task.start_task()
+		return self.task.start_task()
 
 
 class TaskBase(ABC):
@@ -373,9 +373,9 @@ class TrainTask(TaskBase):
 		self.run.log_training("Starting training pipeline.", level=logging.INFO)
 		self.trainer_class.set_training_utilities(start_model=self.start_model, \
 			optimizer=self.optimizer, scheduler=self.scheduler, scaler=self.scaler)
-		self.trainer_class.start_training_task(start_epoch=self.start_epoch, start_fold=self.start_fold)
+		result = self.trainer_class.start_training_task(start_epoch=self.start_epoch, start_fold=self.start_fold)
 		self.run.log_training("Training complete.", level=logging.CRITICAL)
-
+		return result
 
 class InferenceTask(TaskBase):
 	"""Task class for running inference with pre-trained models."""
@@ -410,5 +410,6 @@ class InferenceTask(TaskBase):
 	def start_task(self):
 		"""Executes the inference pipeline, using the loaded model and dataset."""
 		self.run.log_training("Starting inference pipeline.", level=logging.INFO)
-		self.inferencer_class.start_inference_task(model=self.inference_model)
+		result = self.inferencer_class.start_inference_task(model=self.inference_model)
 		self.run.log_training("Inference complete.", level=logging.CRITICAL)
+		return result

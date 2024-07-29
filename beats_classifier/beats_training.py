@@ -24,7 +24,7 @@ class BEATsTraining(ML_Loop):
 		assert self.model is not None, "Model is None. Required for training"
 		assert self.optimizer is not None, "Optimizer is None. Required for training"
 		assert start_epoch >= 1, "Start epoch must be greater or equal to 0"
-		self.kfold_loop(start_epoch=start_epoch, start_fold=start_fold)
+		return self.kfold_loop(start_epoch=start_epoch, start_fold=start_fold)
 
 	# @HookManager.hook_decorator("end_training_step")
 	# def after_train_step(self, *args, **kwargs):

@@ -50,4 +50,4 @@ class CNN_Inference(ML_Loop):
         self.model = model
         self.model.eval()
 
-        self.kfold_loop(start_epoch=1)
+        return self.kfold_loop(start_epoch=1)

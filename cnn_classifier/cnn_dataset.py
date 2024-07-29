@@ -39,7 +39,7 @@ class CNN_Dataset(Dataset):
 		chunk_name = audio_filename.name + "#" + str(frame_start) + "-" + str(frame_end)
 		self.run.log(f"Loading {chunk_name}", name=const.LOGGER_METADATA, level=logging.INFO)
 		# print("file and class: ", audio_file, class_id)
-		raw_audio, file_sr = AudioUtil.Loading.load_audiofile(audio_filename, start_frame=frame_start, \
+		raw_audio, file_sr, padding_mask = AudioUtil.Loading.load_audiofile(audio_filename, start_frame=frame_start, \
 			end_frame=frame_end, target_length=self.config[const.CHUNK_DURATION], pad_method=self.config[const.AUDIO_LENGTH_NORM])
 		if file_sr != self.target_samplerate:
 			raw_audio = preprocessing.resample(raw_audio, file_sr, self.target_samplerate)
@@ -107,7 +107,7 @@ class CNN_Dataset(Dataset):
 
 		if not isinstance(sgram_final, torch.Tensor):
 			sgram_final = tensor(sgram_final)
-		return sgram_final, class_id
+		return sgram_final, class_id, padding_mask
 
 	def __getitem__(self, idx):
 		current_row = self.datalist.iloc[idx]
