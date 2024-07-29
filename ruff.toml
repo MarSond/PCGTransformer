@@ -48,7 +48,7 @@ select = [
 
 ]
 
-ignore = ["F541","F821", "F403", "F405", "W191", "EM101", "EM102", "RUF012", "RET504"]
+ignore = ["F541","F821", "F403", "F405", "W191", "EM101", "EM102", "RUF012", "RET504", "PLR2004"]
 task-tags = ["TODO"]
 
 [lint.flake8-annotations]

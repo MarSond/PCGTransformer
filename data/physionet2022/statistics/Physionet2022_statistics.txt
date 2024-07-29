@@ -6,44 +6,54 @@ label_1
 0    2391
 1     616
 
-Total duration: 137687.19 seconds (38.25 hours)
-Average length (All): 45.79 seconds
-Average length (Negative): 46.10 seconds
-Average length (Positive): 44.58 seconds
-Standard deviation (All): 14.60 seconds
-Standard deviation (Negative): 14.25 seconds
-Standard deviation (Positive): 15.82 seconds
-Median length: 42.98 seconds
-Minimum length: 10.30 seconds
-Maximum length: 129.02 seconds
+Total duration: 68843.59 seconds (19.12 hours)
+Average length (All): 22.89 seconds
+Average length (Negative): 23.05 seconds
+Average length (Positive): 22.29 seconds
+Standard deviation (All): 7.30 seconds
+Standard deviation (Negative): 7.12 seconds
+Standard deviation (Positive): 7.91 seconds
+Median length: 21.49 seconds
+Minimum length: 5.15 seconds
+Maximum length: 64.51 seconds
 Correlation class<->length: -0.0421
 
 Negative class percentage: 79.51%
 Positive class percentage: 20.49%
 
-10 längste Dateien:
-50734_AV.wav: 129.02 Sekunden
-50734_PV.wav: 124.48 Sekunden
-50149_MV.wav: 123.68 Sekunden
-50734_TV.wav: 117.79 Sekunden
-50635_AV.wav: 117.50 Sekunden
-50734_MV.wav: 117.38 Sekunden
-50332_MV.wav: 111.71 Sekunden
-50321_AV_1.wav: 105.38 Sekunden
-50737_MV.wav: 101.98 Sekunden
-50048_MV.wav: 99.97 Sekunden
+15 längste Dateien:
+50734_AV.wav: 64.51 Sekunden
+50734_PV.wav: 62.24 Sekunden
+50149_MV.wav: 61.84 Sekunden
+50734_TV.wav: 58.90 Sekunden
+50635_AV.wav: 58.75 Sekunden
+50734_MV.wav: 58.69 Sekunden
+50332_MV.wav: 55.86 Sekunden
+50321_AV_1.wav: 52.69 Sekunden
+50737_MV.wav: 50.99 Sekunden
+50048_MV.wav: 49.98 Sekunden
+50820_TV.wav: 46.99 Sekunden
+49630_MV.wav: 46.50 Sekunden
+50053_AV.wav: 46.26 Sekunden
+84693_PV.wav: 45.36 Sekunden
+50620_PV.wav: 44.75 Sekunden
 
-10 kürzeste Dateien:
-50348_AV_1.wav: 10.30 Sekunden
-50321_MV_1.wav: 10.50 Sekunden
-50216_Phc_1.wav: 11.36 Sekunden
-68269_PV.wav: 11.90 Sekunden
-50782_MV_2.wav: 12.37 Sekunden
-68465_TV.wav: 12.70 Sekunden
-84853_TV.wav: 12.77 Sekunden
-68465_PV.wav: 13.18 Sekunden
-13918_TV.wav: 13.18 Sekunden
-68269_TV.wav: 13.18 Sekunden
+15 kürzeste Dateien:
+50348_AV_1.wav: 5.15 Sekunden
+50321_MV_1.wav: 5.25 Sekunden
+50216_Phc_1.wav: 5.68 Sekunden
+68269_PV.wav: 5.95 Sekunden
+50782_MV_2.wav: 6.19 Sekunden
+68465_TV.wav: 6.35 Sekunden
+84853_TV.wav: 6.38 Sekunden
+68465_PV.wav: 6.59 Sekunden
+13918_TV.wav: 6.59 Sekunden
+68269_TV.wav: 6.59 Sekunden
+50743_AV_2.wav: 6.77 Sekunden
+84936_PV.wav: 6.99 Sekunden
+68470_TV.wav: 7.06 Sekunden
+84928_PV.wav: 7.09 Sekunden
+69112_AV.wav: 7.09 Sekunden
 
 Heartcycles statistics:
 Min: 0

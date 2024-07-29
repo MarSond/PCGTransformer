@@ -13,6 +13,7 @@ import MLHelper.constants as const
 from MLHelper.dataset import AudioDataset, Physionet2016, Physionet2022
 from run import Run
 
+# ruff: noqa: T201, E501
 
 def save_training_data_to_csv(metadata, dataset):
 	metadata_df = pd.DataFrame(metadata)
@@ -181,9 +182,42 @@ def get_file_metadata_human_ph2022(path: str, anno: pd.DataFrame, dataset_object
 		const.META_DIAGNOSIS: None,
 		const.META_QUALITY: 1,
 		const.META_HEARTCYCLES: _get_heartcycle_indicies_2022(file_path=path),
-		const.META_LABEL_1: dataclass
+		const.META_LABEL_1: dataclass,
+		const.META_ADDITIONAL_ID: anno.get("Additional ID").loc[patient_id]
 	}
 	return {**base_meta, **meta}
+
+def _fix_2022_additional_id(metadata: pd.DataFrame):
+	if const.META_ADDITIONAL_ID not in metadata.columns:
+		return metadata
+
+	# Filter out rows with missing values
+	#metadata_no = metadata[metadata[const.META_ADDITIONAL_ID].notna()]
+
+	# Build mapping between original and additional IDs
+	mapping = {}
+	for idx, row in metadata.iterrows():
+		original_id = row[const.META_PATIENT_ID]
+		if const.META_ADDITIONAL_ID not in row or row[const.META_ADDITIONAL_ID] is None or np.isnan(row[const.META_ADDITIONAL_ID]):
+			continue
+		additional_id = int(row[const.META_ADDITIONAL_ID])
+
+		if original_id not in mapping and additional_id not in mapping:
+			new_id = min(original_id, additional_id)
+			mapping[original_id] = new_id
+			mapping[additional_id] = new_id
+		elif original_id in mapping:
+			mapping[additional_id] = mapping[original_id]
+		elif additional_id in mapping:
+			mapping[original_id] = mapping[additional_id]
+
+	# Update Patient IDs based on the mapping
+	metadata.loc[:, const.META_PATIENT_ID] = metadata[const.META_PATIENT_ID].map(mapping).fillna(metadata[const.META_PATIENT_ID])
+
+	# Remove the Additional ID column as it's no longer needed
+	metadata = metadata.drop(columns=[const.META_ADDITIONAL_ID])
+
+	return metadata
 
 def parse_physionet2022():
 	print("Start parsing Physionet 2022")
@@ -201,11 +235,13 @@ def parse_physionet2022():
 	pbar = tqdm(total=len(training_files), position=0, leave=True, desc="Physionet 2022 Human data list")
 	for file in training_files:
 		meta = get_file_metadata_human_ph2022(file, annotation, dataset)
-		if meta[const.META_LABEL_1] != const.CLASS_UNKNOWN:
+		if meta[const.META_LABEL_1] != const.CLASS_UNKNOWN: # Skip unknown data
 			metadata.append(meta)
 		pbar.update(1)
 
 	metadata_df = pd.DataFrame(metadata)
+	metadata_df = _fix_2022_additional_id(metadata_df)
+
 	print(metadata_df.head())
 	print(f"Train path: {dataset.meta_file_train}")
 	metadata_df[const.META_HEARTCYCLES] = metadata_df[const.META_HEARTCYCLES].apply(json.dumps)
@@ -248,7 +284,7 @@ def save_statistics(dataset: AudioDataset, stats_dir: Path):
 		f.write("\n\n")
 
 		# Length statistics
-		seconds = train_data[const.META_LENGTH] / dataset.target_samplerate
+		seconds = train_data[const.META_LENGTH] / train_data[const.META_SAMPLERATE]
 		total_duration = seconds.sum()
 		f.write(f"Total duration: {total_duration:.2f} seconds ({total_duration/3600:.2f} hours)\n")
 		f.write(f"Average length (All): {seconds.mean():.2f} seconds\n")
@@ -267,15 +303,15 @@ def save_statistics(dataset: AudioDataset, stats_dir: Path):
 		f.write(f"Positive class percentage: {class_counts[1]/len(train_data)*100:.2f}%\n\n")
 
 		# 10 longest and shortest files
-		f.write("10 längste Dateien:\n")
-		for idx, row in train_data.nlargest(10, const.META_LENGTH).iterrows():
-			filename = idx if const.META_FILENAME not in row else row[const.META_FILENAME]
+		f.write("15 längste Dateien:\n")
+		for idx, row in train_data.nlargest(15, const.META_LENGTH).iterrows():
+			filename = row.get(const.META_FILENAME, idx)
 			f.write(f"{filename}: {row[const.META_LENGTH]/dataset.target_samplerate:.2f} Sekunden\n")
 		f.write("\n")
-		
-		f.write("10 kürzeste Dateien:\n")
-		for idx, row in train_data.nsmallest(10, const.META_LENGTH).iterrows():
-			filename = idx if const.META_FILENAME not in row else row[const.META_FILENAME]
+
+		f.write("15 kürzeste Dateien:\n")
+		for idx, row in train_data.nsmallest(15, const.META_LENGTH).iterrows():
+			filename = row.get(const.META_FILENAME, idx)
 			f.write(f"{filename}: {row[const.META_LENGTH]/dataset.target_samplerate:.2f} Sekunden\n")
 		f.write("\n")
 
@@ -296,13 +332,13 @@ def save_statistics(dataset: AudioDataset, stats_dir: Path):
 
 			f.write("10 langsamste BPM Dateien:\n")
 			for idx, row in train_data.nsmallest(10, "bpm").iterrows():
-				filename = idx if const.META_FILENAME not in row else row[const.META_FILENAME]
+				filename = row.get(const.META_FILENAME, idx)
 				f.write(f"{filename}: {row['bpm']:.2f} BPM\n")
 			f.write("\n")
-			
+
 			f.write("10 schnellste BPM Dateien:\n")
 			for idx, row in train_data.nlargest(10, "bpm").iterrows():
-				filename = idx if const.META_FILENAME not in row else row[const.META_FILENAME]
+				filename = row.get(const.META_FILENAME, idx)
 				f.write(f"{filename}: {row['bpm']:.2f} BPM\n")
 			f.write("\n")
 
@@ -312,7 +348,7 @@ def save_statistics(dataset: AudioDataset, stats_dir: Path):
 def plot_statistics(dataset: AudioDataset, stats_dir: Path):
 	data = dataset.load_file_list()
 	dataset_name = dataset.__class__.__name__
-	
+
 	# Length distribution
 	plt.figure(figsize=(12, 8))
 	seconds = data[const.META_LENGTH] / dataset.target_samplerate
@@ -327,11 +363,11 @@ def plot_statistics(dataset: AudioDataset, stats_dir: Path):
 	p_size = 12
 	font_size = 16
 	fig, axs = plt.subplots(1, 3, figsize=(p_size * 3, p_size))
-	
+
 	# Pie chart
 	class_counts = data[const.META_LABEL_1].value_counts()
-	axs[0].pie(class_counts, labels=["NORMAL", "ABNORMAL"], 
-			   autopct="%1.1f%%", colors=["green", "red"])
+	axs[0].pie(class_counts, labels=["NORMAL", "ABNORMAL"],
+				autopct="%1.1f%%", colors=["green", "red"])
 	axs[0].set_title("Class Distribution", fontsize=font_size)
 
 	# Statistics text
