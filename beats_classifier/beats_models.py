@@ -91,6 +91,8 @@ def get_model(run: Run):
 		model = BEATsModel(run)
 	elif model_sub_type == 2:
 		model = BEATsModel2(run)
+	elif model_sub_type == 3:
+		model = BEATsModel3(run)
 	else:
 		raise ValueError(f"Model sub type {model_sub_type} not supported.")
 	#model = torch.compile(model)
@@ -135,6 +137,56 @@ class BEATsModel2(BEATsBase):
 
 		self.tensor_logger.debug(f"BEATsModel2 classifier input shape: {x.shape}")
 		x = self.classifier(x)
+		self.tensor_logger.info(f"BEATsModel2 classifier output shape: {x.shape}")
+
+		return x
+
+# most complex
+class BEATsModel3(BEATsBase):
+	def __init__(self, run: Run):
+		super().__init__(run)
+
+		self.classifier = nn.Sequential(
+			nn.Conv1d(self.beats.encoder.embedding_dim, 256, kernel_size=3, padding=1),
+			nn.BatchNorm1d(256),
+			self.activation,
+			nn.MaxPool1d(2),
+			nn.Conv1d(256, 128, kernel_size=3, padding=1),
+			nn.BatchNorm1d(128),
+			self.activation,
+			nn.MaxPool1d(2),
+			nn.Conv1d(128, 64, kernel_size=3, padding=1),
+			nn.BatchNorm1d(64),
+			self.activation,
+			nn.MaxPool1d(2),
+			nn.Conv1d(64, 32, kernel_size=3, padding=1),
+			nn.BatchNorm1d(32),
+			self.activation,
+			nn.AdaptiveMaxPool1d(1),
+			nn.Linear(32, self.num_classes)
+		)
+
+
+		if self.config[const.TRANSFORMER_PARAMS][const.FREEZE_EXTRACTOR]:
+			for param in self.beats.parameters():
+				param.requires_grad = False
+			self.beats.eval()
+
+	def forward(self, x: Tensor, padding_mask=None) -> Tensor:
+		x = super().forward(x)
+		x, _ = self.beats.extract_features(x)
+		self.tensor_logger.info(f"BEATs extract_features output shape: {x.shape}")
+
+		if padding_mask is not None and padding_mask.any():
+			x = x.masked_fill(padding_mask.unsqueeze(-1), 0)
+			x = x.sum(dim=1) / (~padding_mask).sum(dim=1).unsqueeze(-1)
+		else:
+			x = x.mean(dim=1)
+
+		self.tensor_logger.debug(f"BEATsModel3 classifier input shape: {x.shape}")
+		self.tensor_logger.debug(f"BEATsModel2 classifier input shape: {x.shape}")
+		x = self.classifier(x)
+		self.tensor_logger.info(f"BEATsModel3 classifier output shape: {x.shape}")
 		self.tensor_logger.info(f"BEATsModel2 classifier output shape: {x.shape}")
 
 		return x
