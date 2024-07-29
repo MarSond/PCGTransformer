@@ -181,6 +181,11 @@ def get_file_metadata_human_ph2022(path: str, anno: pd.DataFrame, dataset_object
 		const.META_DATASET_SUBSET: f"{dataset_object.folder_name}",
 		const.META_DIAGNOSIS: None,
 		const.META_QUALITY: 1,
+		const.META_AGE: anno.get("Age").loc[patient_id],
+		const.META_SEX: anno.get("Sex").loc[patient_id],
+		const.META_HEIGHT : anno.get("Height").loc[patient_id],
+		const.META_WEIGHT: anno.get("Weight").loc[patient_id],
+		const.META_PREGNANT: anno.get("Pregnancy status").loc[patient_id],
 		const.META_HEARTCYCLES: _get_heartcycle_indicies_2022(file_path=path),
 		const.META_LABEL_1: dataclass,
 		const.META_ADDITIONAL_ID: anno.get("Additional ID").loc[patient_id]
@@ -299,21 +304,56 @@ def save_statistics(dataset: AudioDataset, stats_dir: Path):
 		f.write(f"Correlation class<->length: {train_data[const.META_LABEL_1].corr(seconds):.4f}\n\n")
 
 		# Class percentages
-		f.write(f"Negative class percentage: {class_counts[0]/len(train_data)*100:.2f}%\n")
-		f.write(f"Positive class percentage: {class_counts[1]/len(train_data)*100:.2f}%\n\n")
+		f.write(f"Negative class percentage: {class_counts.get(0, 0)/len(train_data)*100:.2f}%\n")
+		f.write(f"Positive class percentage: {class_counts.get(1, 0)/len(train_data)*100:.2f}%\n\n")
 
-		# 10 longest and shortest files
-		f.write("15 längste Dateien:\n")
+		# 15 longest and shortest files
+		f.write("15 longest files:\n")
 		for idx, row in train_data.nlargest(15, const.META_LENGTH).iterrows():
 			filename = row.get(const.META_FILENAME, idx)
-			f.write(f"{filename}: {row[const.META_LENGTH]/dataset.target_samplerate:.2f} Sekunden\n")
+			f.write(f"{filename}: {row[const.META_LENGTH]/dataset.target_samplerate:.2f} seconds\n")
 		f.write("\n")
 
-		f.write("15 kürzeste Dateien:\n")
+		f.write("15 shortest files:\n")
 		for idx, row in train_data.nsmallest(15, const.META_LENGTH).iterrows():
 			filename = row.get(const.META_FILENAME, idx)
-			f.write(f"{filename}: {row[const.META_LENGTH]/dataset.target_samplerate:.2f} Sekunden\n")
+			f.write(f"{filename}: {row[const.META_LENGTH]/dataset.target_samplerate:.2f} seconds\n")
 		f.write("\n")
+
+		# Additional statistics for demographic and clinical data
+		for column in [const.META_AGE, const.META_SEX, const.META_HEIGHT,const.META_WEIGHT, const.META_PREGNANT]:
+			if column in train_data.columns:
+				f.write(f"{column} statistics:\n")
+				f.write("count unique top freq\n")
+				f.write(train_data[column].value_counts().to_string())
+				f.write("\n\n")
+
+				if train_data[column].dtype in ["int6", "float64"]:
+					f.write(f"Correlation {column}<->class: {train_data[const.META_LABEL_1].corr(train_data[column]):.4f}\n\n")
+		# TODO implement stats
+		# # Murmur-related statistics
+		# if const.MURMU in train_data.columns:
+		# 	f.write("Murmur distribution:\n")
+		# 	f.write(train_data[const.META_MURMUR].value_counts().to_string())
+		# 	f.write("\n\n")
+
+		# # Recording locations statistics
+		# if const.META_RECORDING_LOCATIONS in train_data.columns:
+		# 	f.write("Recording locations distribution:\n")
+		# 	f.write(train_data[const.META_RECORDING_LOCATIONS].value_counts().to_string())
+		# 	f.write("\n\n")
+
+		# # Outcome statistics
+		# if const.META_OUTCOME in train_data.columns:
+		# 	f.write("Outcome distribution:\n")
+		# 	f.write(train_data[const.META_OUTCOME].value_counts().to_string())
+		# 	f.write("\n\n")
+
+		# # Campaign statistics
+		# if const.META_CAMPAIGN in train_data.columns:
+		# 	f.write("Campaign distribution:\n")
+		# 	f.write(train_data[const.META_CAMPAIGN].value_counts().to_string())
+		# 	f.write("\n\n")
 
 		if isinstance(dataset, Physionet2022):
 			heartcycles = train_data[const.META_HEARTCYCLES]
@@ -330,13 +370,13 @@ def save_statistics(dataset: AudioDataset, stats_dir: Path):
 			f.write(train_data["bpm"].describe().to_string())
 			f.write("\n\n")
 
-			f.write("10 langsamste BPM Dateien:\n")
+			f.write("10 slowest BPM files:\n")
 			for idx, row in train_data.nsmallest(10, "bpm").iterrows():
 				filename = row.get(const.META_FILENAME, idx)
 				f.write(f"{filename}: {row['bpm']:.2f} BPM\n")
 			f.write("\n")
 
-			f.write("10 schnellste BPM Dateien:\n")
+			f.write("10 fastest BPM files:\n")
 			for idx, row in train_data.nlargest(10, "bpm").iterrows():
 				filename = row.get(const.META_FILENAME, idx)
 				f.write(f"{filename}: {row['bpm']:.2f} BPM\n")

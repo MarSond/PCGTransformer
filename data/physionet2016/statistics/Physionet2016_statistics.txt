@@ -21,37 +21,67 @@ Correlation class<->length: 0.1275
 Negative class percentage: 79.48%
 Positive class percentage: 20.52%
 
-15 längste Dateien:
-c0031.wav: 122.00 Sekunden
-c0024.wav: 106.05 Sekunden
-e01313.wav: 101.67 Sekunden
-e01899.wav: 100.97 Sekunden
-e00860.wav: 99.20 Sekunden
-e01355.wav: 98.99 Sekunden
-e01777.wav: 97.02 Sekunden
-e01807.wav: 94.72 Sekunden
-e01449.wav: 93.76 Sekunden
-e01010.wav: 93.73 Sekunden
-e00595.wav: 93.53 Sekunden
-e00603.wav: 91.70 Sekunden
-c0010.wav: 89.29 Sekunden
-e00953.wav: 89.27 Sekunden
-c0015.wav: 85.18 Sekunden
+15 longest files:
+c0031.wav: 122.00 seconds
+c0024.wav: 106.05 seconds
+e01313.wav: 101.67 seconds
+e01899.wav: 100.97 seconds
+e00860.wav: 99.20 seconds
+e01355.wav: 98.99 seconds
+e01777.wav: 97.02 seconds
+e01807.wav: 94.72 seconds
+e01449.wav: 93.76 seconds
+e01010.wav: 93.73 seconds
+e00595.wav: 93.53 seconds
+e00603.wav: 91.70 seconds
+c0010.wav: 89.29 seconds
+e00953.wav: 89.27 seconds
+c0015.wav: 85.18 seconds
 
-15 kürzeste Dateien:
-b0033.wav: 5.31 Sekunden
-b0409.wav: 6.33 Sekunden
-d0001.wav: 6.61 Sekunden
-d0045.wav: 6.64 Sekunden
-b0037.wav: 6.85 Sekunden
-d0006.wav: 6.91 Sekunden
-b0031.wav: 6.99 Sekunden
-b0273.wav: 7.28 Sekunden
-b0151.wav: 7.36 Sekunden
-b0272.wav: 7.45 Sekunden
-d0015.wav: 7.61 Sekunden
-b0441.wav: 7.63 Sekunden
-b0455.wav: 7.73 Sekunden
-b0292.wav: 7.73 Sekunden
-b0128.wav: 7.76 Sekunden
+15 shortest files:
+b0033.wav: 5.31 seconds
+b0409.wav: 6.33 seconds
+d0001.wav: 6.61 seconds
+d0045.wav: 6.64 seconds
+b0037.wav: 6.85 seconds
+d0006.wav: 6.91 seconds
+b0031.wav: 6.99 seconds
+b0273.wav: 7.28 seconds
+b0151.wav: 7.36 seconds
+b0272.wav: 7.45 seconds
+d0015.wav: 7.61 seconds
+b0441.wav: 7.63 seconds
+b0455.wav: 7.73 seconds
+b0292.wav: 7.73 seconds
+b0128.wav: 7.76 seconds
+
+age statistics:
+count unique top freq
+Series([], )
+
+Correlation age<->class: nan
+
+sex statistics:
+count unique top freq
+Series([], )
+
+Correlation sex<->class: nan
+
+height statistics:
+count unique top freq
+Series([], )
+
+Correlation height<->class: nan
+
+weight statistics:
+count unique top freq
+Series([], )
+
+Correlation weight<->class: nan
+
+pregnant statistics:
+count unique top freq
+Series([], )
+
+Correlation pregnant<->class: nan
 
