@@ -110,14 +110,14 @@ class BEATsModel2(BEATsBase):
 			nn.Dropout(self.pDrop0),
 			nn.Linear(1024, 512),
 			nn.BatchNorm1d(512),
-            self.activation,
-            nn.Dropout(self.pDrop1),
-            nn.Linear(512, 256),
-            nn.BatchNorm1d(256),
-            self.activation,
-            nn.Dropout(self.pDrop1),
-            nn.Linear(256, self.num_classes)
-        )
+			self.activation,
+			nn.Dropout(self.pDrop1),
+			nn.Linear(512, 256),
+			nn.BatchNorm1d(256),
+			self.activation,
+			nn.Dropout(self.pDrop1),
+			nn.Linear(256, self.num_classes)
+		)
 
 		if self.config[const.TRANSFORMER_PARAMS][const.FREEZE_EXTRACTOR]:
 			for param in self.beats.parameters():
@@ -147,25 +147,25 @@ class BEATsModel3(BEATsBase):
 		super().__init__(run)
 
 		self.classifier = nn.Sequential(
-			nn.Conv1d(self.beats.encoder.embedding_dim, 256, kernel_size=3, padding=1),
+			nn.Linear(self.beats.encoder.embedding_dim, 512),
+			nn.BatchNorm1d(512),
+			self.activation,
+			nn.Dropout(self.pDrop0),
+			nn.Linear(512, 256),
 			nn.BatchNorm1d(256),
 			self.activation,
-			nn.MaxPool1d(2),
-			nn.Conv1d(256, 128, kernel_size=3, padding=1),
+			nn.Dropout(self.pDrop1),
+			nn.Linear(256, 128),
 			nn.BatchNorm1d(128),
 			self.activation,
-			nn.MaxPool1d(2),
-			nn.Conv1d(128, 64, kernel_size=3, padding=1),
+			nn.Dropout(self.pDrop1),
+			nn.Linear(128, 64),
 			nn.BatchNorm1d(64),
 			self.activation,
-			nn.MaxPool1d(2),
-			nn.Conv1d(64, 32, kernel_size=3, padding=1),
-			nn.BatchNorm1d(32),
-			self.activation,
-			nn.AdaptiveMaxPool1d(1),
-			nn.Linear(32, self.num_classes)
+			nn.Dropout(self.pDrop1),
 		)
 
+		self.fc = nn.Linear(64, self.num_classes)
 
 		if self.config[const.TRANSFORMER_PARAMS][const.FREEZE_EXTRACTOR]:
 			for param in self.beats.parameters():
@@ -184,12 +184,14 @@ class BEATsModel3(BEATsBase):
 			x = x.mean(dim=1)
 
 		self.tensor_logger.debug(f"BEATsModel3 classifier input shape: {x.shape}")
-		self.tensor_logger.debug(f"BEATsModel2 classifier input shape: {x.shape}")
+
 		x = self.classifier(x)
+		x = self.fc(x)
+
 		self.tensor_logger.info(f"BEATsModel3 classifier output shape: {x.shape}")
-		self.tensor_logger.info(f"BEATsModel2 classifier output shape: {x.shape}")
 
 		return x
+
 
 def get_demo_input():
 	return torch.randn(1, 16000)
