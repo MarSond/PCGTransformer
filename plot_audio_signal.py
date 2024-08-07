@@ -122,12 +122,12 @@ class DataAnalysis:
 			ax2.set_title("Filtered Audio")
 
 			# Vierter Subplot für das rohe Mel-Spektrogramm
-			AudioUtil.SignalPlotting.show_mel_spectrogram(sgram_raw, samplerate=sr, raw=True, ax=ax4, hop_length=hop_length)
+			AudioUtil.SignalPlotting.show_mel_spectrogram(sgram_raw, samplerate=sr, ax=ax4, hop_length=hop_length)
 			ax4.set_title("Raw Mel Spectrogram")
 
 
 			# Fünfter Subplot für das bearbeitete Mel-Spektrogramm
-			AudioUtil.SignalPlotting.show_mel_spectrogram(sgram_filtered, samplerate=sr, raw=True, ax=ax5, hop_length=hop_length)
+			AudioUtil.SignalPlotting.show_mel_spectrogram(sgram_filtered, samplerate=sr, ax=ax5, hop_length=hop_length)
 			ax5.set_title("Filtered Mel Spectrogram")
 
 		# Dritter Subplot für das komplette Audiosignal
@@ -140,7 +140,7 @@ class DataAnalysis:
 
 
 		# Sechster Subplot für das augmentierte Mel-Spektrogramm
-		AudioUtil.SignalPlotting.show_mel_spectrogram(sgram_augmented, samplerate=sr, raw=True, ax=ax6, hop_length=hop_length)
+		AudioUtil.SignalPlotting.show_mel_spectrogram(sgram_augmented, samplerate=sr, ax=ax6, hop_length=hop_length)
 		ax6.set_title("Augmented final Mel Spectrogram")
 
 		# Letzter, flacher Subplot für den Text  # Nimmt beide Spalten ein
@@ -149,8 +149,8 @@ class DataAnalysis:
 						f"Processed Audio: {filtered_audio.min():.4f} - {filtered_audio.max():.4f}\n" \
 						f"Class ID: {class_id} | samplerate: {sr} | " \
 						f"chunk seconds: {config[const.CHUNK_DURATION]}\n" \
-						f"Butterworth: {cnn_config[const.BUTTERPASS_LOW]} - {cnn_config[const.BUTTERPASS_HIGH]} " \
-						f"- {cnn_config[const.BUTTERPASS_ORDER]}\n" \
+						f"Butterworth: {config[const.BUTTERPASS_LOW]} - {config[const.BUTTERPASS_HIGH]} " \
+						f"- {config[const.BUTTERPASS_ORDER]}\n" \
 						f"Mel Spectrogramm: {sgram_raw.min():.4f} - {sgram_raw.max():.4f}\n" \
 						f"Filename: {audio_file_name}"
 		ax_text.text(0.5, 0.5, text_content, ha="center", va="center", fontsize=11, wrap=True)
@@ -173,7 +173,7 @@ class DataAnalysis:
 		for raw_audio, filtered_audio, sgram_raw, sgram_filtered, sgram_augmented, metadata_row, audio_file_name in self.demo_loader:
 			audio_file_name = str(audio_file_name[0])
 			audio_path = Path(self.run.task.dataset.dataset_path) / metadata_row[const.META_AUDIO_PATH][0]
-			full_audio, full_sr = AudioUtil.Loading.load_audiofile(audio_path)
+			full_audio, full_sr, padding = AudioUtil.Loading.load_audiofile(audio_path)
 			full_audio = preprocessing.resample(full_audio, full_sr, self.run.task.dataset.target_samplerate)
 			# check values in the dict metadata_row to see if they are tensors- > convert to numpy
 			if isinstance(metadata_row[const.META_SAMPLERATE], Tensor):

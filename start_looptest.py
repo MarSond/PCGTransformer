@@ -19,6 +19,7 @@ if __name__ == "__main__":
 							# TRAINING_CHECKPOINT: {EPOCH: 70, RUN_NAME: "run1", FOLD: 6}, \
 							CHUNK_DURATION: 7.0, CHUNK_METHOD: CHUNK_METHOD_FIXED, \
 							DO_FAKE_UPDATES: 0, RUN_NAME_SUFFIX: "test", \
+							MODEL_METHOD_TYPE: BEATS
                       }
 
 
