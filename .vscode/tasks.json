@@ -31,6 +31,26 @@
 		},
 		"problemMatcher": []
 	  },
+	  {
+		"label": "OPT Dash BEATS",
+		"type": "shell",
+		"command": "optuna-dashboard sqlite:///beats-study.db --port 8081",
+		"group": {
+		  "kind": "build",
+		  "isDefault": true
+		},
+		"problemMatcher": []
+	  },
+	  {
+		"label": "OPT Dash CNN",
+		"type": "shell",
+		"command": "optuna-dashboard sqlite:///cnn-study.db --port 8082",
+		"group": {
+		  "kind": "build",
+		  "isDefault": true
+		},
+		"problemMatcher": []
+	  },
 	  
 	]
   }

@@ -373,7 +373,8 @@ class TrainTask(TaskBase):
 		self.run.log_training("Starting training pipeline.", level=logging.INFO)
 		self.trainer_class.set_training_utilities(start_model=self.start_model, \
 			optimizer=self.optimizer, scheduler=self.scheduler, scaler=self.scaler)
-		result = self.trainer_class.start_training_task(start_epoch=self.start_epoch, start_fold=self.start_fold)
+		result = \
+			self.trainer_class.start_training_task(start_epoch=self.start_epoch, start_fold=self.start_fold)
 		self.run.log_training("Training complete.", level=logging.CRITICAL)
 		return result
 
