@@ -1,0 +1,2 @@
+python -m cProfile -o cprof.txt start_looptest.py
+snakeviz cprof.txt
