@@ -114,8 +114,8 @@ class CNN_Dataset(Dataset):
 		return self.handle_instance(current_row)
 
 	def _get_mel(self, audio, file_sr):
-		return AudioUtil.SignalFeatures.get_melspectrogram(audio, sr=file_sr, n_mels=self.n_mels, \
-			top_db=self.top_db, n_fft=self.n_fft, hop_length=self.hop_length)
+		return AudioUtil.SignalFeatures.get_melspectrogram_torchaudio(audio, sr=file_sr, n_mels=self.n_mels, \
+			top_db=self.top_db, n_fft=self.n_fft, hop_length=self.hop_length, device=self.run.device)
 
 	def set_mode(self, mode):
 		if mode in (const.TRAINING, const.VALIDATION, const.TASK_TYPE_DEMO):
