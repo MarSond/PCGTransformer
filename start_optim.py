@@ -32,7 +32,7 @@ def get_common_update_dict(trial, model_type):
 		OPTIMIZER: trial.suggest_categorical(OPTIMIZER, [OPTIMIZER_ADAM, OPTIMIZER_SGD, OPTIMIZER_ADAMW]),
 		SCHEDULER: trial.suggest_categorical(SCHEDULER, [SCHEDULER_COSINE, SCHEDULER_STEP, SCHEDULER_PLATEAU]),
 		SIGNAL_FILTER: trial.suggest_categorical(SIGNAL_FILTER, [BUTTERPASS, None]),
-		AUGMENTATION_RATE: trial.suggest_float(AUGMENTATION_RATE, 0.0, 1.0, step=0.1),
+		# AUGMENTATION_RATE: trial.suggest_float(AUGMENTATION_RATE, 0.0, 1.0, step=0.1),
 	}
 
 def get_beats_update_dict(trial):

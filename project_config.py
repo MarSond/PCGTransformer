@@ -18,7 +18,7 @@ project_config = {
 	INFERENCE_DATASET: PHYSIONET_2016,
 	INFERENCE_MODEL: None,
 	TRAINING_CHECKPOINT: None,	# load checkpoint for training: {EPOCH: 80, RUN_NAME: "run1", FOLD: 1}
-	AUGMENTATION_RATE: 0.65,
+	AUGMENTATION_RATE: 0.0,
 	NUM_WORKERS: 0,			# workers for dataloader
 	KFOLD_SPLITS: 5,		# number of kfold splits. 1 -> use normal splitting
 	SAVE_MODEL: True,		# Save pytorch model
@@ -61,7 +61,7 @@ project_config = {
 		N_MELS: 512,
 		HOP_LENGTH: 128,
 		N_FFT: 1024,
-		TOP_DB: 800.0,
+		TOP_DB: 80.0,
 		BATCHNORM: True, # Use batchnorm (# TODO not implemented checking for)
 		MODEL_SUB_TYPE: 1,
 	},
