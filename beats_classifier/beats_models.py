@@ -40,6 +40,10 @@ class BEATsBase(nn.Module):
 		beats_config = BEATsConfig(checkpoint["cfg"])
 		beats_model = BEATs(beats_config, logger=self.tensor_logger)
 		beats_model.load_state_dict(checkpoint["model"])
+		if self.config[const.TRANSFORMER_PARAMS][const.FREEZE_EXTRACTOR]:
+			for param in beats_model.parameters():
+				param.requires_grad = False
+			beats_model.eval()
 
 		return beats_model
 
@@ -47,10 +51,15 @@ class BEATsBase(nn.Module):
 		# Initialize BEATs model
 		pass
 
-	def forward(self, x: Tensor) -> Tensor:
+	def forward(self, x: Tensor, padding_mask=None) -> Tensor:
 		self.tensor_logger.debug(f"Raw Forward Input shape: {x.shape}")
-		# TODO assert shapes
-
+		x, _ = self.beats.extract_features(x)
+		if padding_mask is not None and padding_mask.any():
+			x = x.masked_fill(padding_mask.unsqueeze(-1), 0)
+			x = x.sum(dim=1) / (~padding_mask).sum(dim=1).unsqueeze(-1)
+		else:
+			x = x.mean(dim=1)
+		self.tensor_logger.info(f"BEATs extract_features output shape: {x.shape}")
 		return x
 
 class BEATsModel(BEATsBase):
@@ -60,22 +69,9 @@ class BEATsModel(BEATsBase):
 		# Replace the final layer for our classification task
 		self.classifier = nn.Linear(self.beats.encoder.embedding_dim, self.num_classes)
 
-		if self.config[const.TRANSFORMER_PARAMS][const.FREEZE_EXTRACTOR]:
-			for param in self.beats.parameters():
-				param.requires_grad = False
-			self.beats.eval()
-
 	def forward(self, x: Tensor, padding_mask=None) -> Tensor:
-		x = super().forward(x)
-		# Use BEATs extract_features method
-		x, _ = self.beats.extract_features(x)
-		self.tensor_logger.info(f"BEATs extract_features output shape: {x.shape}")
-		# Mittelwertbildung über die Zeitdimension
-		if padding_mask is not None and padding_mask.any():
-			x = x.masked_fill(padding_mask.unsqueeze(-1), 0)
-			x = x.sum(dim=1) / (~padding_mask).sum(dim=1).unsqueeze(-1)
-		else:
-			x = x.mean(dim=1)
+		x = super().forward(x, padding_mask)
+
 		# Pass through the classifier
 		self.tensor_logger.debug(f"BEATsModel classifier input shape: {x.shape}")
 
@@ -93,6 +89,8 @@ def get_model(run: Run):
 		model = BEATsModel2(run)
 	elif model_sub_type == 3:
 		model = BEATsModel3(run)
+	elif model_sub_type == 0:
+		model = BEATsBase(run)
 	else:
 		raise ValueError(f"Model sub type {model_sub_type} not supported.")
 	#model = torch.compile(model)
@@ -119,23 +117,8 @@ class BEATsModel2(BEATsBase):
 			nn.Linear(256, self.num_classes)
 		)
 
-		if self.config[const.TRANSFORMER_PARAMS][const.FREEZE_EXTRACTOR]:
-			for param in self.beats.parameters():
-				param.requires_grad = False
-			self.beats.eval()
-
 	def forward(self, x: Tensor, padding_mask=None) -> Tensor:
-		x = super().forward(x)
-		x, _ = self.beats.extract_features(x)
-		self.tensor_logger.info(f"BEATs extract_features output shape: {x.shape}")
-
-		if padding_mask is not None and padding_mask.any():
-			x = x.masked_fill(padding_mask.unsqueeze(-1), 0)
-			x = x.sum(dim=1) / (~padding_mask).sum(dim=1).unsqueeze(-1)
-		else:
-			x = x.mean(dim=1)
-
-		self.tensor_logger.debug(f"BEATsModel2 classifier input shape: {x.shape}")
+		x = super().forward(x, padding_mask)
 		x = self.classifier(x)
 		self.tensor_logger.info(f"BEATsModel2 classifier output shape: {x.shape}")
 
@@ -167,23 +150,8 @@ class BEATsModel3(BEATsBase):
 
 		self.fc = nn.Linear(64, self.num_classes)
 
-		if self.config[const.TRANSFORMER_PARAMS][const.FREEZE_EXTRACTOR]:
-			for param in self.beats.parameters():
-				param.requires_grad = False
-			self.beats.eval()
-
 	def forward(self, x: Tensor, padding_mask=None) -> Tensor:
-		x = super().forward(x)
-		x, _ = self.beats.extract_features(x)
-		self.tensor_logger.info(f"BEATs extract_features output shape: {x.shape}")
-
-		if padding_mask is not None and padding_mask.any():
-			x = x.masked_fill(padding_mask.unsqueeze(-1), 0)
-			x = x.sum(dim=1) / (~padding_mask).sum(dim=1).unsqueeze(-1)
-		else:
-			x = x.mean(dim=1)
-
-		self.tensor_logger.debug(f"BEATsModel3 classifier input shape: {x.shape}")
+		x = super().forward(x, padding_mask=padding_mask)
 
 		x = self.classifier(x)
 		x = self.fc(x)

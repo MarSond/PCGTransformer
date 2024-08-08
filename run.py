@@ -229,11 +229,14 @@ class TaskBase(ABC):
 		Configures and returns the dataset object based on the task type and dataset configuration.
 		"""
 		task_type = self.config[const.TASK_TYPE]
+
 		if task_type in \
 				[const.TASK_TYPE_TRAINING, const.TASK_TYPE_INFERENCE, const.TASK_TYPE_DEMO]:
 			dataset_mode = self.config.get( \
 				const.TRAIN_DATASET if task_type == const.TASK_TYPE_TRAINING \
 				else const.INFERENCE_DATASET)
+			if isinstance(dataset_mode, tuple):
+				dataset_mode = dataset_mode[0] # Fix for optuna making it a tuple
 			if dataset_mode == const.PHYSIONET_2016:
 				from MLHelper.dataset import Physionet2016
 				dataset = Physionet2016(self.run)

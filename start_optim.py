@@ -111,16 +111,16 @@ def trial_callback(study, trial):
 	with Path(f"{study.study_name}_trials.log").open("a") as f:
 		for key, value in trial_data.items():
 			f.write(f"{key}: {value}\n")
-		f.write("\n#\n")
+		f.write("\n#\n\n")
 
 def start_optimization(model_type, n_trials, dataset, chunk_method):
 
 	study_name = f"{model_type.lower()}_{dataset}_{chunk_method}"
-	storage_name = f"sqlite:///optim_{dataset}.db"
+	storage_name = f"sqlite:///optim_survey_1.db"
 
 	study = optuna.create_study(study_name=study_name, storage=storage_name, load_if_exists=True, direction="maximize")
 	def objective_func(trial):
-		return objective(trial, get_beats_update_dict if model_type == BEATS else get_cnn_update_dict)
+		return objective(trial, get_beats_update_dict if model_type == BEATS else get_cnn_update_dict, dataset, chunk_method)
 	study.optimize(objective_func, n_trials=n_trials, callbacks=[trial_callback])
 
 	print("Best trial:")
