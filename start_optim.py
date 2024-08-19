@@ -18,13 +18,13 @@ def do_run(config: dict):
 		logging.error(f"Failed to start training: {e}")
 		return None
 
-def get_common_update_dict(trial, model_type):
+def get_common_update_dict(trial, model_type, dataset, chunk_method):
 	return {
 		TASK_TYPE: TRAINING,
 		METADATA_FRAC: 0.8,
 		TRAIN_FRAC: 0.8,
 		KFOLD_SPLITS: 1,
-		RUN_NAME_SUFFIX: f"optuna_{PHYSIONET_2022}_{model_type.lower()}_{trial.number}",
+		RUN_NAME_SUFFIX: f"optuna_{dataset}_{chunk_method}_{model_type.lower()}_{trial.number}",
 
 		LEARNING_RATE: trial.suggest_float(f"{model_type.lower()}_lr", 1e-5, 1e-2, log=True),
 		L1_REGULATION_WEIGHT: trial.suggest_float(L1_REGULATION_WEIGHT, 1e-7, 1e-2, log=True),
@@ -35,8 +35,8 @@ def get_common_update_dict(trial, model_type):
 		# AUGMENTATION_RATE: trial.suggest_float(AUGMENTATION_RATE, 0.0, 1.0, step=0.1),
 	}
 
-def get_beats_update_dict(trial):
-	ud = get_common_update_dict(trial, BEATS)
+def get_beats_update_dict(trial, dataset, chunk_method):
+	ud = get_common_update_dict(trial, BEATS, dataset, chunk_method)
 	ud.update({
 		EPOCHS: 15,
 		BATCH_SIZE: 16,
@@ -50,8 +50,8 @@ def get_beats_update_dict(trial):
 	})
 	return ud
 
-def get_cnn_update_dict(trial):
-	ud = get_common_update_dict(trial, CNN)
+def get_cnn_update_dict(trial, dataset, chunk_method):
+	ud = get_common_update_dict(trial, CNN, dataset, chunk_method)
 	ud.update({
 		EPOCHS: 25,
 		BATCH_SIZE: 80,
@@ -84,7 +84,7 @@ def set_chunk_and_scheduler_params(ud, trial, dataset, chunk_method):
 		ud[SCHEDULER_FACTOR] = trial.suggest_float(SCHEDULER_FACTOR, 0.1, 0.9, step=0.1)
 
 def objective(trial, get_update_dict, dataset, chunk_method):
-	train_update_dict = get_update_dict(trial)
+	train_update_dict = get_update_dict(trial, dataset, chunk_method)
 	set_chunk_and_scheduler_params(train_update_dict, trial, dataset, chunk_method)
 	result = do_run(train_update_dict)
 
@@ -108,7 +108,7 @@ def trial_callback(study, trial):
 	}
 
 
-	with Path(f"{study.study_name}_trials.log").open("a") as f:
+	with Path(f"{FOLDER_OPTIMIZATION}/{study.study_name}_trials.log").open("a") as f:
 		for key, value in trial_data.items():
 			f.write(f"{key}: {value}\n")
 		f.write("\n#\n\n")
@@ -116,7 +116,7 @@ def trial_callback(study, trial):
 def start_optimization(model_type, n_trials, dataset, chunk_method):
 
 	study_name = f"{model_type.lower()}_{dataset}_{chunk_method}"
-	storage_name = f"sqlite:///optim_survey_1.db"
+	storage_name = f"sqlite:///{FOLDER_OPTIMIZATION}/optim_survey_1.db"
 
 	study = optuna.create_study(study_name=study_name, storage=storage_name, load_if_exists=True, direction="maximize")
 	def objective_func(trial):
@@ -131,10 +131,10 @@ def start_optimization(model_type, n_trials, dataset, chunk_method):
 		print(f"  {key}: {value}")
 
 if __name__ == "__main__":
-	start_optimization(BEATS, n_trials=20, dataset=PHYSIONET_2022, chunk_method=CHUNK_METHOD_CYCLES)
-	start_optimization(CNN, n_trials=20, dataset=PHYSIONET_2022, chunk_method=CHUNK_METHOD_CYCLES)
-	start_optimization(BEATS, n_trials=20, dataset=PHYSIONET_2022, chunk_method=CHUNK_METHOD_FIXED)
-	start_optimization(CNN, n_trials=20, dataset=PHYSIONET_2022, chunk_method=CHUNK_METHOD_FIXED)
+	start_optimization(BEATS, n_trials=10, dataset=PHYSIONET_2022, chunk_method=CHUNK_METHOD_CYCLES) # gut
+	start_optimization(CNN, n_trials=10, dataset=PHYSIONET_2022, chunk_method=CHUNK_METHOD_CYCLES)	# gut
+	start_optimization(BEATS, n_trials=10, dataset=PHYSIONET_2022, chunk_method=CHUNK_METHOD_FIXED) # gut
+	start_optimization(CNN, n_trials=10, dataset=PHYSIONET_2022, chunk_method=CHUNK_METHOD_FIXED)
 
-	start_optimization(BEATS, n_trials=20, dataset=PHYSIONET_2016, chunk_method=CHUNK_METHOD_FIXED)
-	start_optimization(CNN, n_trials=20, dataset=PHYSIONET_2016, chunk_method=CHUNK_METHOD_FIXED)
+	start_optimization(BEATS, n_trials=10, dataset=PHYSIONET_2016, chunk_method=CHUNK_METHOD_FIXED)
+	start_optimization(CNN, n_trials=5, dataset=PHYSIONET_2016, chunk_method=CHUNK_METHOD_FIXED)

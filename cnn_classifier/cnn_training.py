@@ -48,4 +48,7 @@ class CNNTraining(ML_Loop):
 		assert self.model is not None, "Model is None. Required for training"
 		assert self.optimizer is not None, "Optimizer is None. Required for training"
 		assert start_epoch >= 1, "Start epoch must be greater or equal to 0"
+		duration_ms = \
+			(self.config[const.CNN_PARAMS][const.N_FFT] / self.run.task.dataset.target_samplerate) * 1000
+		self.run.log_training(f"FFT window duration: {duration_ms:.2f} ms", level=logging.INFO)
 		return self.kfold_loop(start_epoch=start_epoch, start_fold=start_fold)

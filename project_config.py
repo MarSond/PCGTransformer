@@ -32,7 +32,7 @@ project_config = {
 	EARLY_STOPPING_ENABLED: True, # Enable early stopping after validation metrics
 	EARLY_STOPPING_PATIENCE: 10, # Count of epochs to wait before checking early stopping
 	EARLY_STOPPING_THRESHOLD: 0.25, # Threshold for early stopping (minimum required)
-	EARLY_STOPPING_METRIC: METRICS_MCC, # Metric to use for early stopping
+	EARLY_STOPPING_METRIC: METRICS_NMCC, # Metric to use for early stopping
 	AUDIO_LENGTH_NORM: LENGTH_NORM_REPEAT, # Audio length normalisation method
 	DO_FAKE_UPDATES: 0, # Enable fake updates values in metric manager (for testing purposes)
 	RUN_RESULTS_PATH: "", # Path to save run results
@@ -40,8 +40,8 @@ project_config = {
 	OPTIMIZER: OPTIMIZER_ADAM, # OPTIMIZER_ADAM, OPTIMIZER_SGD
 	SCHEDULER: SCHEDULER_PLATEAU, # SCHEDULER_COSINE, SCHEDULER_STEP, SCHEDULER_PLATEAU, None
 	LEARNING_RATE: 0.001, # initial learning rate
-	L1_REGULATION_WEIGHT: 0.0001,
-	L2_REGULATION_WEIGHT: 0.0001,
+	L1_REGULATION_WEIGHT: 0.000001,
+	L2_REGULATION_WEIGHT: 0.000001,
 	LOSS_FUNCTION: LOSS_FOCAL_LOSS, # LOSS_CROSS_ENTROPY, LOSS_FOCAL_LOSS
 	LOSS_FUNCTION_PARAMETER_1: 2.0, # Focal Loss: gamma,
 	LOSS_FUNCTION_PARAMETER_2: None,
