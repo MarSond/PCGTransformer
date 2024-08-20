@@ -1,13 +1,31 @@
+from pathlib import Path
+
 import matplotlib.pyplot as plt
 
 from MLHelper.constants import *
+from MLHelper.tools.utils import MLUtil
 from run import Run
 
+
+def send_result_mail(results: dict):
+	subject = f"Training Complete: {results['run_name']}"
+	body = f"Training for has completed successfully.\n\nResults:\n{results}"
+	to_email = "martinsondermann10@gmail.com"  # Ihre E-Mail-Adresse
+	from_email = "martinsondermann10@gmail.com"  # Ihre Gmail-Adresse
+
+	with Path("email_password.txt").open() as f:
+		password = f.read().strip()
+
+	if MLUtil.send_email(subject, body, to_email, from_email, password):
+		print("Email notification sent.")
+	else:
+		print("Failed to send email notification.")
 
 def do_run(config: dict):
 	run = Run(config_update_dict=config)
 	run.setup_task()
 	result = run.start_task()
+	send_result_mail(result)
 	print(result)
 
 
