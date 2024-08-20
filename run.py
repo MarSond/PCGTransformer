@@ -131,6 +131,7 @@ class Run:
 		"""Saves the current configuration to a YAML file and logs the operation."""
 		config_save_path = Path(self.run_results_path) / self.config[const.FILENAME_RUN_CONFIG]
 		self.log_training(f"Saving configuration to {config_save_path}", level=logging.INFO)
+		self.log_training(f"Config: {self.config._config_dict}", level=logging.DEBUG)
 		self.config.save_config_dict(config_save_path)
 
 	def load_config(self) -> Config:
