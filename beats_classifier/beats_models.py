@@ -137,7 +137,7 @@ class BEATsModel3(BEATsBase):
 			nn.Linear(512, 256),
 			nn.BatchNorm1d(256),
 			self.activation,
-			nn.Dropout(self.pDrop1),
+			nn.Dropout(self.pDrop0),
 			nn.Linear(256, 128),
 			nn.BatchNorm1d(128),
 			self.activation,

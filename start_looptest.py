@@ -13,7 +13,7 @@ def send_result_mail(results: dict):
 	to_email = "martinsondermann10@gmail.com"  # Ihre E-Mail-Adresse
 	from_email = "martinsondermann10@gmail.com"  # Ihre Gmail-Adresse
 
-	with Path("email_password.txt").open() as f:
+	with Path("documents/email_password.txt").open() as f:
 		password = f.read().strip()
 
 	if MLUtil.send_email(subject, body, to_email, from_email, password):

@@ -27,11 +27,12 @@ project_config = {
 	CHUNK_HEARTCYCLE_COUNT: 5,	# Number of heart cycles per chunk when using CHUNK_METHOD_CYCLES
 	CHUNK_PADDING_THRESHOLD: 0.65, # minimum duaration of a full chunk required to be considered
 	NORMALIZATION: NORMALIZATION_MAX_ABS, # audio normalisation method
-	EPOCHS: 3,	# Count of epochs to train
-	BATCH_SIZE: 96, # Batch size
+	EPOCHS: 30,	# Count of epochs to train
+	BATCH_SIZE: 72, # Batch size
+	GRAD_ACCUMULATE_STEPS: 1,
 	EARLY_STOPPING_ENABLED: True, # Enable early stopping after validation metrics
-	EARLY_STOPPING_PATIENCE: 10, # Count of epochs to wait before checking early stopping
-	EARLY_STOPPING_THRESHOLD: 0.25, # Threshold for early stopping (minimum required)
+	EARLY_STOPPING_PATIENCE: 8, # Count of epochs to wait before checking early stopping
+	EARLY_STOPPING_THRESHOLD: 0.60, # Threshold for early stopping (minimum required)
 	EARLY_STOPPING_METRIC: METRICS_NMCC, # Metric to use for early stopping
 	AUDIO_LENGTH_NORM: LENGTH_NORM_REPEAT, # Audio length normalisation method
 	DO_FAKE_UPDATES: 0, # Enable fake updates values in metric manager (for testing purposes)
