@@ -1,0 +1,714 @@
+{
+  "structure": {
+    "fold_data": {
+      "training": {
+        "0": [
+          "<2 items>",
+          {
+            "acc": "<number>",
+            "f1": "<number>",
+            "precision": "<number>",
+            "recall": "<number>",
+            "specificity": "<number>",
+            "mcc": "<number>",
+            "nmcc": "<number>",
+            "auroc": "<number>",
+            "auprc": "<number>",
+            "plr": "<number>",
+            "nlr": "<number>",
+            "confusion_matrix": [
+              "<2 items>",
+              [
+                "<2 items>",
+                "<number>"
+              ]
+            ],
+            "curve_data": [
+              "<1 items>",
+              {
+                "roc_data": {
+                  "fpr": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "tpr": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "thresholds": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "auroc": "<number>"
+                },
+                "pr_data": {
+                  "precision": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "recall": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "thresholds": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "auprc": "<number>"
+                },
+                "class": "<number>"
+              }
+            ],
+            "mean_loss": "<number>",
+            "epoch": "<number>",
+            "fold": "<number>",
+            "learning_rate": "<number>"
+          }
+        ],
+        "1": [
+          "<2 items>",
+          {
+            "acc": "<number>",
+            "f1": "<number>",
+            "precision": "<number>",
+            "recall": "<number>",
+            "specificity": "<number>",
+            "mcc": "<number>",
+            "nmcc": "<number>",
+            "auroc": "<number>",
+            "auprc": "<number>",
+            "plr": "<number>",
+            "nlr": "<number>",
+            "confusion_matrix": [
+              "<2 items>",
+              [
+                "<2 items>",
+                "<number>"
+              ]
+            ],
+            "curve_data": [
+              "<1 items>",
+              {
+                "roc_data": {
+                  "fpr": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "tpr": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "thresholds": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "auroc": "<number>"
+                },
+                "pr_data": {
+                  "precision": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "recall": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "thresholds": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "auprc": "<number>"
+                },
+                "class": "<number>"
+              }
+            ],
+            "mean_loss": "<number>",
+            "epoch": "<number>",
+            "fold": "<number>",
+            "learning_rate": "<number>"
+          }
+        ]
+      },
+      "validation": {
+        "0": [
+          "<2 items>",
+          {
+            "acc": "<number>",
+            "f1": "<number>",
+            "precision": "<number>",
+            "recall": "<number>",
+            "specificity": "<number>",
+            "mcc": "<number>",
+            "nmcc": "<number>",
+            "auroc": "<number>",
+            "auprc": "<number>",
+            "plr": "<number>",
+            "nlr": "<number>",
+            "confusion_matrix": [
+              "<2 items>",
+              [
+                "<2 items>",
+                "<number>"
+              ]
+            ],
+            "curve_data": [
+              "<1 items>",
+              {
+                "roc_data": {
+                  "fpr": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "tpr": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "thresholds": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "auroc": "<number>"
+                },
+                "pr_data": {
+                  "precision": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "recall": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "thresholds": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "auprc": "<number>"
+                },
+                "class": "<number>"
+              }
+            ],
+            "mean_loss": "<number>",
+            "epoch": "<number>",
+            "fold": "<number>",
+            "learning_rate": "<number>"
+          }
+        ],
+        "1": [
+          "<2 items>",
+          {
+            "acc": "<number>",
+            "f1": "<number>",
+            "precision": "<number>",
+            "recall": "<number>",
+            "specificity": "<number>",
+            "mcc": "<number>",
+            "nmcc": "<number>",
+            "auroc": "<number>",
+            "auprc": "<number>",
+            "plr": "<number>",
+            "nlr": "<number>",
+            "confusion_matrix": [
+              "<2 items>",
+              [
+                "<2 items>",
+                "<number>"
+              ]
+            ],
+            "curve_data": [
+              "<1 items>",
+              {
+                "roc_data": {
+                  "fpr": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "tpr": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "thresholds": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "auroc": "<number>"
+                },
+                "pr_data": {
+                  "precision": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "recall": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "thresholds": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "auprc": "<number>"
+                },
+                "class": "<number>"
+              }
+            ],
+            "mean_loss": "<number>",
+            "epoch": "<number>",
+            "fold": "<number>",
+            "learning_rate": "<number>"
+          }
+        ]
+      }
+    },
+    "averages": {
+      "training": {
+        "acc": [
+          "<2 items>",
+          {
+            "mean": "<number>",
+            "std": "<number>",
+            "epoch": "<number>"
+          }
+        ],
+        "f1": [
+          "<2 items>",
+          {
+            "mean": "<number>",
+            "std": "<number>",
+            "epoch": "<number>"
+          }
+        ],
+        "precision": [
+          "<2 items>",
+          {
+            "mean": "<number>",
+            "std": "<number>",
+            "epoch": "<number>"
+          }
+        ],
+        "recall": [
+          "<2 items>",
+          {
+            "mean": "<number>",
+            "std": "<number>",
+            "epoch": "<number>"
+          }
+        ],
+        "curve_data": [
+          "<4 items>",
+          {
+            "mean": [
+              "<1 items>",
+              {
+                "roc_data": {
+                  "fpr": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "tpr": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "thresholds": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "auroc": "<number>"
+                },
+                "pr_data": {
+                  "precision": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "recall": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "thresholds": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "auprc": "<number>"
+                },
+                "class": "<number>"
+              }
+            ],
+            "std": [
+              "<1 items>",
+              {
+                "roc_data": {
+                  "fpr": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "tpr": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "thresholds": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "auroc": "<number>"
+                },
+                "pr_data": {
+                  "precision": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "recall": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "thresholds": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "auprc": "<number>"
+                },
+                "class": "<number>"
+              }
+            ],
+            "epoch": "<number>"
+          }
+        ],
+        "specificity": [
+          "<2 items>",
+          {
+            "mean": "<number>",
+            "std": "<number>",
+            "epoch": "<number>"
+          }
+        ],
+        "confusion_matrix": [
+          "<4 items>",
+          {
+            "mean": [
+              "<2 items>",
+              [
+                "<2 items>",
+                "<number>"
+              ]
+            ],
+            "std": [
+              "<2 items>",
+              [
+                "<2 items>",
+                "<number>"
+              ]
+            ],
+            "epoch": "<number>"
+          }
+        ],
+        "mcc": [
+          "<2 items>",
+          {
+            "mean": "<number>",
+            "std": "<number>",
+            "epoch": "<number>"
+          }
+        ],
+        "nmcc": [
+          "<2 items>",
+          {
+            "mean": "<number>",
+            "std": "<number>",
+            "epoch": "<number>"
+          }
+        ],
+        "auprc": [
+          "<2 items>",
+          {
+            "mean": "<number>",
+            "std": "<number>",
+            "epoch": "<number>"
+          }
+        ],
+        "auroc": [
+          "<2 items>",
+          {
+            "mean": "<number>",
+            "std": "<number>",
+            "epoch": "<number>"
+          }
+        ],
+        "mean_loss": [
+          "<2 items>",
+          {
+            "mean": "<number>",
+            "std": "<number>",
+            "epoch": "<number>"
+          }
+        ],
+        "plr": [
+          "<2 items>",
+          {
+            "mean": "<number>",
+            "std": "<number>",
+            "epoch": "<number>"
+          }
+        ],
+        "nlr": [
+          "<2 items>",
+          {
+            "mean": "<number>",
+            "std": "<number>",
+            "epoch": "<number>"
+          }
+        ],
+        "learning_rate": [
+          "<2 items>",
+          {
+            "mean": "<number>",
+            "std": "<number>",
+            "epoch": "<number>"
+          }
+        ]
+      },
+      "validation": {
+        "acc": [
+          "<2 items>",
+          {
+            "mean": "<number>",
+            "std": "<number>",
+            "epoch": "<number>"
+          }
+        ],
+        "f1": [
+          "<2 items>",
+          {
+            "mean": "<number>",
+            "std": "<number>",
+            "epoch": "<number>"
+          }
+        ],
+        "precision": [
+          "<2 items>",
+          {
+            "mean": "<number>",
+            "std": "<number>",
+            "epoch": "<number>"
+          }
+        ],
+        "recall": [
+          "<2 items>",
+          {
+            "mean": "<number>",
+            "std": "<number>",
+            "epoch": "<number>"
+          }
+        ],
+        "curve_data": [
+          "<4 items>",
+          {
+            "mean": [
+              "<1 items>",
+              {
+                "roc_data": {
+                  "fpr": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "tpr": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "thresholds": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "auroc": "<number>"
+                },
+                "pr_data": {
+                  "precision": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "recall": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "thresholds": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "auprc": "<number>"
+                },
+                "class": "<number>"
+              }
+            ],
+            "std": [
+              "<1 items>",
+              {
+                "roc_data": {
+                  "fpr": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "tpr": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "thresholds": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "auroc": "<number>"
+                },
+                "pr_data": {
+                  "precision": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "recall": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "thresholds": [
+                    "<100 items>",
+                    "<number>"
+                  ],
+                  "auprc": "<number>"
+                },
+                "class": "<number>"
+              }
+            ],
+            "epoch": "<number>"
+          }
+        ],
+        "specificity": [
+          "<2 items>",
+          {
+            "mean": "<number>",
+            "std": "<number>",
+            "epoch": "<number>"
+          }
+        ],
+        "confusion_matrix": [
+          "<4 items>",
+          {
+            "mean": [
+              "<2 items>",
+              [
+                "<2 items>",
+                "<number>"
+              ]
+            ],
+            "std": [
+              "<2 items>",
+              [
+                "<2 items>",
+                "<number>"
+              ]
+            ],
+            "epoch": "<number>"
+          }
+        ],
+        "mcc": [
+          "<2 items>",
+          {
+            "mean": "<number>",
+            "std": "<number>",
+            "epoch": "<number>"
+          }
+        ],
+        "nmcc": [
+          "<2 items>",
+          {
+            "mean": "<number>",
+            "std": "<number>",
+            "epoch": "<number>"
+          }
+        ],
+        "auprc": [
+          "<2 items>",
+          {
+            "mean": "<number>",
+            "std": "<number>",
+            "epoch": "<number>"
+          }
+        ],
+        "auroc": [
+          "<2 items>",
+          {
+            "mean": "<number>",
+            "std": "<number>",
+            "epoch": "<number>"
+          }
+        ],
+        "mean_loss": [
+          "<2 items>",
+          {
+            "mean": "<number>",
+            "std": "<number>",
+            "epoch": "<number>"
+          }
+        ],
+        "plr": [
+          "<2 items>",
+          {
+            "mean": "<number>",
+            "std": "<number>",
+            "epoch": "<number>"
+          }
+        ],
+        "nlr": [
+          "<2 items>",
+          {
+            "mean": "<number>",
+            "std": "<number>",
+            "epoch": "<number>"
+          }
+        ],
+        "learning_rate": [
+          "<2 items>",
+          {
+            "mean": "<number>",
+            "std": "<number>",
+            "epoch": "<number>"
+          }
+        ]
+      }
+    }
+  },
+  "summary": {
+    "training_folds": 2,
+    "training_epochs": 2,
+    "training_average_metrics": [
+      "acc",
+      "f1",
+      "precision",
+      "recall",
+      "curve_data",
+      "specificity",
+      "confusion_matrix",
+      "mcc",
+      "nmcc",
+      "auprc",
+      "auroc",
+      "mean_loss",
+      "plr",
+      "nlr",
+      "learning_rate"
+    ],
+    "training_average_epochs": 2,
+    "validation_folds": 2,
+    "validation_epochs": 2,
+    "validation_average_metrics": [
+      "acc",
+      "f1",
+      "precision",
+      "recall",
+      "curve_data",
+      "specificity",
+      "confusion_matrix",
+      "mcc",
+      "nmcc",
+      "auprc",
+      "auroc",
+      "mean_loss",
+      "plr",
+      "nlr",
+      "learning_rate"
+    ],
+    "validation_average_epochs": 2
+  }
+}

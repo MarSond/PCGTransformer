@@ -8,26 +8,25 @@ from run import Run
 
 # ruff: noqa: T201
 
-def send_result_mail(results: dict):
-	subject = f"Training Complete: {results['run_name']}"
-	body = f"Training for has completed successfully.\n\nResults:\n{results}"
-	to_email = "martinsondermann10@gmail.com"
-	from_email = "martinsondermann10@gmail.com"
+def send_result_mail(name: str, results: dict):
+	try:
+		subject = f"Study Complete: {name}"
+		body = f"Study completed successfully.\n\nStudy name: {name}\nresults:\n{results}"
+		own_adress = "martinsondermann10@gmail.com"
 
-	with Path("documents/email_password.txt").open() as f:
-		password = f.read().strip()
-
-	if MLUtil.send_email(subject, body, to_email, from_email, password):
-		print("Email notification sent.")
-	else:
-		print("Failed to send email notification.")
+		if MLUtil.send_self_mail_gmail(subject, body, own_adress):
+			print("Email notification sent.")
+		else:
+			print("Failed to send email notification.")
+	except Exception as e:
+		print(f"Failed to send email notification: {e}")
 
 def do_run(config: dict):
 	try:
 		run = Run(config_update_dict=config)
 		run.setup_task()
 		result = run.start_task()
-		send_result_mail(result)
+		send_result_mail(config[RUN_NAME_SUFFIX], result)
 	except Exception as e:
 		print(e)
 		print("Failed to start training.")
@@ -223,32 +222,34 @@ if __name__ == "__main__":
 		CHUNK_METHOD: CHUNK_METHOD_CYCLES,
 		RUN_NAME_SUFFIX: "2022_cycle_beats_fullrun-final2",
 
-		CHUNK_DURATION: 12.0,
+		CHUNK_DURATION: 8.0,
+		CHUNK_HEARTCYCLE_COUNT: 10,
 		NORMALIZATION: NORMALIZATION_MAX_ABS,
-		AUDIO_LENGTH_NORM: LENGTH_NORM_PADDING,
-		OPTIMIZER: OPTIMIZER_ADAM,
-		L1_REGULATION_WEIGHT: 0.005,
-		L2_REGULATION_WEIGHT: 0.001,
-		LEARNING_RATE: 0.0005,
+		AUDIO_LENGTH_NORM: LENGTH_NORM_STRETCH,
+		OPTIMIZER: OPTIMIZER_ADAMW,
+		L1_REGULATION_WEIGHT: 0.0017,
+		L2_REGULATION_WEIGHT: 1e-05,
+		LEARNING_RATE: 4.1e-05,
 		AUGMENTATION_RATE: 0.6,
 		SCHEDULER: SCHEDULER_PLATEAU,
-		SCHEDULER_FACTOR: 0.25,
-		SCHEDULER_PATIENCE: 12,
+		SCHEDULER_FACTOR: 0.5,
+		SCHEDULER_PATIENCE: 10,
 		TRANSFORMER_PARAMS: {
-			ACTIVATION: ACTIVATION_SILU,
-			DROP0: 0.4,
+			ACTIVATION: ACTIVATION_RELU,
+			DROP0: 0.6,
 			DROP1: 0.6,
-			MODEL_SUB_TYPE: 3,
+			MODEL_SUB_TYPE: 2,
 		}
 	})
 
 	# Execute runs
-	#do_run(physionet_2016_fixed_cnn) # done
-	#do_run(physionet_2022_fixed_cnn) # done
-	#do_run(physionet_2022_fixed_beats) 
+	#do_run(physionet_2016_fixed_cnn) # done nmcc 0.859
+	#do_run(physionet_2022_fixed_cnn) # done nmcc 0.76
+	#do_run(physionet_2022_cycles_beats) # done bad
+
+	#do_run(physionet_2022_fixed_beats)
 	#do_run(physionet_2022_cycles_cnn)
-	
+
 	#do_run(physionet_2016_fixed_beats)
-	do_run(physionet_2022_cycles_beats)
 
 	plt.show()

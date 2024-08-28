@@ -51,18 +51,15 @@ def send_result_mail(name: str, results: dict):
 	try:
 		subject = f"Study Complete: {name}"
 		body = f"Study completed successfully.\n\nStudy name: {name}\nresults:\n{results}"
-		to_email = "martinsondermann10@gmail.com"
-		from_email = "martinsondermann10@gmail.com"
+		adress = "martinsondermann10@gmail.com"
 
-		with Path("documents/email_password.txt").open() as f:
-			password = f.read().strip()
-
-		if MLUtil.send_email(subject, body, to_email, from_email, password):
+		if MLUtil.send_self_mail_gmail(subject, body, adress):
 			print("Email notification sent.")
 		else:
 			print("Failed to send email notification.")
 	except Exception as e:
 		print(f"Failed to send email notification: {e}")
+
 def do_run(config: dict):
 	try:
 		run = Run(config_update_dict=config)
