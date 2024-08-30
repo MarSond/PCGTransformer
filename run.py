@@ -113,7 +113,6 @@ class Run:
 		self.train_logger = self.logger_dict[const.LOGGER_TRAINING]
 		self.train_logger.info(f"Logger initialized. Log file: {log_filename}")
 
-
 	def log(self, message, name, level=logging.INFO):
 		"""Generic logging function that logs a message with a specified level and logger."""
 		assert name in self.logger_dict, f"Logger {name} not found"
