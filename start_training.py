@@ -35,7 +35,7 @@ def do_run(config: dict):
 if __name__ == "__main__":
 
 	base_config = {	TASK_TYPE: TRAINING, METADATA_FRAC: 1.0, \
-					SINGLE_BATCH_MODE: False, KFOLD_SPLITS: 5, SIGNAL_FILTER: BUTTERPASS, \
+					SINGLE_BATCH_MODE: False, KFOLD_SPLITS: 10, SIGNAL_FILTER: BUTTERPASS, \
 					SAVE_ONLY_LAST_MODEL: False, SAVE_MODEL: True, \
 					EARLY_STOPPING_ENABLED: False,
 					# TRAINING_CHECKPOINT: {EPOCH: 70, RUN_NAME: "run1", FOLD: 6},
@@ -60,10 +60,9 @@ if __name__ == "__main__":
 	physionet_2016_fixed_cnn.update({
 		TRAIN_DATASET: PHYSIONET_2016,
 		EPOCHS: 60,
-		KFOLD_SPLITS: 5,
 		MODEL_METHOD_TYPE: CNN,
 		CHUNK_METHOD: CHUNK_METHOD_FIXED,
-		RUN_NAME_SUFFIX: "2016_fixed_cnn_fullrun-final2",
+		RUN_NAME_SUFFIX: "2016_fixed_cnn_fullrun-final3",
 
 		CHUNK_DURATION: 10.0,
 		NORMALIZATION: NORMALIZATION_ZSCORE,
@@ -243,9 +242,9 @@ if __name__ == "__main__":
 	})
 
 	# Execute runs
-	#do_run(physionet_2016_fixed_cnn) # done nmcc 0.859
-	#do_run(physionet_2022_fixed_cnn) # done nmcc 0.76
-	#do_run(physionet_2022_cycles_beats) # done bad
+	do_run(physionet_2016_fixed_cnn) # done nmcc 0.859	# 3: 
+	#do_run(physionet_2022_fixed_cnn) # done nmcc 0.76	# 3:
+	#do_run(physionet_2022_cycles_beats) # done bad		# 3:
 
 	#do_run(physionet_2022_fixed_beats)
 	#do_run(physionet_2022_cycles_cnn)
