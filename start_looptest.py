@@ -25,7 +25,7 @@ if __name__ == "__main__":
 
 	run_loop_test_dict = train_update_dict.copy()
 	run_loop_test_dict.update({ \
-		TRAIN_DATASET: PHYSIONET_2022, KFOLD_SPLITS: 2, EPOCHS: 2, METADATA_FRAC: 0.07})
+		TRAIN_DATASET: PHYSIONET_2016, KFOLD_SPLITS: 2, EPOCHS: 2, METADATA_FRAC: 0.05})
 
 	do_run(run_loop_test_dict)
 

@@ -11,7 +11,7 @@
 			"guiEventLoop": "none", 
 			"program": "start_inference.py",
 			"console": "integratedTerminal",
-			"justMyCode": false,
+			"justMyCode": true,
 			"env": {
                 "QT_API": ""
             }
@@ -23,7 +23,7 @@
 			"request": "launch",
 			"program": "start_training.py",
 			"console": "integratedTerminal",
-			"justMyCode": false,
+			"justMyCode": true,
 			"env": {
                 "QT_API": ""
             }
