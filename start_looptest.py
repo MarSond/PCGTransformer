@@ -18,14 +18,15 @@ if __name__ == "__main__":
 							SINGLE_BATCH_MODE: False, TRAIN_FRAC: 0.8, KFOLD_SPLITS: 1, \
 							# TRAINING_CHECKPOINT: {EPOCH: 70, RUN_NAME: "run1", FOLD: 6}, \
 							CHUNK_DURATION: 7.0, CHUNK_METHOD: CHUNK_METHOD_FIXED, \
-							DO_FAKE_UPDATES: 0, RUN_NAME_SUFFIX: "test", \
+							DO_FAKE_UPDATES: 0, RUN_NAME_SUFFIX: "test", 
+							EARLY_STOPPING_ENABLED: False, \
 							MODEL_METHOD_TYPE: CNN
                       }
 
 
 	run_loop_test_dict = train_update_dict.copy()
 	run_loop_test_dict.update({ \
-		TRAIN_DATASET: PHYSIONET_2016, KFOLD_SPLITS: 2, EPOCHS: 2, METADATA_FRAC: 0.05})
+		TRAIN_DATASET: PHYSIONET_2016, KFOLD_SPLITS: 2, EPOCHS: 13, METADATA_FRAC: 0.05})
 
 	do_run(run_loop_test_dict)
 

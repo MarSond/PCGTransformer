@@ -145,7 +145,7 @@ if __name__ == "__main__":
 			N_MELS: 1024,
 			HOP_LENGTH: 160,
 			N_FFT: 640,
-			MODEL_SUB_TYPE: 4, # TODO: Frage, wie weit sollten sich zum vergleich die modelle Unterscheiden? Vergleichbarkeit
+			MODEL_SUB_TYPE: 4,
 		}
 	})
 
@@ -176,7 +176,7 @@ if __name__ == "__main__":
 			N_MELS: 640,
 			HOP_LENGTH: 224,
 			N_FFT: 1408,
-			MODEL_SUB_TYPE: 3, # TODO: Frage, wie weit sollten sich zum vergleich die modelle Unterscheiden? Vergleichbarkeit
+			MODEL_SUB_TYPE: 3,
 		}
 	})
 
