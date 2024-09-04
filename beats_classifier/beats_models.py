@@ -89,7 +89,7 @@ def get_model(run: Run):
 		model = BEATsModel2(run)
 	elif model_sub_type == 3:
 		model = BEATsModel3(run)
-	elif model_sub_type == 0:
+	elif model_sub_type == 0 or model_sub_type == const.MODEL_TYPE_KNN:
 		model = BEATsBase(run)
 	else:
 		raise ValueError(f"Model sub type {model_sub_type} not supported.")

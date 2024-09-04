@@ -242,7 +242,7 @@ if __name__ == "__main__":
 	})
 
 	# Execute runs
-	do_run(physionet_2016_fixed_cnn) # done nmcc 0.859	# 3: 
+	#do_run(physionet_2016_fixed_cnn) # done nmcc 0.859	# 3: nmcc 0.8406 # fertig
 	#do_run(physionet_2022_fixed_cnn) # done nmcc 0.76	# 3:
 	#do_run(physionet_2022_cycles_beats) # done bad		# 3:
 

@@ -72,6 +72,25 @@ def do_run(config: dict):
 	finally:
 		reset_pytorch_state()
 
+def get_common_update_dict_knn(trial, model_type, dataset, chunk_method):
+	return {
+		TASK_TYPE: TRAINING,
+		METADATA_FRAC: 0.85,
+		TRAIN_FRAC: 0.8,
+		KFOLD_SPLITS: 1,
+		RUN_NAME_SUFFIX: f"optuna_{dataset}_{chunk_method}_{model_type.lower()}_{trial.number}_knn",
+
+		TRANSFORMER_PARAMS: {
+			MODEL_SUB_TYPE: MODEL_TYPE_KNN,
+		},
+		KNN_PARAMS: {
+			KNN_N_NEIGHBORS: trial.suggest_int(KNN_N_NEIGHBORS, 1, 26, step=2),
+			KNN_ASSUME_POSTIVE_P: trial.suggest_float(KNN_ASSUME_POSTIVE_P, 0.1, 1.0),
+			KNN_WEIGHT: trial.suggest_categorical(KNN_WEIGHT, [KNN_WEIGHT_UNIFORM, KNN_WEIGHT_DISTANCE]),
+			KNN_METRIC: trial.suggest_categorical(KNN_METRIC, [KNN_METRIC_CHEBYSHEV, KNN_METRIC_MINKOWSKI]),
+		},
+	}
+
 def get_common_update_dict(trial, model_type, dataset, chunk_method):
 	return {
 		TASK_TYPE: TRAINING,
@@ -88,24 +107,27 @@ def get_common_update_dict(trial, model_type, dataset, chunk_method):
 		# AUGMENTATION_RATE: trial.suggest_float(AUGMENTATION_RATE, 0.0, 1.0, step=0.1),
 	}
 
-def get_beats_update_dict(trial, dataset, chunk_method):
-	ud = get_common_update_dict(trial, BEATS, dataset, chunk_method)
-	ud.update({
-		EPOCHS: 25,
-		BATCH_SIZE: 5,
-		MODEL_METHOD_TYPE: BEATS,
-		GRAD_ACCUMULATE_STEPS: 7,
-		TRANSFORMER_PARAMS: {
-			DROP0: trial.suggest_float(DROP0, 0.0, 0.8, step=0.2),
-			DROP1: trial.suggest_float(DROP1, 0.0, 0.8, step=0.2),
-			ACTIVATION: trial.suggest_categorical(ACTIVATION, [ACTIVATION_SILU, ACTIVATION_RELU]),
-			MODEL_SUB_TYPE: trial.suggest_int(MODEL_SUB_TYPE, 2, 3),
-		},
-	})
+def get_beats_update_dict(trial, dataset, chunk_method, knn):
+	if knn:
+		ud = get_common_update_dict_knn(trial, BEATS, dataset, chunk_method)
+	else:
+		ud = get_common_update_dict(trial, BEATS, dataset, chunk_method, knn)
+		ud.update({
+			EPOCHS: 25,
+			BATCH_SIZE: 5,
+			MODEL_METHOD_TYPE: BEATS,
+			GRAD_ACCUMULATE_STEPS: 7,
+			TRANSFORMER_PARAMS: {
+				DROP0: trial.suggest_float(DROP0, 0.0, 0.8, step=0.2),
+				DROP1: trial.suggest_float(DROP1, 0.0, 0.8, step=0.2),
+				ACTIVATION: trial.suggest_categorical(ACTIVATION, [ACTIVATION_SILU, ACTIVATION_RELU]),
+				MODEL_SUB_TYPE: trial.suggest_int(MODEL_SUB_TYPE, 2, 3),
+			},
+		})
 	return ud
 
-def get_cnn_update_dict(trial, dataset, chunk_method):
-	ud = get_common_update_dict(trial, CNN, dataset, chunk_method)
+def get_cnn_update_dict(trial, dataset, chunk_method, knn):
+	ud = get_common_update_dict(trial, CNN, dataset, chunk_method, knn)
 	ud.update({
 		EPOCHS: 30,
 		BATCH_SIZE: 72,
@@ -123,7 +145,7 @@ def get_cnn_update_dict(trial, dataset, chunk_method):
 	})
 	return ud
 
-def set_chunk_and_scheduler_params(ud, trial, dataset, chunk_method):
+def set_chunk_and_scheduler_params(ud, trial, dataset, chunk_method, knn):
 	ud[TRAIN_DATASET] =	dataset
 	ud[CHUNK_METHOD] = chunk_method
 	if ud[CHUNK_METHOD] == CHUNK_METHOD_CYCLES:
@@ -142,13 +164,13 @@ def set_chunk_and_scheduler_params(ud, trial, dataset, chunk_method):
 
 	ud[SCHEDULER_FACTOR] = trial.suggest_float(SCHEDULER_FACTOR, 0.1, 0.9, step=0.2)
 
-def objective(trial, get_update_dict, dataset, chunk_method):
-	train_update_dict = get_update_dict(trial, dataset, chunk_method)
-	set_chunk_and_scheduler_params(train_update_dict, trial, dataset, chunk_method)
+def objective(trial, get_update_dict, dataset, chunk_method, knn):
+	train_update_dict = get_update_dict(trial, dataset, chunk_method, knn)
+	set_chunk_and_scheduler_params(train_update_dict, trial, dataset, chunk_method, knn)
 	result = do_run(train_update_dict)
 
 	if result is not None and METRICS_NMCC in result:
-		trial.set_user_attr("run_name", result[RUN_NAME])
+		trial.set_user_attr(RUN_NAME, result[RUN_NAME])
 		return result[METRICS_NMCC]
 	else:
 		print("error in objective")
@@ -174,14 +196,17 @@ def trial_callback(study, trial):
 			f.write(f"{key}: {value}\n")
 		f.write("\n#\n\n")
 
-def start_optimization(model_type, n_trials, dataset, chunk_method):
+def start_optimization(model_type, n_trials, dataset, chunk_method, knn=False):
 	study_name = f"{model_type.lower()}_{dataset}_{chunk_method}"
+	if knn:
+		study_name = f"{study_name}_knn"
+
 	storage_name = f"sqlite:///{FOLDER_OPTIMIZATION}/optim_survey_2.db"
 
 	try:
 		study = optuna.create_study(study_name=study_name, storage=storage_name, load_if_exists=True, direction="maximize")
 		def objective_func(trial):
-			return objective(trial, get_beats_update_dict if model_type == BEATS else get_cnn_update_dict, dataset, chunk_method)
+			return objective(trial, get_beats_update_dict if model_type == BEATS else get_cnn_update_dict, dataset, chunk_method, knn)
 		study.optimize(objective_func, n_trials=n_trials, callbacks=[trial_callback])
 
 		print("Best trial:")
@@ -209,4 +234,4 @@ if __name__ == "__main__":
 
 	#start_optimization(BEATS, n_trials=1, dataset=PHYSIONET_2022, chunk_method=CHUNK_METHOD_CYCLES)
 	#start_optimization(BEATS, n_trials=1, dataset=PHYSIONET_2022, chunk_method=CHUNK_METHOD_FIXED)
-	start_optimization(BEATS, n_trials=1, dataset=PHYSIONET_2016, chunk_method=CHUNK_METHOD_FIXED)
+	start_optimization(BEATS, n_trials=1, dataset=PHYSIONET_2022, chunk_method=CHUNK_METHOD_FIXED, knn=True)

@@ -74,5 +74,12 @@ project_config = {
 		EXTRACTOR_FOLDER: f"beats_classifier/{EXTRACTOR_FOLDER_NAME}/",
 		EXTRACTOR_NAME: "BEATs_iter3_plus_AS2M.pt",	# Name of the model for extracting
 		MODEL_SUB_TYPE: 1, # Specific model impementation for BEATs type
-	}
+	},
+	KNN_PARAMS: {
+		KNN_N_NEIGHBORS: 5,
+		KNN_METRIC: KNN_EUCLIDEAN,
+		KNN_WEIGHT: KNN_WEIGHT_DISTANCE,
+		KNN_ASSUME_POSTIVE_P: 0.5,
+		KNN_COMBINE_METHOD: KNN_COMBINE_METHOD_MEAN,
+	},
 }
