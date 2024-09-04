@@ -1,0 +1,101 @@
+{
+	"fold_data": {
+		"training": 
+			[		// All folds
+				[ 	// Epochs per fold
+					{}, // first epoch
+					{
+						"acc": 0.6,
+						"f1": 0.2, // and so on, more metrics
+						"curve_data": [
+							{
+								"class": 1,
+								"roc_data": {
+									"fpr": [0.1, 0.2, 0.3],
+									"tpr": [0.1, 0.2, 0.3],
+									"thresholds": [0.1, 0.2, 0.3],
+									"auroc": 0.5
+								},
+								"pr_data": {
+									"precision": [0.1, 0.2, 0.3],
+									"recall": [0.1, 0.2, 0.3],
+									"thresholds": [0.1, 0.2, 0.3],
+									"auprc": 0.5
+								}
+							}, 
+							{
+								"class": 2
+								// ...
+							}
+						],
+						"epoch": 2,
+						"fold": 1
+					}	
+				],
+				[] // second fold
+			],
+		"validation": [
+			[],// same as training
+			[
+				{
+					"acc": 0.6,
+					"f1": 0.2,
+					"curve_data": [],
+					// ...
+					"epoch": 2,
+					"fold": 1
+				}	
+			] 
+		]
+	},
+	"averages": {
+		"training": {
+			"acc": [ // list of epochs
+				{"mean": 0.5, "std": 0.1, "epoch": 1}, // mean and std for each epoch
+				{"mean": 0.6, "std": 0.2, "epoch": 2}
+			],
+			"f1": [ ],
+			"curve_data": [
+				{
+					"mean": [
+						{
+						"roc_data": {
+							"fpr": [0.0, 0.0101],
+							"tpr": [0.0, 0.1072],
+							"thresholds": [0.0, 0.0101],
+							"auroc": 0.9002
+						},
+						"pr_data": {
+							"precision": [0.2737, 0.3445],
+							"recall": [1.0, 0.9899],
+							"thresholds": [0.0, 0.0101],
+							"auprc": 0.704
+						},
+						"class": 1.0
+						}
+					],
+					"std": [
+						{
+							"roc_data": {
+								"fpr": [0.0, 0.0101],
+								"tpr": [0.0, 0.1072]
+							},
+							"pr_data": {
+								"precision": [0.2737, 0.3445],
+								"recall": [1.0, 0.9899]
+							},
+							"class": 1.0
+						}, {"class": 2.0 /* ... */}
+					],
+					"epoch": 1
+				}
+			],
+			// other metrics
+			"epoch": 1,	// highest epoch for which averages calculated
+			"fold": 1	// number of folds that were averaged
+		},
+		"validation": {
+			// same as training
+		}
+	}
+}
