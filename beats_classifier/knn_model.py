@@ -77,11 +77,11 @@ class KNN_Classifier(nn.Module):
 		self.neighbor_data = torch.cat([self.neighbor_data, data], dim=0)
 		self.neighbor_labels = torch.cat([self.neighbor_labels, labels], dim=0)
 
-	def extract_embeddings(self, x):
+	def extract_embeddings(self, raw_input):
 		if self.extractor is None:
 			raise RuntimeError("The feature extractor is not set.")
 		with torch.no_grad():
-			embeddings = self.extractor(x)
+			embeddings = self.extractor(raw_input)
 		self.tensor_logger.info(f"raw embedding shape: {embeddings.shape}")
 		embeddings = self.combine_embeddings(embeddings, self.combine_mode)
 		self.tensor_logger.info(f"Features shape after combining: {embeddings.shape}")
@@ -140,13 +140,16 @@ class KNN_Classifier(nn.Module):
 		if not self.is_fitted:
 			raise RuntimeError("The KNN classifier has not been fitted yet.")
 
-		embeddings = self.extract_embeddings(x) # already combined
-		num_embeddings = 1
-		batch_size, embedding_size = embeddings.shape
-		self.tensor_logger.debug(f"batch_size: {batch_size}, num_embeddings: {num_embeddings}, embedding_size: {embedding_size}")
+		with torch.no_grad():
+			embeddings = self.extractor(x)
+		self.tensor_logger.info(f"raw embedding shape: {embeddings.shape}")
+		embeddings = self.combine_embeddings(embeddings, self.combine_mode)
+
+		batch_size, num_embeddings, embedding_size = embeddings.shape
+		self.tensor_logger.info(f"batch_size: {batch_size}, num_embeddings: {num_embeddings}, embedding_size: {embedding_size}")
 		embeddings = embeddings.reshape(batch_size*num_embeddings, embedding_size)
 		embeddings = embeddings.cpu().detach().numpy()
-		self.tensor_logger.debug(f"Embeddings shape after forward reshape: {embeddings.shape}")
+		self.tensor_logger.info(f"Embeddings shape after forward reshape: {embeddings.shape}")
 
 		# Klassifikation und Wahrscheinlichkeiten
 		preds = self.classifier.predict(embeddings)
@@ -162,7 +165,7 @@ class KNN_Classifier(nn.Module):
 			instance_predictions = np.where(positive_counts >= threshold, 1, 0)
 		else:
 			instance_predictions = np.argmax(np.mean(preds_proba_reshape, axis=1), axis=-1)  # Multiclass
-
+		# TODO test instance_preds plain=1 == preds_reshape
 		instance_probabilities = np.mean(preds_proba_reshape, axis=1)
 
 		return instance_predictions, instance_probabilities

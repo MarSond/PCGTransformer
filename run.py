@@ -85,7 +85,7 @@ class Run:
 						logging_helper.LEVEL_FILE: logging.DEBUG},
 
 				const.LOGGER_TENSOR: \
-					{	logging_helper.LEVEL_CONSOLE: logging.DEBUG, \
+					{	logging_helper.LEVEL_CONSOLE: logging.INFO, \
 						logging_helper.LEVEL_FILE: logging.DEBUG},
 			}
 		else:

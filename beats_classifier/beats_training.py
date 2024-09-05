@@ -1,14 +1,17 @@
-from beats_classifier.beats_dataset import BEATsDataset
+import logging
+from typing import Any, Callable, Dict, List, Tuple
+
+import numpy as np
+import torch
+
 from beats_classifier import knn_model
+from beats_classifier.beats_dataset import BEATsDataset
 from MLHelper import constants as const
-from MLHelper.tools.utils import MLUtil, FileUtils, MLModelInfo
 from MLHelper.dataset import AudioDataset
 from MLHelper.ml_loop import HookManager, ML_Loop
-from typing import Any, Callable, Dict, List, Tuple
+from MLHelper.tools.utils import FileUtils, MLModelInfo, MLUtil
 from run import Run
-import torch
-import numpy as np
-import logging
+
 
 class BEATsTraining(ML_Loop):
 	def __init__(self, run: Run, dataset: AudioDataset):
@@ -29,16 +32,14 @@ class BEATsTraining(ML_Loop):
 
 		if self.is_knn_mode:
 			knn_params = self.run.config[const.KNN_PARAMS]
-			n_neighbors = knn_params[const.KNN_N_NEIGHBORS]
-			weights = knn_params[const.KNN_WEIGHT]
-			metric = knn_params[const.KNN_METRIC]
-			self.knn_classifier = knn_model.KNN_Classifier(self.model, knn_params, self.run.logger_dict[const.LOGGER_TENSOR], self.run.device)
+			self.knn_classifier = knn_model.KNN_Classifier(self.model, \
+				knn_params, self.run.logger_dict[const.LOGGER_TENSOR], self.run.device)
 			self.knn_classifier = self.knn_classifier.to(self.run.device)
 
 	def start_training_task(self, start_epoch: int, start_fold: int):
 		assert self.model is not None, "Model is None. Required for training"
 		assert start_epoch >= 1, "Start epoch must be greater or equal to 0"
-		if not self.is_knn_mode: 
+		if not self.is_knn_mode:
 			assert self.optimizer is not None, "Optimizer is None. Required for training"
 		return self.kfold_loop(start_epoch=start_epoch, start_fold=start_fold)
 
@@ -48,14 +49,9 @@ class BEATsTraining(ML_Loop):
 			inputs = inputs.to(self.run.device)
 			labels = labels.to(self.run.device)
 			self.knn_classifier.add_training_example(inputs, labels)
-			fake_loss = torch.tensor(88.8)
-			fake_probabilities = torch.zeros_like(labels)
-			# change proba shape to be vertical stack to argmax dim=1
-			fake_probabilities = fake_probabilities.reshape(fake_probabilities.shape[0], -1)
-			return fake_loss, fake_probabilities, labels
-		else:
-			return super().training_step(inputs, labels)
-		
+			return None, None, labels
+		return super().training_step(inputs, labels)
+
 	@HookManager.hook_wrapper("validation_step")
 	def validation_step(self, inputs: torch.Tensor, labels: torch.Tensor):
 		if self.is_knn_mode:
@@ -63,8 +59,7 @@ class BEATsTraining(ML_Loop):
 			if isinstance(probabilities, np.ndarray):
 				probabilities = torch.tensor(probabilities)
 			return torch.tensor(77.7), probabilities, labels
-		else:
-			return super().validation_step(inputs, labels)
+		return super().validation_step(inputs, labels)
 
 	@HookManager.hook_wrapper("epoch")
 	def epoch_loop(self, epoch: int, fold_idx: int, **kwargs: Any) -> None:
@@ -79,20 +74,22 @@ class BEATsTraining(ML_Loop):
 		if self.is_knn_mode:
 			self.knn_classifier.reset_data()
 		super().fold_loop(fold_idx, start_epoch, **kwargs)
-	
+
 	@HookManager.hook_wrapper("end_training_epoch")
 	def end_training_epoch(self, epoch: int, fold: int, **kwargs: Any) -> None:
 		if not self.is_knn_mode:
 			super().end_training_epoch(epoch, fold, **kwargs)
 		else:
-			self.run.log(f"Finished collecting data for KNN in epoch {epoch}", name=const.LOGGER_TRAINING, level=logging.INFO)
+			self.run.log(f"Finished collecting data for KNN in epoch {epoch}", \
+				name=const.LOGGER_TRAINING, level=logging.INFO)
 
 	@HookManager.hook_wrapper("end_validation_epoch")
 	def end_validation_epoch(self, epoch: int, fold: int, **kwargs: Any) -> None:
 		super().end_validation_epoch(epoch, fold, **kwargs)
 		if self.is_knn_mode:
-			self.run.log(f"KNN validation completed for epoch {epoch}", name=const.LOGGER_TRAINING, level=logging.INFO)
-	
+			self.run.log(f"KNN validation completed for epoch {epoch}", \
+				name=const.LOGGER_TRAINING, level=logging.INFO)
+
 	def save_model(self, epoch, fold):
 		if self.is_knn_mode:
 			model_name = const.get_model_filename(type=f"{const.BEATS}_knn", epoch=epoch, fold=fold)
