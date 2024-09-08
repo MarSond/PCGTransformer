@@ -60,7 +60,7 @@ class BEATsTraining(ML_Loop):
 				probabilities = torch.tensor(probabilities)
 			return torch.tensor(77.7), probabilities, labels
 		return super().validation_step(inputs, labels)
-
+# TODO save knn model
 	@HookManager.hook_wrapper("epoch")
 	def epoch_loop(self, epoch: int, fold_idx: int, **kwargs: Any) -> None:
 		if self.config[const.TASK_TYPE] == const.TRAINING:

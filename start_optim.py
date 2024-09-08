@@ -75,9 +75,14 @@ def do_run(config: dict):
 def get_common_update_dict_knn(trial, model_type, dataset, chunk_method):
 	return {
 		TASK_TYPE: TRAINING,
-		METADATA_FRAC: 0.85,
+		METADATA_FRAC: 1.0,
 		TRAIN_FRAC: 0.8,
 		KFOLD_SPLITS: 1,
+		EPOCHS: 1,
+		MODEL_METHOD_TYPE: BEATS,
+		BATCH_SIZE: 5,
+		OPTIMIZER: None,
+		SCHEDULER: None,
 		RUN_NAME_SUFFIX: f"optuna_{dataset}_{chunk_method}_{model_type.lower()}_{trial.number}_knn",
 
 		TRANSFORMER_PARAMS: {
@@ -85,9 +90,9 @@ def get_common_update_dict_knn(trial, model_type, dataset, chunk_method):
 		},
 		KNN_PARAMS: {
 			KNN_N_NEIGHBORS: trial.suggest_int(KNN_N_NEIGHBORS, 1, 26, step=2),
-			KNN_ASSUME_POSTIVE_P: trial.suggest_float(KNN_ASSUME_POSTIVE_P, 0.1, 1.0),
 			KNN_WEIGHT: trial.suggest_categorical(KNN_WEIGHT, [KNN_WEIGHT_UNIFORM, KNN_WEIGHT_DISTANCE]),
-			KNN_METRIC: trial.suggest_categorical(KNN_METRIC, [KNN_METRIC_CHEBYSHEV, KNN_METRIC_MINKOWSKI]),
+			KNN_METRIC: trial.suggest_categorical(KNN_METRIC, [KNN_METRIC_EUCLIDEAN, KNN_METRIC_MANHATTAN, KNN_METRIC_COSINE]),
+			KNN_ALGORITHM: trial.suggest_categorical(KNN_ALGORITHM, [KNN_ALGORITHM_BRUTE, KNN_ALGORITHM_BALL_TREE, KNN_ALGORITHM_BALL_TREE]),
 		},
 	}
 
@@ -149,20 +154,20 @@ def set_chunk_and_scheduler_params(ud, trial, dataset, chunk_method, knn):
 	ud[TRAIN_DATASET] =	dataset
 	ud[CHUNK_METHOD] = chunk_method
 	if ud[CHUNK_METHOD] == CHUNK_METHOD_CYCLES:
-		ud[CHUNK_HEARTCYCLE_COUNT] = trial.suggest_int(CHUNK_HEARTCYCLE_COUNT, 3, 15, step=1)
+		ud[CHUNK_HEARTCYCLE_COUNT] = trial.suggest_int(CHUNK_HEARTCYCLE_COUNT, 3, 17, step=1)
 		ud[AUDIO_LENGTH_NORM] = LENGTH_NORM_STRETCH
-		ud[CHUNK_DURATION] = trial.suggest_float("cycle_chunk_count", 3.0, 18.0, step=1.0)
+		ud[CHUNK_DURATION] = trial.suggest_float("cycle_"+CHUNK_DURATION, 3.0, 18.0, step=1.0)
 	else:
 		ud[AUDIO_LENGTH_NORM] = trial.suggest_categorical( \
 			AUDIO_LENGTH_NORM, [LENGTH_NORM_PADDING, LENGTH_NORM_REPEAT, LENGTH_NORM_STRETCH])
-		ud[CHUNK_DURATION] = trial.suggest_float("fix_chunk_count", 3.0, 18.0, step=1.0)
+		ud[CHUNK_DURATION] = trial.suggest_float("fix_"+CHUNK_DURATION, 3.0, 18.0, step=1.0)
 
 	if ud[SCHEDULER] == SCHEDULER_PLATEAU:
 		ud[SCHEDULER_PATIENCE] = trial.suggest_int("plateau_patience", 5, 16, step=2)
 	elif ud[SCHEDULER] == SCHEDULER_STEP:
 		ud[SCHEDULER_PATIENCE] = trial.suggest_int("step_patience", 5, 25, step=5)
-
-	ud[SCHEDULER_FACTOR] = trial.suggest_float(SCHEDULER_FACTOR, 0.1, 0.9, step=0.2)
+	if not knn:
+		ud[SCHEDULER_FACTOR] = trial.suggest_float(SCHEDULER_FACTOR, 0.1, 0.9, step=0.2)
 
 def objective(trial, get_update_dict, dataset, chunk_method, knn):
 	train_update_dict = get_update_dict(trial, dataset, chunk_method, knn)
@@ -232,6 +237,10 @@ if __name__ == "__main__":
 	#start_optimization(CNN, n_trials=25, dataset=PHYSIONET_2022, chunk_method=CHUNK_METHOD_FIXED)
 	#start_optimization(CNN, n_trials=25, dataset=PHYSIONET_2016, chunk_method=CHUNK_METHOD_FIXED)
 
-	#start_optimization(BEATS, n_trials=1, dataset=PHYSIONET_2022, chunk_method=CHUNK_METHOD_CYCLES)
+	#start_optimization(BEATS, n_trials=1, dataset=PHYSIONET_2022, chunk_method=CHUNK_METHOD_CYCLES) # mehr machen
 	#start_optimization(BEATS, n_trials=1, dataset=PHYSIONET_2022, chunk_method=CHUNK_METHOD_FIXED)
-	start_optimization(BEATS, n_trials=1, dataset=PHYSIONET_2022, chunk_method=CHUNK_METHOD_FIXED, knn=True)
+
+	start_optimization(BEATS, n_trials=7, dataset=PHYSIONET_2022, chunk_method=CHUNK_METHOD_FIXED, knn=True)
+	start_optimization(BEATS, n_trials=7, dataset=PHYSIONET_2022, chunk_method=CHUNK_METHOD_CYCLES, knn=True)
+	start_optimization(BEATS, n_trials=7, dataset=PHYSIONET_2016, chunk_method=CHUNK_METHOD_FIXED, knn=True)
+
