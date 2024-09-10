@@ -1,9 +1,9 @@
 import logging
 
+import numpy as np
 import torch
 from sklearn.neighbors import KNeighborsClassifier
 from torch import nn
-import numpy as np
 
 from MLHelper import constants as const
 
@@ -61,7 +61,7 @@ class KNN_Classifier(nn.Module):
 
 	def save_state_dict(self):
 		state_dict = {
-			const.EXTRACTOR: self.extractor,
+			const.EXTRACTOR: self.extractor.state_dict(),
 			const.KNN_NEIGHBOR_DATA: self.neighbor_data,
 			const.KNN_NEIGHBOR_LABELS: self.neighbor_labels,
 			const.MODEL_STATE_DICT: super().state_dict(),
