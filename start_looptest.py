@@ -33,7 +33,7 @@ if __name__ == "__main__":
 	knn_test_dict = knn_base_dict.copy()
 	knn_test_dict.update({
 		TRAIN_DATASET: PHYSIONET_2022, KFOLD_SPLITS: 1,
-		METADATA_FRAC: 0.1,
+		METADATA_FRAC: 0.05,
 		EMBEDDING_PARAMS: {
 			KNN_N_NEIGHBORS: 1,
 			KNN_WEIGHT: KNN_WEIGHT_UNIFORM,
@@ -41,6 +41,10 @@ if __name__ == "__main__":
 			KNN_ALGORITHM: KNN_ALGORITHM_AUTO,
 			USE_SMOTE: True,
 			USE_HDBSCAN: False,
+			REDUCE_DIM_UMAP: True,
+			EMBEDDINGS_REDUCE_UMAP_MIN_DIST: 0.1,
+			EMBEDDINGS_REDUCE_UMAP_N_NEIGHBORS: 15,
+			EMBEDDINGS_REDUCE_UMAP_N_COMPONENTS: 10,
 		},
 	})
 

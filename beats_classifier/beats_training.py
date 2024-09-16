@@ -5,7 +5,7 @@ from typing import Any
 import numpy as np
 import torch
 
-from beats_classifier import knn_model
+from beats_classifier import embedding_model
 from beats_classifier.beats_dataset import BEATsDataset
 from MLHelper import constants as const
 from MLHelper.dataset import AudioDataset
@@ -36,7 +36,7 @@ class BEATsTraining(ML_Loop):
 
 		if self.is_knn_mode:
 			knn_params = self.run.config[const.EMBEDDING_PARAMS]
-			self.knn_classifier = knn_model.EmbeddingClassifier(self.model, \
+			self.knn_classifier = embedding_model.EmbeddingClassifier(self.model, \
 				knn_params, self.run.logger_dict[const.LOGGER_TENSOR], self.run.device)
 			self.knn_classifier = self.knn_classifier.to(self.run.device)
 	# TODO schleife mit embeddings von knn rausnehmen, hier alles trainieren und dann am ende in einem schritt zum klasssifikator modell

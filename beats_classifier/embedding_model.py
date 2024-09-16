@@ -50,6 +50,10 @@ class EmbeddingClassifier(nn.Module):
 		steps = []
 
 		if self.emb_params.get(const.REDUCE_DIM_UMAP, False):
+			assert const.EMBEDDINGS_REDUCE_UMAP_N_COMPONENTS in self.emb_params, "UMAP n_components not set."
+			assert const.EMBEDDINGS_REDUCE_UMAP_N_NEIGHBORS in self.emb_params, "UMAP n_neighbors not set."
+			assert const.EMBEDDINGS_REDUCE_UMAP_MIN_DIST in self.emb_params, "UMAP min_dist not set."
+
 			steps.append(("umap", UMAPTransformer(
 				n_components=self.emb_params.get(const.EMBEDDINGS_REDUCE_UMAP_N_COMPONENTS, 2),
 				n_neighbors=self.emb_params.get(const.EMBEDDINGS_REDUCE_UMAP_N_NEIGHBORS, 15),
@@ -86,8 +90,12 @@ class EmbeddingClassifier(nn.Module):
 		# Sicherstellen, dass embedding_labels ein 2D-Array ist
 		#if self.embedding_labels.ndim == 1:
 		#	self.embedding_labels = self.embedding_labels.reshape(-1, 1)
-
+		self.tensor_logger.info(f"Initial embedding_data shape: {self.embedding_data.shape}")
+		self.tensor_logger.info(f"Initial embedding_labels shape: {self.embedding_labels.shape}")
 		self.pipeline.fit(self.embedding_data, self.embedding_labels)
+		self.tensor_logger.info(f"Final embedding_data shape: {self.embedding_data.shape}")
+		self.tensor_logger.info(f"Final embedding_labels shape: {self.embedding_labels.shape}")
+
 		self.tensor_logger.error("Pipeline fitted.")
 		self.is_fitted = True
 
@@ -229,7 +237,7 @@ class UMAPTransformer(BaseEstimator, TransformerMixin):
 			n_components=self.n_components,
 			n_neighbors=self.n_neighbors,
 			min_dist=self.min_dist,
-			random_state=const.SEED_VALUE,
+			#random_state=const.SEED_VALUE,
 			low_memory=False,
 			n_jobs=-1,
 		)
@@ -237,7 +245,8 @@ class UMAPTransformer(BaseEstimator, TransformerMixin):
 		return self
 
 	def transform(self, x):
-		return self.umap_model.transform(x)
+		output = self.umap_model.transform(x)
+		return output
 
 class HDBSCANTransformer(BaseEstimator, TransformerMixin):
 
@@ -254,8 +263,16 @@ class HDBSCANTransformer(BaseEstimator, TransformerMixin):
 		self.clusterer.fit(x)
 		return self
 
-	def transform(self, x):
+	def transform(self, x, y=None):
 		if self.clusterer is None:
 			raise ValueError("Clusterer is not fitted yet.")
 		cluster_labels = self.clusterer.fit_predict(x)
-		return x[cluster_labels != -1]
+		mask = cluster_labels != -1
+		if y is not None:
+			return x[mask], y[mask]
+		return x[mask]
+
+	def fit_transform(self, x, y=None):
+		self.fit(x)
+		transformed = self.transform(x, y)
+		return transformed
