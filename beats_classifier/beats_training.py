@@ -72,7 +72,8 @@ class BEATsTraining(ML_Loop):
 		if self.config[const.TASK_TYPE] == const.TRAINING:
 			if self.is_knn_mode:
 				self.training_epoch_loop(epoch=epoch, fold=fold_idx)
-				self.knn_classifier.build_nn_classifier()
+				self.knn_classifier.build_pipeline()
+				self.knn_classifier.fit_pipeline() # todo export embeddings
 		self.validation_epoch_loop(epoch=epoch, fold=fold_idx)
 
 	@HookManager.hook_wrapper("fold")
@@ -96,25 +97,34 @@ class BEATsTraining(ML_Loop):
 			self.run.log(f"KNN validation completed for epoch {epoch}", \
 				name=const.LOGGER_TRAINING, level=logging.INFO)
 
+	def save_embeddings(self, embeddings, labels, fold):
+		if self.config[const.EMBEDDING_PARAMS].get(const.EMBEDDING_SAVE_TO_FILE, False):
+			import pickle # TODO check if embeddings are saved after smote or BEFORE
+			base_path = Path(self.run.run_results_path) / const.OTHER_FOLDER_NAME
+			pkl_path = base_path / f"{fold}_{const.FILENAME_EMBEDDINGS_VALUE}"
+			FileUtils.safe_path_create(pkl_path)
+			with (pkl_path).open("wb") as file:
+				pickle.dump({const.EMBEDDINGS: embeddings, const.LABELS: labels, const.FOLD: fold}, file)
+			self.run.log_training(f"Embeddings saved to {pkl_path}", level=logging.INFO)
+		else:
+			self.run.log_training(f"Embeddings not saved", level=logging.INFO)
+
 	def create_umap_plots(self, embeddings, labels, epoch, fold):
-		import pickle
 		import umap
 
-		base_path = Path(self.run.run_results_path) / const.OTHER_FOLDER_NAME
-		pkl_path = base_path / "embeddings.pkl"
-		FileUtils.safe_path_create(pkl_path)
+
 		# save embeddings to other directory
-		with (pkl_path).open("wb") as file:
-			pickle.dump({"embeddings": embeddings, "labels": labels}, file)
-		self.run.log_training(f"Embeddings saved to {pkl_path}", level=logging.INFO)
+		self.save_embeddings(embeddings, labels, fold)
 
 		n_neighbors = 30
 		min_dist = 0.4
-
+		if embeddings.ndim == 1:
+			embeddings = embeddings.reshape(-1, 1)
 		reducer = umap.UMAP(random_state=const.SEED_VALUE, n_neighbors=n_neighbors, min_dist=min_dist)
 		umap_embeddings = reducer.fit_transform(embeddings, y=labels)
 
 		fig_2d = Plotting.DimensionReduction.plot_umap2d(umap_embeddings, labels, n_neighbors=n_neighbors, min_dist=min_dist)
+		base_path = Path(self.run.run_results_path) / const.OTHER_FOLDER_NAME
 
 		FileUtils.safe_path_create(base_path)
 		Plotting.show_save(fig_2d, base_path / f"umap_2d_epoch_{epoch}_fold_{fold}.png", show=False)
@@ -125,9 +135,9 @@ class BEATsTraining(ML_Loop):
 	def create_umap_plots_hook(self, epoch: int, fold: int, **kwargs: Any) -> None:
 		if self.is_knn_mode:
 			self.run.logger_dict[const.LOGGER_TRAINING].info("Creating UMAP plots")
-			embeddings = self.knn_classifier.neighbor_data.cpu().numpy()
-			labels = self.knn_classifier.neighbor_labels.cpu().numpy()
-			self.create_umap_plots(embeddings, labels, epoch, fold)
+			embeddings = self.knn_classifier.embedding_data
+			labels = self.knn_classifier.embedding_labels
+			#self.create_umap_plots(embeddings, labels, epoch, fold)
 
 	def save_model(self, epoch, fold):
 		if self.is_knn_mode:
