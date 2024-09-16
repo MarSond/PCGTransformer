@@ -30,7 +30,7 @@ project_config = {
 
 	CHUNK_METHOD: CHUNK_METHOD_FIXED,		# Chunking method to split longer files into smaller chunks
 	CHUNK_HEARTCYCLE_COUNT: 5,				# Number of heart cycles per chunk when using CHUNK_METHOD_CYCLES
-	CHUNK_PADDING_THRESHOLD: 0.65,			# minimum duaration of a full chunk required to be considered
+	CHUNK_PADDING_THRESHOLD: 0.60,			# minimum duaration of a full chunk required to be considered
 	NORMALIZATION: NORMALIZATION_MAX_ABS,	# audio normalisation method
 	AUDIO_LENGTH_NORM: LENGTH_NORM_REPEAT,	# Audio length normalisation method
 
@@ -50,7 +50,7 @@ project_config = {
 	LEARNING_RATE: 0.001,			# initial learning rate
 	SCHEDULER_FACTOR: 0.1,
 
-	L1_REGULATION_WEIGHT: 0.000001,	# L1 weight decay, used with raw loss in step function
+	L1_REGULATION_WEIGHT: 0.000001,	# L1 weight decay, used with raw loss in step function # TODO test 0 or NOne as default
 	L2_REGULATION_WEIGHT: 0.000001,	# L2 weight decay, passed to optimizer
 	LOSS_FUNCTION: LOSS_FOCAL_LOSS,	# LOSS_CROSS_ENTROPY, LOSS_FOCAL_LOSS
 	LOSS_FUNCTION_PARAMETER_1: 2.0,	# Focal Loss: gamma,

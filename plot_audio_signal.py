@@ -34,12 +34,13 @@ class DataAnalysis:
 		"""
 
 		self.run.config[const.AUDIO_LENGTH_NORM] = const.LENGTH_NORM_PADDING
-		self.run.config[const.CHUNK_METHOD] = const.CHUNK_METHOD_FIXED
+		self.run.config[const.CHUNK_METHOD] = const.CHUNK_METHOD_CYCLES
 		self.run.config[const.CHUNK_PADDING_THRESHOLD] = 0.65
 		self.run.config[const.CHUNK_DURATION] = 15
+		self.run.config[const.CHUNK_HEARTCYCLE_COUNT] = 6
 
 		if self.demo_task == const.TASK_TYPE_TRAINING:
-			self.run.config[const.TRAIN_FRAC] = 1.0
+			self.run.config[const.TRAIN_FRAC] = 0.99
 		else:
 			self.run.config[const.TRAIN_FRAC] = 0.0
 

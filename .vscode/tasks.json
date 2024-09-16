@@ -41,6 +41,16 @@
 		},
 		"problemMatcher": []
 	  },
+	  {
+		"label": "OPT Dash KNN",
+		"type": "shell",
+		"command": "optuna-dashboard sqlite:///optimization/optim_survey_3.db --port 8083",
+		"group": {
+		  "kind": "build",
+		  "isDefault": true
+		},
+		"problemMatcher": []
+	  }
 	  
 	]
   }

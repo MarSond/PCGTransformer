@@ -34,7 +34,7 @@ if __name__ == "__main__":
 	knn_test_dict = knn_base_dict.copy()
 	knn_test_dict.update({
 		TRAIN_DATASET: PHYSIONET_2022, KFOLD_SPLITS: 1,
-		METADATA_FRAC: 0.05,
+		METADATA_FRAC: 1.0,
 		EMBEDDING_PARAMS: {
 			KNN_N_NEIGHBORS: 1,
 			KNN_WEIGHT: KNN_WEIGHT_UNIFORM,
