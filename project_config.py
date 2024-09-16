@@ -27,13 +27,13 @@ project_config = {
 	KFOLD_SPLITS: 1,			# number of kfold splits. 1 -> use normal splitting
 	SAVE_MODEL: True,			# Save pytorch model
 	SAVE_ONLY_LAST_MODEL: True,	# Save only last model (deletes old models when saving new)
-	
+
 	CHUNK_METHOD: CHUNK_METHOD_FIXED,		# Chunking method to split longer files into smaller chunks
 	CHUNK_HEARTCYCLE_COUNT: 5,				# Number of heart cycles per chunk when using CHUNK_METHOD_CYCLES
 	CHUNK_PADDING_THRESHOLD: 0.65,			# minimum duaration of a full chunk required to be considered
 	NORMALIZATION: NORMALIZATION_MAX_ABS,	# audio normalisation method
 	AUDIO_LENGTH_NORM: LENGTH_NORM_REPEAT,	# Audio length normalisation method
-	
+
 	GRAD_ACCUMULATE_STEPS: 1,				# Number of gradient accumulation steps
 	DO_FAKE_UPDATES: 0,				# Enable fake updates values in metric manager (for testing purposes)
 
@@ -99,6 +99,5 @@ project_config = {
 		HDBSCAN_PARAM_MIN_CLUSTER_SIZE: 5,
 		HDBSCAN_PARAM_MIN_SAMPLES: 5,
 		EMBEDDING_SAVE_TO_FILE: True,
-		#LOAD_EMBEDDINGS_FROM_RUN: None,
 	},
 }

@@ -20,7 +20,8 @@ if __name__ == "__main__":
 		CHUNK_DURATION: 7.0, CHUNK_METHOD: CHUNK_METHOD_FIXED,
 		DO_FAKE_UPDATES: 0, RUN_NAME_SUFFIX: "beats-test",
 		EARLY_STOPPING_ENABLED: False,
-		MODEL_METHOD_TYPE: CNN
+		MODEL_METHOD_TYPE: CNN,
+		SAVE_MODEL: False,
 	}
 
 	knn_base_dict = train_update_dict.copy()
@@ -40,7 +41,7 @@ if __name__ == "__main__":
 			KNN_METRIC: KNN_METRIC_EUCLIDEAN,
 			KNN_ALGORITHM: KNN_ALGORITHM_AUTO,
 			USE_SMOTE: True,
-			USE_HDBSCAN: False,
+			USE_HDBSCAN: True,
 			REDUCE_DIM_UMAP: True,
 			EMBEDDINGS_REDUCE_UMAP_MIN_DIST: 0.1,
 			EMBEDDINGS_REDUCE_UMAP_N_NEIGHBORS: 15,
