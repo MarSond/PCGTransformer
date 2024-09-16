@@ -32,12 +32,15 @@ if __name__ == "__main__":
 
 	knn_test_dict = knn_base_dict.copy()
 	knn_test_dict.update({
-		TRAIN_DATASET: PHYSIONET_2016, KFOLD_SPLITS: 1,
-		KNN_PARAMS: {
-			KNN_N_NEIGHBORS: 3,
+		TRAIN_DATASET: PHYSIONET_2022, KFOLD_SPLITS: 1,
+		METADATA_FRAC: 0.1,
+		EMBEDDING_PARAMS: {
+			KNN_N_NEIGHBORS: 1,
 			KNN_WEIGHT: KNN_WEIGHT_UNIFORM,
 			KNN_METRIC: KNN_METRIC_EUCLIDEAN,
 			KNN_ALGORITHM: KNN_ALGORITHM_AUTO,
+			USE_SMOTE: True,
+			USE_HDBSCAN: False,
 		},
 	})
 

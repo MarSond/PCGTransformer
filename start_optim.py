@@ -88,7 +88,7 @@ def get_common_update_dict_knn(trial, model_type, dataset, chunk_method):
 		TRANSFORMER_PARAMS: {
 			MODEL_SUB_TYPE: MODEL_TYPE_KNN,
 		},
-		KNN_PARAMS: {
+		EMBEDDING_PARAMS: {
 			KNN_N_NEIGHBORS: trial.suggest_int(KNN_N_NEIGHBORS, 1, 26, step=2),
 			KNN_WEIGHT: trial.suggest_categorical(KNN_WEIGHT, [KNN_WEIGHT_UNIFORM, KNN_WEIGHT_DISTANCE]),
 			KNN_METRIC: trial.suggest_categorical(KNN_METRIC, [KNN_METRIC_EUCLIDEAN, KNN_METRIC_MANHATTAN, KNN_METRIC_COSINE]),
