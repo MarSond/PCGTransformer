@@ -32,7 +32,7 @@ project_config = {
 	CHUNK_HEARTCYCLE_COUNT: 5,				# Number of heart cycles per chunk when using CHUNK_METHOD_CYCLES
 	CHUNK_PADDING_THRESHOLD: 0.60,			# minimum duaration of a full chunk required to be considered
 	NORMALIZATION: NORMALIZATION_MAX_ABS,	# audio normalisation method
-	AUDIO_LENGTH_NORM: LENGTH_NORM_REPEAT,	# Audio length normalisation method
+	AUDIO_LENGTH_NORM: LENGTH_NORM_PADDING,	# Audio length normalisation method
 
 	GRAD_ACCUMULATE_STEPS: 1,				# Number of gradient accumulation steps
 	DO_FAKE_UPDATES: 0,				# Enable fake updates values in metric manager (for testing purposes)

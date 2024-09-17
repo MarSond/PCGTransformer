@@ -49,8 +49,51 @@ if __name__ == "__main__":
 		},
 	})
 
-	do_run(knn_test_dict)
+	#do_run(knn_test_dict)
 
+
+	knn_extract_2016_fix = knn_base_dict.copy()
+	knn_extract_2016_fix.update({
+		TRAIN_DATASET: PHYSIONET_2016, 
+		KFOLD_SPLITS: 1,
+		METADATA_FRAC: 1.0,
+		SAVE_MODEL: True,
+		CHUNK_METHOD: CHUNK_METHOD_FIXED,
+		AUDIO_LENGTH_NORM: LENGTH_NORM_PADDING,
+		CHUNK_DURATION: 9.0,
+		RUN_NAME_SUFFIX: "2016_fix_optim_audio",
+	})
+	do_run(knn_extract_2016_fix)
+
+
+	knn_extract_2022_fix = knn_base_dict.copy()
+	knn_extract_2022_fix.update({
+		TRAIN_DATASET: PHYSIONET_2022,
+		KFOLD_SPLITS: 1,
+		METADATA_FRAC: 1.0,
+		SAVE_MODEL: True,
+		AUDIO_LENGTH_NORM: LENGTH_NORM_PADDING,
+		CHUNK_METHOD: CHUNK_METHOD_FIXED,
+		CHUNK_DURATION: 5.0,
+		RUN_NAME_SUFFIX: "2022_fix_optim_audio",
+	})
+	do_run(knn_extract_2022_fix)
+
+	knn_extract_2022_cycle = knn_base_dict.copy()
+	knn_extract_2022_cycle.update({
+		TRAIN_DATASET: PHYSIONET_2022,
+		KFOLD_SPLITS: 1,
+		METADATA_FRAC: 1.0,
+		SAVE_MODEL: True,
+		AUDIO_LENGTH_NORM: LENGTH_NORM_STRETCH,
+		CHUNK_METHOD: CHUNK_METHOD_CYCLES,
+		CHUNK_HEARTCYCLE_COUNT: 12,
+		CHUNK_DURATION: 9.0,
+		RUN_NAME_SUFFIX: "2022_cycle_optim_audio",
+	})
+	do_run(knn_extract_2022_cycle)
+
+######
 	fold_test_dict = train_update_dict.copy()
 	fold_test_dict.update({
 		MODEL_METHOD_TYPE: CNN,
