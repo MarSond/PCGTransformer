@@ -72,29 +72,6 @@ def do_run(config: dict):
 	finally:
 		reset_pytorch_state()
 
-def get_common_update_dict_knn(trial, model_type, dataset, chunk_method):
-	return {
-		TASK_TYPE: TRAINING,
-		METADATA_FRAC: 1.0,
-		TRAIN_FRAC: 0.8,
-		KFOLD_SPLITS: 1,
-		EPOCHS: 1,
-		MODEL_METHOD_TYPE: BEATS,
-		BATCH_SIZE: 5,
-		OPTIMIZER: None,
-		SCHEDULER: None,
-		RUN_NAME_SUFFIX: f"optuna_{dataset}_{chunk_method}_{model_type.lower()}_{trial.number}_knn",
-
-		TRANSFORMER_PARAMS: {
-			MODEL_SUB_TYPE: MODEL_TYPE_KNN,
-		},
-		EMBEDDING_PARAMS: {
-			KNN_N_NEIGHBORS: trial.suggest_int(KNN_N_NEIGHBORS, 1, 26, step=2),
-			KNN_WEIGHT: trial.suggest_categorical(KNN_WEIGHT, [KNN_WEIGHT_UNIFORM, KNN_WEIGHT_DISTANCE]),
-			KNN_METRIC: trial.suggest_categorical(KNN_METRIC, [KNN_METRIC_EUCLIDEAN, KNN_METRIC_MANHATTAN, KNN_METRIC_COSINE]),
-			KNN_ALGORITHM: trial.suggest_categorical(KNN_ALGORITHM, [KNN_ALGORITHM_BRUTE, KNN_ALGORITHM_BALL_TREE, KNN_ALGORITHM_BALL_TREE]),
-		},
-	}
 
 def get_common_update_dict(trial, model_type, dataset, chunk_method):
 	return {
@@ -102,76 +79,72 @@ def get_common_update_dict(trial, model_type, dataset, chunk_method):
 		METADATA_FRAC: 0.7,
 		TRAIN_FRAC: 0.8,
 		KFOLD_SPLITS: 1,
+		SAVE_MODEL: False,
 		RUN_NAME_SUFFIX: f"optuna_{dataset}_{chunk_method}_{model_type.lower()}_{trial.number}",
 
-		LEARNING_RATE: trial.suggest_float("lr", 0.000001, 0.001, log=True),
-		L1_REGULATION_WEIGHT: trial.suggest_float(L1_REGULATION_WEIGHT, 1e-6, 1e-2, log=True),
-		L2_REGULATION_WEIGHT: trial.suggest_float(L2_REGULATION_WEIGHT, 1e-6, 1e-2, log=True),
-		OPTIMIZER: trial.suggest_categorical(OPTIMIZER, [OPTIMIZER_ADAM, OPTIMIZER_SGD, OPTIMIZER_ADAMW]),
-		SCHEDULER: trial.suggest_categorical(SCHEDULER, [SCHEDULER_STEP, SCHEDULER_PLATEAU]),
-		# AUGMENTATION_RATE: trial.suggest_float(AUGMENTATION_RATE, 0.0, 1.0, step=0.1),
+		LEARNING_RATE: trial.suggest_float("lr", 0.000001, 0.01, log=True),
+		L1_REGULATION_WEIGHT: trial.suggest_float(L1_REGULATION_WEIGHT, 1e-7, 1e-1, log=True),
+		L2_REGULATION_WEIGHT: trial.suggest_float(L2_REGULATION_WEIGHT, 1e-7, 1e-1, log=True),
+		OPTIMIZER: trial.suggest_categorical(OPTIMIZER, [OPTIMIZER_ADAM, OPTIMIZER_ADAMW]),
+		SCHEDULER: SCHEDULER_PLATEAU,
+
 	}
 
-def get_beats_update_dict(trial, dataset, chunk_method, knn):
-	if knn:
-		ud = get_common_update_dict_knn(trial, BEATS, dataset, chunk_method)
-	else:
-		ud = get_common_update_dict(trial, BEATS, dataset, chunk_method, knn)
-		ud.update({
-			EPOCHS: 25,
-			BATCH_SIZE: 5,
-			MODEL_METHOD_TYPE: BEATS,
-			GRAD_ACCUMULATE_STEPS: 7,
-			TRANSFORMER_PARAMS: {
-				DROP0: trial.suggest_float(DROP0, 0.0, 0.8, step=0.2),
-				DROP1: trial.suggest_float(DROP1, 0.0, 0.8, step=0.2),
-				ACTIVATION: trial.suggest_categorical(ACTIVATION, [ACTIVATION_SILU, ACTIVATION_RELU]),
-				MODEL_SUB_TYPE: trial.suggest_int(MODEL_SUB_TYPE, 2, 3),
-			},
-		})
+def get_beats_update_dict(trial, dataset, chunk_method):
+	ud = get_common_update_dict(trial, BEATS, dataset, chunk_method)
+	ud.update({
+		EPOCHS: 25,
+		BATCH_SIZE: 5,
+		MODEL_METHOD_TYPE: BEATS,
+		GRAD_ACCUMULATE_STEPS: 7,
+		TRANSFORMER_PARAMS: {
+			DROP0: trial.suggest_float(DROP0, 0.0, 0.8, step=0.2),
+			DROP1: trial.suggest_float(DROP1, 0.0, 0.8, step=0.2),
+			ACTIVATION: trial.suggest_categorical(ACTIVATION, [ACTIVATION_SILU, ACTIVATION_RELU]),
+			MODEL_SUB_TYPE: trial.suggest_int(MODEL_SUB_TYPE, 2, 3),
+		},
+	})
 	return ud
 
-def get_cnn_update_dict(trial, dataset, chunk_method, knn):
-	ud = get_common_update_dict(trial, CNN, dataset, chunk_method, knn)
+def get_cnn_update_dict(trial, dataset, chunk_method):
+	ud = get_common_update_dict(trial, CNN, dataset, chunk_method)
 	ud.update({
 		EPOCHS: 30,
 		BATCH_SIZE: 72,
 		MODEL_METHOD_TYPE: CNN,
-		NORMALIZATION: trial.suggest_categorical(NORMALIZATION, [NORMALIZATION_MAX_ABS, NORMALIZATION_ZSCORE]),
+		NORMALIZATION: NORMALIZATION_MAX_ABS,
 		CNN_PARAMS: {
-			DROP0: trial.suggest_float(DROP0, 0.0, 0.8, step=0.2),
-			DROP1: trial.suggest_float(DROP1, 0.0, 0.8, step=0.2),
+			DROP0: 0.4,
+			DROP1: 0.6,
 			ACTIVATION: trial.suggest_categorical(ACTIVATION, [ACTIVATION_SILU, ACTIVATION_RELU]),
 			MODEL_SUB_TYPE: trial.suggest_int(MODEL_SUB_TYPE, 1, 4),
 			N_MELS: trial.suggest_int(N_MELS, 128, 2048, step=256),
-			HOP_LENGTH: trial.suggest_int(HOP_LENGTH, 64, 512, step=32),
+			HOP_LENGTH: trial.suggest_int(HOP_LENGTH, 32, 512, step=32),
 			N_FFT: trial.suggest_int(N_FFT, 128, 2048, step=256),
 		},
 	})
 	return ud
 
-def set_chunk_and_scheduler_params(ud, trial, dataset, chunk_method, knn):
+def set_chunk_and_scheduler_params(ud, trial, dataset, chunk_method):
 	ud[TRAIN_DATASET] =	dataset
 	ud[CHUNK_METHOD] = chunk_method
 	if ud[CHUNK_METHOD] == CHUNK_METHOD_CYCLES:
 		ud[CHUNK_HEARTCYCLE_COUNT] = trial.suggest_int(CHUNK_HEARTCYCLE_COUNT, 3, 17, step=1)
 		ud[AUDIO_LENGTH_NORM] = LENGTH_NORM_STRETCH
-		ud[CHUNK_DURATION] = trial.suggest_float("cycle_"+CHUNK_DURATION, 3.0, 18.0, step=1.0)
+		ud[CHUNK_DURATION] = trial.suggest_float("cycle_"+CHUNK_DURATION, 5.0, 18.0, step=1.0)
 	else:
-		ud[AUDIO_LENGTH_NORM] = trial.suggest_categorical( \
-			AUDIO_LENGTH_NORM, [LENGTH_NORM_PADDING, LENGTH_NORM_REPEAT, LENGTH_NORM_STRETCH])
-		ud[CHUNK_DURATION] = trial.suggest_float("fix_"+CHUNK_DURATION, 3.0, 18.0, step=1.0)
+		ud[AUDIO_LENGTH_NORM] = LENGTH_NORM_PADDING
+		ud[CHUNK_DURATION] = trial.suggest_float("fix_"+CHUNK_DURATION, 5.0, 18.0, step=1.0)
 
 	if ud[SCHEDULER] == SCHEDULER_PLATEAU:
-		ud[SCHEDULER_PATIENCE] = trial.suggest_int("plateau_patience", 5, 16, step=2)
+		ud[SCHEDULER_PATIENCE] = 10
 	elif ud[SCHEDULER] == SCHEDULER_STEP:
-		ud[SCHEDULER_PATIENCE] = trial.suggest_int("step_patience", 5, 25, step=5)
-	if not knn:
-		ud[SCHEDULER_FACTOR] = trial.suggest_float(SCHEDULER_FACTOR, 0.1, 0.9, step=0.2)
+		ud[SCHEDULER_PATIENCE] = 15
+	ud[SCHEDULER_FACTOR] = 0.5
 
-def objective(trial, get_update_dict, dataset, chunk_method, knn):
-	train_update_dict = get_update_dict(trial, dataset, chunk_method, knn)
-	set_chunk_and_scheduler_params(train_update_dict, trial, dataset, chunk_method, knn)
+def objective(trial, get_update_dict, dataset, chunk_method):
+	train_update_dict = get_update_dict(trial, dataset, chunk_method)
+	set_chunk_and_scheduler_params(train_update_dict, trial, dataset, chunk_method)
 	result = do_run(train_update_dict)
 
 	if result is not None and METRICS_NMCC in result:
@@ -201,17 +174,15 @@ def trial_callback(study, trial):
 			f.write(f"{key}: {value}\n")
 		f.write("\n#\n\n")
 
-def start_optimization(model_type, n_trials, dataset, chunk_method, knn=False):
+def start_optimization(model_type, n_trials, dataset, chunk_method):
 	study_name = f"{model_type.lower()}_{dataset}_{chunk_method}"
-	if knn:
-		study_name = f"{study_name}_knn"
 
-	storage_name = f"sqlite:///{FOLDER_OPTIMIZATION}/optim_survey_2.db"
+	storage_name = f"sqlite:///{FOLDER_OPTIMIZATION}/optim_survey_4.db"
 
 	try:
 		study = optuna.create_study(study_name=study_name, storage=storage_name, load_if_exists=True, direction="maximize")
 		def objective_func(trial):
-			return objective(trial, get_beats_update_dict if model_type == BEATS else get_cnn_update_dict, dataset, chunk_method, knn)
+			return objective(trial, get_beats_update_dict if model_type == BEATS else get_cnn_update_dict, dataset, chunk_method)
 		study.optimize(objective_func, n_trials=n_trials, callbacks=[trial_callback])
 
 		print("Best trial:")
@@ -229,18 +200,15 @@ def start_optimization(model_type, n_trials, dataset, chunk_method, knn=False):
 		except Exception as e:
 			best_val = -1
 			best_params = {}
-		send_result_mail(study_name, {"value": best_val, "params": best_params})
+		#send_result_mail(study_name, {"value": best_val, "params": best_params})
 		print("Study done")
 
 if __name__ == "__main__":
-	#start_optimization(CNN, n_trials=25, dataset=PHYSIONET_2022, chunk_method=CHUNK_METHOD_CYCLES)
-	#start_optimization(CNN, n_trials=25, dataset=PHYSIONET_2022, chunk_method=CHUNK_METHOD_FIXED)
+	start_optimization(CNN, n_trials=1, dataset=PHYSIONET_2022, chunk_method=CHUNK_METHOD_CYCLES)
+	start_optimization(CNN, n_trials=1, dataset=PHYSIONET_2022, chunk_method=CHUNK_METHOD_FIXED)
+	start_optimization(BEATS, n_trials=1, dataset=PHYSIONET_2022, chunk_method=CHUNK_METHOD_FIXED)
+
 	#start_optimization(CNN, n_trials=25, dataset=PHYSIONET_2016, chunk_method=CHUNK_METHOD_FIXED)
-
 	#start_optimization(BEATS, n_trials=1, dataset=PHYSIONET_2022, chunk_method=CHUNK_METHOD_CYCLES) # mehr machen
-	#start_optimization(BEATS, n_trials=1, dataset=PHYSIONET_2022, chunk_method=CHUNK_METHOD_FIXED)
 
-	start_optimization(BEATS, n_trials=7, dataset=PHYSIONET_2022, chunk_method=CHUNK_METHOD_FIXED, knn=True)
-	start_optimization(BEATS, n_trials=7, dataset=PHYSIONET_2022, chunk_method=CHUNK_METHOD_CYCLES, knn=True)
-	start_optimization(BEATS, n_trials=7, dataset=PHYSIONET_2016, chunk_method=CHUNK_METHOD_FIXED, knn=True)
-
+# TODO ausarbeiting: 50209_PV.wav - viele eindeutige Zyklen nciht labeleed

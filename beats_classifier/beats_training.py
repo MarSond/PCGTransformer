@@ -137,6 +137,8 @@ class BEATsTraining(ML_Loop):
 
 	def save_model(self, epoch, fold):
 		if self.is_knn_mode:
+			if not self.config[const.SAVE_MODEL]:
+				return
 			model_name = const.get_model_filename(type=f"{const.BEATS}_knn", epoch=epoch, fold=fold)
 			full_path = FileUtils.join([self.run.run_results_path, const.MODELS_FOLDER_NAME, model_name])
 			FileUtils.safe_path_create(full_path)

@@ -66,7 +66,7 @@ def do_run(config: dict):
 def get_base_config():
 	return {
 		TASK_TYPE: TRAINING,
-		METADATA_FRAC: 1.0,
+		METADATA_FRAC: 0.85,
 		TRAIN_FRAC: 0.8,
 		KFOLD_SPLITS: 1,
 		EPOCHS: 1,
@@ -74,6 +74,7 @@ def get_base_config():
 		BATCH_SIZE: 16,
 		OPTIMIZER: None,
 		SCHEDULER: None,
+		SAVE_MODEL: False,
 	}
 
 def get_beats_knn_params(trial):
@@ -89,7 +90,7 @@ def get_beats_knn_params(trial):
 
 			USE_SMOTE: trial.suggest_categorical(USE_SMOTE, [True, False], ),
 			USE_UMAP: trial.suggest_categorical(USE_UMAP, [True, False]),
-			USE_HDBSCAN: trial.suggest_categorical(USE_UMAP, [True, False]),
+			USE_HDBSCAN: trial.suggest_categorical(USE_HDBSCAN, [True, False]),
 
 		},
 	}
@@ -180,13 +181,15 @@ def start_optimization(config, n_trials):
 		except Exception as e:
 			best_val = -1
 			best_params = {}
-		send_result_mail(study_name, {"value": best_val, "params": best_params})
+		#send_result_mail(study_name, {"value": best_val, "params": best_params})
 		print("Study done")
 
 if __name__ == "__main__":
 
-	start_optimization({TRAIN_DATASET: PHYSIONET_2022, CHUNK_METHOD: CHUNK_METHOD_FIXED}, n_trials=4)
-	start_optimization({TRAIN_DATASET: PHYSIONET_2022, CHUNK_METHOD: CHUNK_METHOD_CYCLES}, n_trials=5)
+	start_optimization({TRAIN_DATASET: PHYSIONET_2022, CHUNK_METHOD: CHUNK_METHOD_FIXED}, n_trials=2)
+	start_optimization({TRAIN_DATASET: PHYSIONET_2022, CHUNK_METHOD: CHUNK_METHOD_CYCLES}, n_trials=2)
 	start_optimization({TRAIN_DATASET: PHYSIONET_2016, CHUNK_METHOD: CHUNK_METHOD_FIXED}, n_trials=2)
+	# Results -> Full extraction with best settings -> optim hdb, knn
+
 
 # TODO CNN 4x

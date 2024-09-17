@@ -34,7 +34,7 @@
 	  {
 		"label": "OPT Dash",
 		"type": "shell",
-		"command": "optuna-dashboard sqlite:///optimization/optim_survey_2.db --port 8082",
+		"command": "optuna-dashboard sqlite:///optimization/optim_survey_4.db --port 8082",
 		"group": {
 		  "kind": "build",
 		  "isDefault": true

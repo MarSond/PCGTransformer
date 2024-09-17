@@ -86,6 +86,7 @@ if __name__ == "__main__":
 		}
 	})
 
+	# maybe knn
 	physionet_2016_fixed_beats = base_config.copy()
 	physionet_2016_fixed_beats.update({
 		TRAIN_DATASET: PHYSIONET_2016,
