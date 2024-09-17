@@ -1,4 +1,5 @@
 import logging
+import pickle
 from pathlib import Path
 from typing import Any
 
@@ -10,7 +11,7 @@ from beats_classifier.beats_dataset import BEATsDataset
 from MLHelper import constants as const
 from MLHelper.dataset import AudioDataset
 from MLHelper.ml_loop import HookManager, ML_Loop
-from MLHelper.tools.utils import FileUtils, MLModelInfo, MLUtil, Plotting
+from MLHelper.tools.utils import FileUtils, Plotting
 from run import Run
 
 # TODO extraktor: nicht roh beats sondern beats + trainiertes 128 layer über 20 epochen
@@ -27,6 +28,7 @@ class BEATsTraining(ML_Loop):
 		self.beats_params = self.run.config[const.TRANSFORMER_PARAMS]
 		self.knn_classifier = None
 		self.is_knn_mode = self.beats_params[const.MODEL_SUB_TYPE] == const.MODEL_TYPE_KNN
+		self.load_embeddings_run_name = self.run.config.get(const.LOAD_EMBEDDINGS_FROM_RUN_NAME)
 
 	def set_training_utilities(self, start_model, optimizer, scheduler, scaler):
 		self.model = start_model
@@ -50,6 +52,7 @@ class BEATsTraining(ML_Loop):
 	@HookManager.hook_wrapper("training_step")
 	def training_step(self, inputs: torch.Tensor, labels: torch.Tensor):
 		if self.is_knn_mode:
+			assert self.load_embeddings_run_name is None, "Load embeddings directly, not via training loop"
 			inputs = inputs.to(self.run.device)
 			labels = labels.to(self.run.device)
 			self.knn_classifier.add_training_example(inputs, labels)
@@ -64,12 +67,31 @@ class BEATsTraining(ML_Loop):
 				probabilities = torch.tensor(probabilities)
 			return torch.tensor(77.7), probabilities, labels
 		return super().validation_step(inputs, labels)
-# TODO save knn model
+
+	def load_embeddings_from_file(self, fold):
+		if self.load_embeddings_run_name:
+			base_path = Path(self.run.config[const.RUN_FOLDER]) / self.load_embeddings_run_name / const.OTHER_FOLDER_NAME
+			pkl_path = base_path / f"{const.FOLD}{fold}_{const.FILENAME_EMBEDDINGS_VALUE}"
+
+			if pkl_path.exists():
+				with pkl_path.open("rb") as file:
+					data = pickle.load(file)
+					self.knn_classifier.embedding_data = data[const.EMBEDDINGS]
+					self.knn_classifier.embedding_labels = data[const.LABELS]
+					assert data[const.FOLD] == fold
+				self.run.log_training(f"Embeddings loaded from {pkl_path}", level=logging.INFO)
+			else:
+				self.run.log_training(f"Embeddings file not found: {pkl_path}", level=logging.ERROR)
+				raise FileNotFoundError(f"Embeddings file not found: {pkl_path}")
+
 	@HookManager.hook_wrapper("epoch")
 	def epoch_loop(self, epoch: int, fold_idx: int, **kwargs: Any) -> None:
 		if self.config[const.TASK_TYPE] == const.TRAINING:
 			if self.is_knn_mode:
-				self.training_epoch_loop(epoch=epoch, fold=fold_idx)
+				if self.load_embeddings_run_name is None:
+					self.training_epoch_loop(epoch=epoch, fold=fold_idx)
+				else:
+					self.load_embeddings_from_file(fold=fold_idx)
 				self.knn_classifier.build_pipeline()
 				self.knn_classifier.fit_pipeline()
 				self.create_umap_plots_hook(epoch=epoch, fold=fold_idx)
@@ -98,7 +120,6 @@ class BEATsTraining(ML_Loop):
 
 	def save_embeddings_to_file(self, embeddings, labels, fold):
 		if self.config[const.EMBEDDING_PARAMS].get(const.EMBEDDING_SAVE_TO_FILE, False):
-			import pickle # TODO check if embeddings are saved after smote or BEFORE
 			base_path = Path(self.run.run_results_path) / const.OTHER_FOLDER_NAME
 			pkl_path = base_path / f"{const.FOLD}{fold}_{const.FILENAME_EMBEDDINGS_VALUE}"
 			FileUtils.safe_path_create(pkl_path)
@@ -113,7 +134,7 @@ class BEATsTraining(ML_Loop):
 
 		if embeddings.ndim == 1:
 			embeddings = embeddings.reshape(-1, 1)
-		reducer = umap.UMAP(random_state=const.SEED_VALUE, n_neighbors=n_neighbors, min_dist=min_dist)
+		reducer = umap.UMAP(random_state=const.SEED_VALUE, n_neighbors=n_neighbors, min_dist=min_dist, low_memory=False)
 		umap_embeddings = reducer.fit_transform(embeddings, y=labels)
 
 		fig_2d = Plotting.DimensionReduction.plot_umap2d(umap_embeddings, labels, n_neighbors=n_neighbors, min_dist=min_dist)
@@ -124,16 +145,20 @@ class BEATsTraining(ML_Loop):
 
 		self.run.log_training(f"UMAP plots saved for epoch {epoch}, fold {fold}", level=logging.INFO)
 
-# TODO text: metghoden wie smote wurden bei CNN statdessen mittels FocalLoss angegangen
+# TODO text: methoden wie smote wurden bei CNN statdessen mittels FocalLoss angegangen
 	def create_umap_plots_hook(self, epoch: int, fold: int, **kwargs: Any) -> None:
 		if self.is_knn_mode:
 			self.run.logger_dict[const.LOGGER_TRAINING].info("Creating UMAP plots")
 			embeddings = self.knn_classifier.embedding_data
 			labels = self.knn_classifier.embedding_labels
-			self.save_embeddings_to_file(embeddings, labels, fold)
-			self.create_umap_plots(embeddings, labels, epoch, fold)
-			classifier = self.knn_classifier.pipeline.named_steps["classifier"].classifier
-			self.create_umap_plots(classifier._fit_X, classifier._y, epoch, fold, name="after_transformation")
+			if not self.load_embeddings_run_name:
+				self.save_embeddings_to_file(embeddings, labels, fold)
+				self.create_umap_plots(embeddings, labels, epoch, fold)
+			try:
+				classifier = self.knn_classifier.pipeline.named_steps["classifier"].classifier
+				self.create_umap_plots(classifier._fit_X, classifier._y, epoch, fold, name="after_transformation")
+			except Exception as e:
+				self.run.logger_dict[const.LOGGER_TRAINING].warning(f"Failed to create UMAP plots: {e}")
 
 	def save_model(self, epoch, fold):
 		if self.is_knn_mode:

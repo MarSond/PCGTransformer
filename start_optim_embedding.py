@@ -88,7 +88,7 @@ def get_beats_knn_params(trial):
 			KNN_WEIGHT: trial.suggest_categorical(KNN_WEIGHT, [KNN_WEIGHT_UNIFORM, KNN_WEIGHT_DISTANCE]),
 			KNN_METRIC: trial.suggest_categorical(KNN_METRIC, [KNN_METRIC_EUCLIDEAN, KNN_METRIC_MANHATTAN]),
 
-			USE_SMOTE: trial.suggest_categorical(USE_SMOTE, [True, False], ),
+			USE_SMOTE: trial.suggest_categorical(USE_SMOTE, [True, False]),
 			USE_UMAP: trial.suggest_categorical(USE_UMAP, [True, False]),
 			USE_HDBSCAN: trial.suggest_categorical(USE_HDBSCAN, [True, False]),
 

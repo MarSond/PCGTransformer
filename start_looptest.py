@@ -31,6 +31,8 @@ if __name__ == "__main__":
 		TRANSFORMER_PARAMS: {MODEL_SUB_TYPE: MODEL_TYPE_KNN},
 	})
 
+
+	# General test for KNN embeddings mode
 	knn_test_dict = knn_base_dict.copy()
 	knn_test_dict.update({
 		TRAIN_DATASET: PHYSIONET_2022, KFOLD_SPLITS: 1,
@@ -48,13 +50,26 @@ if __name__ == "__main__":
 			EMBEDDINGS_REDUCE_UMAP_N_COMPONENTS: 10,
 		},
 	})
-
 	#do_run(knn_test_dict)
 
 
+	##### To test loading from ebeddings
+	knn_continue_dict = knn_base_dict.copy()
+	knn_continue_dict.update({
+		TRAIN_DATASET: PHYSIONET_2016,
+		KFOLD_SPLITS: 1,
+		METADATA_FRAC: 1.0,
+		CHUNK_DURATION: 9.0,
+		CHUNK_METHOD: CHUNK_METHOD_FIXED,
+		AUDIO_LENGTH_NORM: LENGTH_NORM_PADDING,
+		LOAD_EMBEDDINGS_FROM_RUN_NAME: "2024-09-17_15-50-38_2016_fix_optim_audio",
+	})
+	do_run(knn_continue_dict)
+
+	########## To extract all embeddings for further training ##########
 	knn_extract_2016_fix = knn_base_dict.copy()
 	knn_extract_2016_fix.update({
-		TRAIN_DATASET: PHYSIONET_2016, 
+		TRAIN_DATASET: PHYSIONET_2016,
 		KFOLD_SPLITS: 1,
 		METADATA_FRAC: 1.0,
 		SAVE_MODEL: True,
@@ -63,8 +78,7 @@ if __name__ == "__main__":
 		CHUNK_DURATION: 9.0,
 		RUN_NAME_SUFFIX: "2016_fix_optim_audio",
 	})
-	do_run(knn_extract_2016_fix)
-
+	#do_run(knn_extract_2016_fix)
 
 	knn_extract_2022_fix = knn_base_dict.copy()
 	knn_extract_2022_fix.update({
@@ -77,7 +91,7 @@ if __name__ == "__main__":
 		CHUNK_DURATION: 5.0,
 		RUN_NAME_SUFFIX: "2022_fix_optim_audio",
 	})
-	do_run(knn_extract_2022_fix)
+	#do_run(knn_extract_2022_fix)
 
 	knn_extract_2022_cycle = knn_base_dict.copy()
 	knn_extract_2022_cycle.update({
@@ -91,18 +105,20 @@ if __name__ == "__main__":
 		CHUNK_DURATION: 9.0,
 		RUN_NAME_SUFFIX: "2022_cycle_optim_audio",
 	})
-	do_run(knn_extract_2022_cycle)
+	#do_run(knn_extract_2022_cycle)
 
 ######
+
+	##### To test fold and epoch logic
 	fold_test_dict = train_update_dict.copy()
 	fold_test_dict.update({
 		MODEL_METHOD_TYPE: CNN,
 		TRAIN_DATASET: PHYSIONET_2016, KFOLD_SPLITS: 3, EPOCHS: 2,
 	})
-
-
 	#do_run(fold_test_dict)
 
+
+	##### To test continue from a saved model checkpoint
 	continue_test = {
 		METADATA_FRAC: 0.05, RUN_NAME_SUFFIX: "continue-test", EPOCHS: 82,
 		TRAINING_CHECKPOINT: {EPOCH: 80, RUN_NAME: "2024-07-12_21-52-51_combined-optimized-2", FOLD: 1},
@@ -110,3 +126,7 @@ if __name__ == "__main__":
 	}
 
 	# do_run(continue_test)
+
+# 2024-09-17_12-59-02_2016_fix_optim_audio
+# 2024-09-17_13-02-44_2022_fix_optim_audio
+# 2024-09-17_13-05-43_2022_cycle_optim_audio

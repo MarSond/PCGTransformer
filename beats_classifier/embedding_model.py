@@ -240,7 +240,7 @@ class EmbeddingClassifier(nn.Module):
 		self.tensor_logger.info(f"Embeddings shape after extraction: {embeddings.shape}")
 
 		combined_embeddings = self.combine_embeddings(embeddings, self.emb_params[const.EMBEDDING_COMBINE_METHOD])
-		self.tensor_logger.warning(f"Embeddings shape after combining: {embeddings.shape}")
+		self.tensor_logger.info(f"Embeddings shape after combining: {embeddings.shape}")
 
 
 		# Use transform method directly for inference (which includes validation)
