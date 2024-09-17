@@ -69,7 +69,7 @@ def do_run(config: dict):
 def get_base_config():
 	return {
 		TASK_TYPE: TRAINING,
-		METADATA_FRAC: 0.85,
+		METADATA_FRAC: 1.0,
 		TRAIN_FRAC: 0.8,
 		KFOLD_SPLITS: 1,
 		EPOCHS: 1,
@@ -129,7 +129,7 @@ def objective(trial, config):
 	update_dict = get_base_config()
 	update_dict.update(config)
 	update_dict.update(get_beats_knn_params(trial))
-	update_dict.update(get_chunk_params(trial, config[CHUNK_METHOD]))
+	#update_dict.update(get_chunk_params(trial, config[CHUNK_METHOD]))
 	update_dict[RUN_NAME_SUFFIX] = f"optuna_{config[TRAIN_DATASET]}_{config[CHUNK_METHOD]}_beats_knn_{trial.number}"
 
 	result = do_run(update_dict)
@@ -162,7 +162,7 @@ def trial_callback(study, trial):
 		f.write("\n#\n\n")
 
 def start_optimization(config, n_trials):
-	study_name = f"beats_knn_{config[TRAIN_DATASET]}_{config[CHUNK_METHOD]}"
+	study_name = f"beats_knn_{config[TRAIN_DATASET]}_{config[CHUNK_METHOD]}_embedding"
 	storage_name = f"sqlite:///{FOLDER_OPTIMIZATION}/optim_survey_3.db"
 
 	try:
@@ -188,11 +188,16 @@ def start_optimization(config, n_trials):
 		print("Study done")
 
 if __name__ == "__main__":
-
-	start_optimization({TRAIN_DATASET: PHYSIONET_2022, CHUNK_METHOD: CHUNK_METHOD_FIXED}, n_trials=2)
-	start_optimization({TRAIN_DATASET: PHYSIONET_2022, CHUNK_METHOD: CHUNK_METHOD_CYCLES}, n_trials=2)
-	start_optimization({TRAIN_DATASET: PHYSIONET_2016, CHUNK_METHOD: CHUNK_METHOD_FIXED}, n_trials=2)
-	# Results -> Full extraction with best settings -> optim hdb, knn
-
-
-# TODO CNN 4x
+    configs = [
+        {TRAIN_DATASET: PHYSIONET_2016, CHUNK_DURATION: 9.0, CHUNK_METHOD: CHUNK_METHOD_FIXED, LOAD_EMBEDDINGS_FROM_RUN_NAME: "2024-09-17_15-50-38_2016_fix_optim_audio"},
+        {TRAIN_DATASET: PHYSIONET_2022, CHUNK_DURATION: 5.0, CHUNK_METHOD: CHUNK_METHOD_FIXED, LOAD_EMBEDDINGS_FROM_RUN_NAME: "2024-09-17_13-02-44_2022_fix_optim_audio"},
+        {
+			TRAIN_DATASET: PHYSIONET_2022, CHUNK_DURATION: 9.0, CHUNK_HEARTCYCLE_COUNT: 12,
+			AUDIO_LENGTH_NORM: LENGTH_NORM_STRETCH,
+			CHUNK_METHOD: CHUNK_METHOD_CYCLES,
+			LOAD_EMBEDDINGS_FROM_RUN_NAME: "2024-09-17_13-05-43_2022_cycle_optim_audio"
+		},
+    ]
+	# TODO POST VERIFY settings for NO 2+3
+    for config in configs:
+        start_optimization(config, n_trials=5)
