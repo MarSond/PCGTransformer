@@ -3,6 +3,10 @@ from run import Run
 
 
 def do_run(config: dict):
+	# sleep 3 sec
+	print("starting in 3 sec...")
+	import time
+	time.sleep(3)
 	run = Run(config_update_dict=config)
 	run.setup_task()
 	result = run.start_task()
@@ -66,46 +70,18 @@ if __name__ == "__main__":
 	})
 	do_run(knn_continue_dict)
 
-	########## To extract all embeddings for further training ##########
-	knn_extract_2016_fix = knn_base_dict.copy()
-	knn_extract_2016_fix.update({
+	##### To test loading from ebeddings
+	knn_continue_dict = knn_base_dict.copy()
+	knn_continue_dict.update({
 		TRAIN_DATASET: PHYSIONET_2016,
 		KFOLD_SPLITS: 1,
 		METADATA_FRAC: 1.0,
-		SAVE_MODEL: True,
+		CHUNK_DURATION: 9.0,
 		CHUNK_METHOD: CHUNK_METHOD_FIXED,
 		AUDIO_LENGTH_NORM: LENGTH_NORM_PADDING,
-		CHUNK_DURATION: 9.0,
-		RUN_NAME_SUFFIX: "2016_fix_optim_audio",
+		LOAD_EMBEDDINGS_FROM_RUN_NAME: "2024-09-17_15-50-38_2016_fix_optim_audio",
 	})
-	#do_run(knn_extract_2016_fix)
-
-	knn_extract_2022_fix = knn_base_dict.copy()
-	knn_extract_2022_fix.update({
-		TRAIN_DATASET: PHYSIONET_2022,
-		KFOLD_SPLITS: 1,
-		METADATA_FRAC: 1.0,
-		SAVE_MODEL: True,
-		AUDIO_LENGTH_NORM: LENGTH_NORM_PADDING,
-		CHUNK_METHOD: CHUNK_METHOD_FIXED,
-		CHUNK_DURATION: 5.0,
-		RUN_NAME_SUFFIX: "2022_fix_optim_audio",
-	})
-	#do_run(knn_extract_2022_fix)
-
-	knn_extract_2022_cycle = knn_base_dict.copy()
-	knn_extract_2022_cycle.update({
-		TRAIN_DATASET: PHYSIONET_2022,
-		KFOLD_SPLITS: 1,
-		METADATA_FRAC: 1.0,
-		SAVE_MODEL: True,
-		AUDIO_LENGTH_NORM: LENGTH_NORM_STRETCH,
-		CHUNK_METHOD: CHUNK_METHOD_CYCLES,
-		CHUNK_HEARTCYCLE_COUNT: 12,
-		CHUNK_DURATION: 9.0,
-		RUN_NAME_SUFFIX: "2022_cycle_optim_audio",
-	})
-	#do_run(knn_extract_2022_cycle)
+	do_run(knn_continue_dict)
 
 ######
 
@@ -127,6 +103,7 @@ if __name__ == "__main__":
 
 	# do_run(continue_test)
 
+# Run names to use:
 # 2024-09-17_12-59-02_2016_fix_optim_audio
 # 2024-09-17_13-02-44_2022_fix_optim_audio
 # 2024-09-17_13-05-43_2022_cycle_optim_audio

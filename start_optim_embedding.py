@@ -53,6 +53,9 @@ def send_result_mail(name: str, results: dict):
 
 def do_run(config: dict):
 	try:
+		print("starting in 3 sec...")
+		import time
+		time.sleep(3)
 		run = Run(config_update_dict=config)
 		run.setup_task()
 		result = run.start_task()

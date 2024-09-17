@@ -98,8 +98,8 @@ def get_beats_update_dict(trial, dataset, chunk_method):
 		MODEL_METHOD_TYPE: BEATS,
 		GRAD_ACCUMULATE_STEPS: 7,
 		TRANSFORMER_PARAMS: {
-			DROP0: trial.suggest_float(DROP0, 0.0, 0.8, step=0.2),
-			DROP1: trial.suggest_float(DROP1, 0.0, 0.8, step=0.2),
+			DROP0: 0.4,
+			DROP1: 0.6,
 			ACTIVATION: trial.suggest_categorical(ACTIVATION, [ACTIVATION_SILU, ACTIVATION_RELU]),
 			MODEL_SUB_TYPE: trial.suggest_int(MODEL_SUB_TYPE, 2, 3),
 		},
