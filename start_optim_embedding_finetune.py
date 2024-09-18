@@ -266,5 +266,5 @@ if __name__ == "__main__":
 	# for config, ranges in zip(configs, param_ranges):
 	# 	start_optimization(config, ranges, n_trials=10)
 	start_optimization(configs[2], param_ranges[2], n_trials=10)
-	start_optimization(configs[1], param_ranges[1], n_trials=10)
-	start_optimization(configs[0], param_ranges[0], n_trials=7)
+	start_optimization(configs[1], param_ranges[1], n_trials=5)
+	#start_optimization(configs[0], param_ranges[0], n_trials=1)

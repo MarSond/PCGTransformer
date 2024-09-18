@@ -45,6 +45,7 @@ if __name__ == "__main__":
 	knn_config = base_config.copy()
 	knn_config.update({
 		EPOCHS: 1,
+		BATCH_SIZE: 16,
 		MODEL_METHOD_TYPE: BEATS,
 		TRANSFORMER_PARAMS: {
 			MODEL_SUB_TYPE: MODEL_TYPE_KNN,
@@ -87,10 +88,14 @@ if __name__ == "__main__":
 		TRAIN_DATASET: PHYSIONET_2016,
 		RUN_NAME_SUFFIX: "2016_fixed_beats_knn_finalrun",
 		CHUNK_METHOD: CHUNK_METHOD_FIXED,
+		CHUNK_DURATION: 10.0,
 		EMBEDDING_PARAMS: {
 			KNN_N_NEIGHBORS: 5,
-			KNN_WEIGHT: KNN_WEIGHT_DISTANCE,
-			KNN_METRIC: KNN_METRIC_COSINE,
+			KNN_WEIGHT: KNN_WEIGHT_UNIFORM,
+			KNN_METRIC: KNN_METRIC_EUCLIDEAN,
+			USE_SMOTE: True,
+			USE_HDBSCAN: False,
+			USE_UMAP: False,
 		}
 	})
 
@@ -154,13 +159,14 @@ if __name__ == "__main__":
 		TRAIN_DATASET: PHYSIONET_2022,
 		RUN_NAME_SUFFIX: "2022_fixed_beats_knn_finalrun",
 		CHUNK_METHOD: CHUNK_METHOD_FIXED,
-		TRANSFORMER_PARAMS: {
-			MODEL_SUB_TYPE: MODEL_TYPE_KNN,
-		},
+		CHUNK_DURATION: 5.0,
 		EMBEDDING_PARAMS: {
-			KNN_N_NEIGHBORS: 5,
+			KNN_N_NEIGHBORS: 23,
 			KNN_WEIGHT: KNN_WEIGHT_DISTANCE,
-			KNN_METRIC: KNN_METRIC_COSINE,
+			KNN_METRIC: KNN_METRIC_EUCLIDEAN,
+			USE_SMOTE: False,
+			USE_HDBSCAN: False,
+			USE_UMAP: False,
 		}
 	})
 
@@ -195,28 +201,38 @@ if __name__ == "__main__":
 	physionet_2022_cycles_beats_knn.update({
 		TRAIN_DATASET: PHYSIONET_2022,
 		RUN_NAME_SUFFIX: "2022_cycles_beats_knn_finalrun",
-		CHUNK_HEARTCYCLE_COUNT: 5,
 		CHUNK_METHOD: CHUNK_METHOD_CYCLES,
+		CHUNK_HEARTCYCLE_COUNT: 12,
+		CHUNK_DURATION: 8.0,
 		EMBEDDING_PARAMS: {
-			KNN_N_NEIGHBORS: 5,
-			KNN_WEIGHT: KNN_WEIGHT_DISTANCE,
-			KNN_METRIC: KNN_METRIC_COSINE,
+			KNN_N_NEIGHBORS: 21,
+			KNN_WEIGHT: KNN_WEIGHT_UNIFORM,
+			KNN_METRIC: KNN_METRIC_EUCLIDEAN,
+			USE_SMOTE: True,
+			USE_HDBSCAN: False,
+			USE_UMAP: True,
+			EMBEDDINGS_REDUCE_UMAP_MIN_DIST: 0.1,
+			EMBEDDINGS_REDUCE_UMAP_N_NEIGHBORS: 10,
+			EMBEDDINGS_REDUCE_UMAP_N_COMPONENTS: 7,
 		}
 	})
 
 	# Execute runs
 	models_to_run = [
+		physionet_2016_fixed_beats_knn,		# started
+		physionet_2022_fixed_beats_knn,
+		physionet_2022_cycles_beats_knn
 		physionet_2016_fixed_cnn,			# started
-		# physionet_2016_fixed_beats_knn,
 		physionet_2022_fixed_cnn,			# started
-		# physionet_2022_fixed_beats_knn,
 		physionet_2022_cycles_cnn,			# started
-		# physionet_2022_cycles_beats_knn
 		physionet_2022_fixed_beats_linear,	# started
 	]
 
 	# TODO wenn ergebnisse nicht zufriedenstellend: Stumpf bestes ergebnis nachtrainieren
 
+	# TODO test mit force HDB scan
+	# HDB scan ganz weglassen
+	# Wenn doch: outlier analyse manuell später durchführen
 	for model_config in models_to_run:
 		do_run(model_config)
 
