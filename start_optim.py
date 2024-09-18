@@ -85,7 +85,7 @@ def get_common_update_dict(trial, model_type, dataset, chunk_method):
 		LEARNING_RATE: trial.suggest_float("lr", 0.000001, 0.01, log=True),
 		L1_REGULATION_WEIGHT: trial.suggest_float(L1_REGULATION_WEIGHT, 1e-7, 1e-1, log=True),
 		L2_REGULATION_WEIGHT: trial.suggest_float(L2_REGULATION_WEIGHT, 1e-7, 1e-1, log=True),
-		OPTIMIZER: trial.suggest_categorical(OPTIMIZER, [OPTIMIZER_ADAM, OPTIMIZER_ADAMW]),
+
 		SCHEDULER: SCHEDULER_PLATEAU,
 
 	}
@@ -97,11 +97,12 @@ def get_beats_update_dict(trial, dataset, chunk_method):
 		BATCH_SIZE: 5,
 		MODEL_METHOD_TYPE: BEATS,
 		GRAD_ACCUMULATE_STEPS: 7,
+		OPTIMIZER: OPTIMIZER_ADAMW,
 		TRANSFORMER_PARAMS: {
 			DROP0: 0.4,
 			DROP1: 0.6,
-			ACTIVATION: trial.suggest_categorical(ACTIVATION, [ACTIVATION_SILU, ACTIVATION_RELU]),
-			MODEL_SUB_TYPE: trial.suggest_int(MODEL_SUB_TYPE, 2, 3),
+			ACTIVATION: ACTIVATION_RELU,
+			MODEL_SUB_TYPE: 3,
 		},
 	})
 	return ud
@@ -113,6 +114,7 @@ def get_cnn_update_dict(trial, dataset, chunk_method):
 		BATCH_SIZE: 72,
 		MODEL_METHOD_TYPE: CNN,
 		NORMALIZATION: NORMALIZATION_MAX_ABS,
+		OPTIMIZER: trial.suggest_categorical(OPTIMIZER, [OPTIMIZER_ADAM, OPTIMIZER_ADAMW]),
 		CNN_PARAMS: {
 			DROP0: 0.4,
 			DROP1: 0.6,
@@ -175,7 +177,7 @@ def trial_callback(study, trial):
 		f.write("\n#\n\n")
 
 def start_optimization(model_type, n_trials, dataset, chunk_method):
-	study_name = f"{model_type.lower()}_{dataset}_{chunk_method}"
+	study_name = f"{model_type.lower()}_{dataset}_{chunk_method}_2"
 
 	storage_name = f"sqlite:///{FOLDER_OPTIMIZATION}/optim_survey_4.db"
 
@@ -204,8 +206,8 @@ def start_optimization(model_type, n_trials, dataset, chunk_method):
 		print("Study done")
 
 if __name__ == "__main__":
-	start_optimization(CNN, n_trials=1, dataset=PHYSIONET_2022, chunk_method=CHUNK_METHOD_CYCLES)
-	start_optimization(CNN, n_trials=1, dataset=PHYSIONET_2022, chunk_method=CHUNK_METHOD_FIXED)
+	#start_optimization(CNN, n_trials=1, dataset=PHYSIONET_2022, chunk_method=CHUNK_METHOD_CYCLES)
+	#start_optimization(CNN, n_trials=1, dataset=PHYSIONET_2022, chunk_method=CHUNK_METHOD_FIXED)
 	start_optimization(BEATS, n_trials=1, dataset=PHYSIONET_2022, chunk_method=CHUNK_METHOD_FIXED)
 
 	#start_optimization(CNN, n_trials=25, dataset=PHYSIONET_2016, chunk_method=CHUNK_METHOD_FIXED)
