@@ -50,7 +50,7 @@ project_config = {
 	LEARNING_RATE: 0.001,			# initial learning rate
 	SCHEDULER_FACTOR: 0.1,
 
-	L1_REGULATION_WEIGHT: 0.000001,	# L1 weight decay, used with raw loss in step function # TODO test 0 or NOne as default
+	L1_REGULATION_WEIGHT: 0.0,	# L1 weight decay, used with raw loss in step function # TODO test 0 or NOne as default
 	L2_REGULATION_WEIGHT: 0.000001,	# L2 weight decay, passed to optimizer
 	LOSS_FUNCTION: LOSS_FOCAL_LOSS,	# LOSS_CROSS_ENTROPY, LOSS_FOCAL_LOSS
 	LOSS_FUNCTION_PARAMETER_1: 2.0,	# Focal Loss: gamma,

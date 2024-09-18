@@ -58,6 +58,8 @@ class BEATsDataset(Dataset):
 			normalized_audio = preprocessing.max_abs_normalization(filtered_audio)
 		elif self.config[const.NORMALIZATION] == const.NORMALIZATION_ZSCORE:
 			normalized_audio = preprocessing.zscore_normalization(filtered_audio)
+		else:
+			normalized_audio = filtered_audio
 
 		if self.mode != const.VALIDATION:
 			_audio_augmentation = \

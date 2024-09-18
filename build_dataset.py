@@ -357,13 +357,13 @@ def save_statistics(dataset: AudioDataset, stats_dir: Path):
 
 		if isinstance(dataset, Physionet2022):
 			heartcycles = train_data[const.META_HEARTCYCLES]
-			heartcycles_lengths = heartcycles.apply(len)
+			heartcycles_counts = heartcycles.apply(len)
 			f.write("Heartcycles statistics:\n")
-			f.write(f"Min: {heartcycles_lengths.min()}\n")
-			f.write(f"Max: {heartcycles_lengths.max()}\n")
-			f.write(f"Mean: {heartcycles_lengths.mean():.2f}\n")
-			f.write(f"Std: {heartcycles_lengths.std():.2f}\n")
-			f.write(f"Median: {heartcycles_lengths.median()}\n\n")
+			f.write(f"Min: {heartcycles_counts.min()}\n")
+			f.write(f"Max: {heartcycles_counts.max()}\n")
+			f.write(f"Mean: {heartcycles_counts.mean():.2f}\n")
+			f.write(f"Std: {heartcycles_counts.std():.2f}\n")
+			f.write(f"Median: {heartcycles_counts.median()}\n\n")
 
 			train_data["bpm"] = train_data[const.META_HEARTCYCLES].apply(calculate_bpm)
 			f.write("BPM statistics:\n")

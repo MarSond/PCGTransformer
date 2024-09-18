@@ -3,10 +3,6 @@ from run import Run
 
 
 def do_run(config: dict):
-	# sleep 3 sec
-	print("starting in 3 sec...")
-	import time
-	time.sleep(3)
 	run = Run(config_update_dict=config)
 	run.setup_task()
 	result = run.start_task()
@@ -54,7 +50,7 @@ if __name__ == "__main__":
 			EMBEDDINGS_REDUCE_UMAP_N_COMPONENTS: 10,
 		},
 	})
-	#do_run(knn_test_dict)
+	do_run(knn_test_dict)
 	####
 
 	########## To extract all embeddings for further training ##########
@@ -109,7 +105,7 @@ if __name__ == "__main__":
 		AUDIO_LENGTH_NORM: LENGTH_NORM_PADDING,
 		LOAD_EMBEDDINGS_FROM_RUN_NAME: "2024-09-17_15-50-38_2016_fix_optim_audio",
 	})
-	do_run(knn_continue_emb_dict)
+	#do_run(knn_continue_emb_dict)
 
 
 ######

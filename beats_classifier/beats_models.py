@@ -62,7 +62,7 @@ class BEATsBase(nn.Module):
 		self.tensor_logger.info(f"BEATs extract_features output shape: {x.shape}")
 		return x
 
-class BEATsModel(BEATsBase):
+class BEATsModel1(BEATsBase):
 	def __init__(self, run: Run):
 		super().__init__(run)
 
@@ -74,9 +74,7 @@ class BEATsModel(BEATsBase):
 
 		# Pass through the classifier
 		self.tensor_logger.debug(f"BEATsModel classifier input shape: {x.shape}")
-
 		x = self.classifier(x)
-
 		self.tensor_logger.info(f"BEATsModel classifier output shape: {x.shape}")
 
 		return x
@@ -84,12 +82,12 @@ class BEATsModel(BEATsBase):
 def get_model(run: Run):
 	model_sub_type = run.config[const.TRANSFORMER_PARAMS][const.MODEL_SUB_TYPE]
 	if model_sub_type == 1:
-		model = BEATsModel(run)
+		model = BEATsModel1(run)
 	elif model_sub_type == 2:
 		model = BEATsModel2(run)
 	elif model_sub_type == 3:
 		model = BEATsModel3(run)
-	elif model_sub_type == 0 or model_sub_type == const.MODEL_TYPE_KNN:
+	elif model_sub_type in (0, const.MODEL_TYPE_KNN):
 		model = BEATsBase(run)
 	else:
 		raise ValueError(f"Model sub type {model_sub_type} not supported.")
