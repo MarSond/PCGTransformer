@@ -136,13 +136,13 @@ if __name__ == "__main__":
 		MODEL_METHOD_TYPE: BEATS,
 		CHUNK_METHOD: CHUNK_METHOD_FIXED,
 		RUN_NAME_SUFFIX: "2022_fixed_beats_linear_finalrun",
-		CHUNK_DURATION: 10.0,
+		CHUNK_DURATION: 8.0,
 		OPTIMIZER: OPTIMIZER_ADAMW,
-		LEARNING_RATE: 0.0001,
-		SCHEDULER: SCHEDULER_PLATEAU,
+		LEARNING_RATE: 0.001,
+		SCHEDULER: SCHEDULER_STEP,
 		SCHEDULER_PATIENCE: 10,
 		SCHEDULER_FACTOR: 0.5,
-		AUGMENTATION_RATE: 0.7,
+		AUGMENTATION_RATE: 0.6,
 		BATCH_SIZE: 5,
 		GRAD_ACCUMULATE_STEPS: 7,
 		L1_REGULATION_WEIGHT:  0.0001,
@@ -181,6 +181,7 @@ if __name__ == "__main__":
 		CHUNK_METHOD: CHUNK_METHOD_CYCLES,
 		CHUNK_HEARTCYCLE_COUNT: 7,
 		AUGMENTATION_RATE: 0.6,
+		AUDIO_LENGTH_NORM: LENGTH_NORM_STRETCH,
 		CHUNK_DURATION: 10.0,
 		OPTIMIZER: OPTIMIZER_ADAMW,
 		LEARNING_RATE: 5.0e-5,
@@ -260,6 +261,7 @@ if __name__ == "__main__":
 		TRAIN_DATASET: PHYSIONET_2022,
 		RUN_NAME_SUFFIX: "2022_cycles_beats_knn_finalrun_v2",
 		CHUNK_METHOD: CHUNK_METHOD_CYCLES,
+		AUDIO_LENGTH_NORM: LENGTH_NORM_STRETCH,
 		CHUNK_HEARTCYCLE_COUNT: 12,
 		CHUNK_DURATION: 8.0,
 		EMBEDDING_PARAMS: {
@@ -273,51 +275,116 @@ if __name__ == "__main__":
 	})
 
 	# 2022 Cycles BEATS kNN
-	physionet_2022_cycles_beats_knn_v3 = knn_config.copy()
-	physionet_2022_cycles_beats_knn_v3.update({
+	physionet_2022_cycles_beats_knn_v5 = knn_config.copy()
+	physionet_2022_cycles_beats_knn_v5.update({
 		TRAIN_DATASET: PHYSIONET_2022,
-		RUN_NAME_SUFFIX: "2022_cycles_beats_knn_finalrun_v3",
+		RUN_NAME_SUFFIX: "2022_cycles_beats_knn_finalrun_v5",
 		CHUNK_METHOD: CHUNK_METHOD_CYCLES,
-		CHUNK_HEARTCYCLE_COUNT: 12,
-		CHUNK_DURATION: 8.0,
+		AUDIO_LENGTH_NORM: LENGTH_NORM_STRETCH,
+		CHUNK_HEARTCYCLE_COUNT: 11,
+		CHUNK_DURATION: 7.0,
 		EMBEDDING_PARAMS: {
-			KNN_N_NEIGHBORS: 5,
+			KNN_N_NEIGHBORS: 23,
 			KNN_WEIGHT: KNN_WEIGHT_UNIFORM,
 			KNN_METRIC: KNN_METRIC_EUCLIDEAN,
-			USE_SMOTE: True,
-			USE_HDBSCAN: True,
+			USE_SMOTE: False,
+			USE_HDBSCAN: False,
 			USE_UMAP: False,
 			HDBSCAN_PARAM_MIN_CLUSTER_SIZE: 6,
 			HDBSCAN_PARAM_MIN_SAMPLES: 10,
 		}
 	})
 
-	# 2022 fix BEATS kNN
-	physionet_2022_fixed_beats_knn_v3 = knn_config.copy()
-	physionet_2022_fixed_beats_knn_v3.update({
+	# 2022 Fix CNN
+	physionet_2022_fixed_cnn_v2 = base_config.copy()
+	physionet_2022_fixed_cnn_v2.update({
 		TRAIN_DATASET: PHYSIONET_2022,
-		RUN_NAME_SUFFIX: "2022_fix_beats_knn_finalrun_v3",
+		RUN_NAME_SUFFIX: "2022_fixed_cnn_finalrun_v2",
+		MODEL_METHOD_TYPE: CNN,
 		CHUNK_METHOD: CHUNK_METHOD_FIXED,
-		CHUNK_DURATION: 5.0,
+		CHUNK_DURATION: 8.0,
+		OPTIMIZER: OPTIMIZER_ADAM,
+		LEARNING_RATE: 0.001,
+		SCHEDULER: SCHEDULER_STEP,
+		SCHEDULER_PATIENCE: 10,
+		SCHEDULER_FACTOR: 0.5,
+		AUGMENTATION_RATE: 0.6,
+		BATCH_SIZE: 72,
+		L1_REGULATION_WEIGHT: 0.005,
+		L2_REGULATION_WEIGHT: 2.8e-07,
+		CNN_PARAMS: {
+			ACTIVATION: ACTIVATION_SILU,
+			DROP0: 0.4,
+			DROP1: 0.6,
+			N_MELS: 352,
+			HOP_LENGTH: 352,
+			N_FFT: 512,
+			MODEL_SUB_TYPE: 4,
+		}
+	})
+
+	# 2022 fix BEATS kNN
+	physionet_2022_fixed_beats_knn_v5 = knn_config.copy()
+	physionet_2022_fixed_beats_knn_v5.update({
+		TRAIN_DATASET: PHYSIONET_2022,
+		RUN_NAME_SUFFIX: "2022_fix_beats_knn_finalrun_v5",
+		CHUNK_METHOD: CHUNK_METHOD_FIXED,
+		CHUNK_DURATION: 6.0,
 		EMBEDDING_PARAMS: {
-			KNN_N_NEIGHBORS: 5,
-			KNN_WEIGHT: KNN_WEIGHT_UNIFORM,
+			KNN_N_NEIGHBORS: 21,
+			KNN_WEIGHT: KNN_WEIGHT_DISTANCE,
 			KNN_METRIC: KNN_METRIC_EUCLIDEAN,
-			USE_SMOTE: True,
+			USE_SMOTE: False,
 			USE_HDBSCAN: True,
 			USE_UMAP: False,
-			HDBSCAN_PARAM_MIN_CLUSTER_SIZE: 6,
-			HDBSCAN_PARAM_MIN_SAMPLES: 10,
+			HDBSCAN_PARAM_MIN_CLUSTER_SIZE: 30,
+			HDBSCAN_PARAM_MIN_SAMPLES: 15,
+		}
+	})
+
+	# 2022 Cycles CNN
+	physionet_2022_cycles_cnn_v2 = base_config.copy()
+	physionet_2022_cycles_cnn_v2.update({
+		TRAIN_DATASET: PHYSIONET_2022,
+		RUN_NAME_SUFFIX: "2022_cycles_cnn_finalrun_v2",
+		MODEL_METHOD_TYPE: CNN,
+		CHUNK_METHOD: CHUNK_METHOD_CYCLES,
+		CHUNK_HEARTCYCLE_COUNT: 10,
+		AUGMENTATION_RATE: 0.6,
+		AUDIO_LENGTH_NORM: LENGTH_NORM_STRETCH,
+		CHUNK_DURATION: 8.0,
+		OPTIMIZER: OPTIMIZER_ADAMW,
+		LEARNING_RATE: 0.001,
+		L1_REGULATION_WEIGHT: 0.0,
+		L2_REGULATION_WEIGHT: 0.003,
+		SCHEDULER: SCHEDULER_STEP,
+		SCHEDULER_FACTOR: 0.5,
+		SCHEDULER_PATIENCE: 10,
+		CNN_PARAMS: {
+			ACTIVATION: ACTIVATION_SILU,
+			DROP0: 0.4,
+			DROP1: 0.6,
+			N_MELS: 128,
+			HOP_LENGTH: 288,
+			N_FFT: 1152,
+			MODEL_SUB_TYPE: 4,
 		}
 	})
 	################ NEU VERSION 2
 	models_to_run_2 = [
-		physionet_2022_fixed_beats_knn_v2,
-		physionet_2022_cycles_beats_knn_v2,
-		physionet_2022_fixed_beats_knn_v3,
-		physionet_2022_cycles_beats_knn_v3,
-		#physionet_2022_fixed_beats_linear,	# 	restart with fix # Do it standalone
+		physionet_2022_cycles_beats_knn_v5,
+		physionet_2022_cycles_beats_knn_v5,
+		physionet_2022_cycles_cnn_v2, # mittel
+		physionet_2022_fixed_cnn_v2,	# läuft gut?
+		physionet_2022_fixed_beats_linear
 	]
+
+
+
+	models_to_run_3 = [
+		physionet_2022_fixed_beats_linear # 	restart with fix # Do it standalone
+	]
+
 	# TODO wenn ergebnisse nicht zufriedenstellend: Stumpf bestes ergebnis nachtrainieren
 
 	# TODO test mit force HDB scan
