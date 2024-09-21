@@ -114,10 +114,10 @@ if __name__ == "__main__":
 	##### To test fold and epoch logic
 	fold_test_dict = train_update_dict.copy()
 	fold_test_dict.update({
-		MODEL_METHOD_TYPE: CNN,
-		TRAIN_DATASET: PHYSIONET_2016, KFOLD_SPLITS: 3, EPOCHS: 1, DO_FAKE_UPDATES: 1,
+		MODEL_METHOD_TYPE: BEATS,
+		TRAIN_DATASET: PHYSIONET_2016, KFOLD_SPLITS: 3, EPOCHS: 2,
 	})
-	#do_run(fold_test_dict)
+	do_run(fold_test_dict)
 
 
 	##### To test continue from a saved model checkpoint
