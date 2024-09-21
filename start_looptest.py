@@ -28,7 +28,7 @@ if __name__ == "__main__":
 	knn_base_dict.update({
 		MODEL_METHOD_TYPE: BEATS,
 		EPOCHS: 1, OPTIMIZER: None, SCHEDULER: None,
-		TRANSFORMER_PARAMS: {MODEL_SUB_TYPE: MODEL_TYPE_KNN},
+		TRANSFORMER_PARAMS: {MODEL_SUB_TYPE: MODEL_TYPE_EMBEDDING},
 	})
 
 
@@ -36,7 +36,7 @@ if __name__ == "__main__":
 	knn_test_dict = knn_base_dict.copy()
 	knn_test_dict.update({
 		TRAIN_DATASET: PHYSIONET_2022, KFOLD_SPLITS: 1,
-		METADATA_FRAC: 1.0,
+		METADATA_FRAC: 0.05,
 		EMBEDDING_PARAMS: {
 			KNN_N_NEIGHBORS: 1,
 			KNN_WEIGHT: KNN_WEIGHT_UNIFORM,
@@ -50,7 +50,8 @@ if __name__ == "__main__":
 			EMBEDDINGS_REDUCE_UMAP_N_COMPONENTS: 10,
 		},
 	})
-	do_run(knn_test_dict)
+	#do_run(knn_test_dict)
+
 	####
 
 	########## To extract all embeddings for further training ##########
@@ -114,7 +115,7 @@ if __name__ == "__main__":
 	fold_test_dict = train_update_dict.copy()
 	fold_test_dict.update({
 		MODEL_METHOD_TYPE: CNN,
-		TRAIN_DATASET: PHYSIONET_2016, KFOLD_SPLITS: 3, EPOCHS: 2,
+		TRAIN_DATASET: PHYSIONET_2016, KFOLD_SPLITS: 3, EPOCHS: 1, DO_FAKE_UPDATES: 1,
 	})
 	#do_run(fold_test_dict)
 

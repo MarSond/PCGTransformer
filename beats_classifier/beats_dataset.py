@@ -33,7 +33,7 @@ class BEATsDataset(Dataset):
 		frame_end = current_row[const.CHUNK_RANGE_END]
 		class_id = current_row[self.config[const.LABEL_NAME]]
 		chunk_name = audio_filename.name + "#" + str(frame_start) + "-" + str(frame_end)
-		self.run.log(f"Loading {chunk_name}", name=const.LOGGER_METADATA, level=logging.INFO)
+		self.run.log(f"Loading {chunk_name}", name=const.LOGGER_METADATA, level=logging.DEBUG)
 
 		raw_audio, file_sr, padding_mask = AudioUtil.Loading.load_audiofile(
 			audio_filename,

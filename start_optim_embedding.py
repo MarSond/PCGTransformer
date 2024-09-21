@@ -83,7 +83,7 @@ def get_base_config():
 def get_beats_knn_params(trial):
 	params = {
 		TRANSFORMER_PARAMS: {
-			MODEL_SUB_TYPE: MODEL_TYPE_KNN,
+			MODEL_SUB_TYPE: MODEL_TYPE_EMBEDDING,
 		},
 		EMBEDDING_PARAMS: {
 			EMBEDDING_CLASSIFIER: CLASSIFIER_KNN,

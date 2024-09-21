@@ -98,10 +98,10 @@ class Run:
 						logging_helper.LEVEL_FILE: logging.INFO},
 				const.LOGGER_LOOP: \
 					{	logging_helper.LEVEL_CONSOLE: logging.INFO, \
-						logging_helper.LEVEL_FILE: logging.INFO},
+						logging_helper.LEVEL_FILE: logging.DEBUG},
 				const.LOGGER_METADATA: \
 					{	logging_helper.LEVEL_CONSOLE: logging.WARNING,  \
-						logging_helper.LEVEL_FILE: logging.WARNING},
+						logging_helper.LEVEL_FILE: logging.DEBUG},
 				const.LOGGER_TENSOR: \
 					{	logging_helper.LEVEL_CONSOLE: logging.ERROR, \
 						logging_helper.LEVEL_FILE: logging.WARNING},
@@ -206,6 +206,9 @@ class TaskBase(ABC):
 			from cnn_classifier import cnn_training
 			return cnn_training.CNNTraining(run=run, dataset=dataset)
 		if model_type == const.BEATS:
+			if self.config[const.TRANSFORMER_PARAMS].get(const.MODEL_SUB_TYPE, 0) == const.MODEL_TYPE_EMBEDDING:
+				from beats_classifier import beats_training_knn
+				return beats_training_knn.BEATsTrainingKNN(run=run, dataset=dataset)
 			from beats_classifier import beats_training
 			return beats_training.BEATsTraining(run=run, dataset=dataset)
 
