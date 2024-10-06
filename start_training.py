@@ -327,7 +327,7 @@ if __name__ == "__main__":
 	physionet_2022_fixed_beats_knn_v5 = knn_config.copy()
 	physionet_2022_fixed_beats_knn_v5.update({
 		TRAIN_DATASET: PHYSIONET_2022,
-		RUN_NAME_SUFFIX: "2022_fix_beats_knn_finalrun_v5",
+		RUN_NAME_SUFFIX: "2022_fixed_beats_knn_finalrun_v5",
 		CHUNK_METHOD: CHUNK_METHOD_FIXED,
 		CHUNK_DURATION: 6.0,
 		EMBEDDING_PARAMS: {
@@ -372,11 +372,10 @@ if __name__ == "__main__":
 	})
 	################ NEU VERSION 2
 	models_to_run_2 = [
-		physionet_2022_cycles_beats_knn_v5,
-		physionet_2022_cycles_beats_knn_v5,
-		physionet_2022_cycles_cnn_v2, # mittel
-		physionet_2022_fixed_cnn_v2,	# läuft gut?
-		physionet_2022_fixed_beats_linear
+		#physionet_2022_cycles_beats_knn_v5,# schlecht
+		physionet_2022_fixed_beats_knn_v5, # muss noch
+		#physionet_2022_cycles_cnn_v2, # mittel
+		#physionet_2022_fixed_cnn_v2,	# läuft gut?
 	]
 
 

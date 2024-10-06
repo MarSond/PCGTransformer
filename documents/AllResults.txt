@@ -1,0 +1,208 @@
+Run Name: 2024-09-18_23-40-18_2016_fixed_beats_knn_finalrun
+Total Epochs: 1
+Total Folds: 19
+
+
+Training Metrics:
+No data available
+
+--------------------
+
+Validation Metrics:
+acc: 0.8856 +- 0.0091
+f1: 0.7775 +- 0.0280
+precision: 0.6933 +- 0.0437
+recall: 0.8879 +- 0.0253
+specificity: 0.8854 +- 0.0121
+confusion_matrix: [[141.9000, 62.7000], [18.1000, 483.3000]]
+mcc: 0.7127 +- 0.0275
+nmcc: 0.8563 +- 0.0137
+auprc: 0.7685 +- 0.0257
+auroc: 0.9376 +- 0.0097
+mean_loss: 77.7000 +- 0.0000
+plr: 7.8206 +- 0.6748
+nlr: 0.1265 +- 0.0277
+learning_rate: None
+confusion_matrix_std: [[10.5589, 8.7641], [5.2240, 17.4072]]
+
+#######################
+
+Run Name: 2024-09-19_01-01-49_2016_fixed_cnn_finalrun
+Total Epochs: 60
+Total Folds: 10
+
+Training Metrics:
+acc: 0.9030 +- 0.0078
+f1: 0.7864 +- 0.0166
+precision: 0.7856 +- 0.0160
+recall: 0.7873 +- 0.0201
+specificity: 0.9370 +- 0.0055
+confusion_matrix: [[1133.6000, 309.7000], [306.4000, 4604.2000]]
+mcc: 0.7237 +- 0.0217
+nmcc: 0.8618 +- 0.0108
+auprc: 0.8501 +- 0.0179
+auroc: 0.9565 +- 0.0053
+mean_loss: 0.7892 +- 0.0939
+plr: 12.6139 +- 1.4663
+nlr: 0.2271 +- 0.0221
+learning_rate: 0.0001
+confusion_matrix_std: [[27.2367, 26.3517], [29.8737, 41.7727]]
+
+--------------------
+
+Validation Metrics:
+acc: 0.9047 +- 0.0134
+f1: 0.7877 +- 0.0363
+precision: 0.7951 +- 0.0703
+recall: 0.7889 +- 0.0654
+specificity: 0.9379 +- 0.0270
+confusion_matrix: [[126.6000, 34.0000], [33.4000, 512.0000]]
+mcc: 0.7296 +- 0.0408
+nmcc: 0.8648 +- 0.0204
+auprc: 0.8643 +- 0.0356
+auroc: 0.9614 +- 0.0078
+mean_loss: 0.7629 +- 0.0869
+plr: 15.3321 +- 6.4274
+nlr: 0.2239 +- 0.0645
+learning_rate: 0.0001
+confusion_matrix_std: [[17.5397, 15.0532], [9.4889, 23.8495]]
+
+#######################
+
+Run Name: 2024-09-21_12-19-45_2022_cycles_beats_knn_finalrun_v2
+Total Epochs: 1
+Total Folds: 10
+
+Training Metrics:
+No data available
+
+--------------------
+
+Validation Metrics:
+acc: 0.8229 +- 0.0649
+f1: 0.3884 +- 0.0886
+precision: 0.7169 +- 0.1309
+recall: 0.2722 +- 0.0744
+specificity: 0.9721 +- 0.0150
+confusion_matrix: [[21.0000, 7.8000], [56.2000, 269.9000]]
+mcc: 0.3620 +- 0.0848
+nmcc: 0.6810 +- 0.0424
+auprc: 0.4658 +- 0.0949
+auroc: 0.7008 +- 0.0449
+mean_loss: 77.7000 +- 0.0000
+plr: 13.2404 +- 8.7896
+nlr: 0.7486 +- 0.0745
+learning_rate: None
+confusion_matrix_std: [[14.0428, 3.9950], [27.3817, 38.4719]]
+
+#######################
+
+Run Name: 2024-09-22_01-01-39_2022_cycles_cnn_finalrun_v2
+Total Epochs: 60
+Total Folds: 10
+
+Training Metrics:
+acc: 0.8603 +- 0.0424
+f1: 0.6576 +- 0.1128
+precision: 0.7000 +- 0.0923
+recall: 0.6218 +- 0.1291
+specificity: 0.9274 +- 0.0185
+confusion_matrix: [[562.0000, 233.1000], [341.6000, 2978.1000]]
+mcc: 0.5727 +- 0.1366
+nmcc: 0.7863 +- 0.0683
+auprc: 0.6791 +- 0.1251
+auroc: 0.8389 +- 0.0675
+mean_loss: 0.2285 +- 0.0289
+plr: 9.9622 +- 5.6126
+nlr: 0.4106 +- 0.1455
+learning_rate: 0.0000 +- 0.0000
+confusion_matrix_std: [[117.7344, 59.0025], [116.2189, 68.0830]]
+
+--------------------
+
+Validation Metrics:
+acc: 0.8257 +- 0.0460
+f1: 0.4992 +- 0.1028
+precision: 0.6896 +- 0.1605
+recall: 0.4111 +- 0.1204
+specificity: 0.9428 +- 0.0429
+confusion_matrix: [[40.4000, 20.2000], [60.0000, 336.6000]]
+mcc: 0.4322 +- 0.1210
+nmcc: 0.7161 +- 0.0605
+auprc: 0.6183 +- 0.1082
+auroc: 0.7541 +- 0.0767
+mean_loss: 0.0914 +- 0.0638
+plr: 12.6965 +- 8.6646
+nlr: 0.6242 +- 0.1238
+learning_rate: 0.0000 +- 0.0000
+confusion_matrix_std: [[14.6027, 14.4069], [21.2885, 37.1543]]
+
+#######################
+
+Run Name: 2024-09-22_15-36-53_2022_fixed_cnn_finalrun_v2
+Total Epochs: 60
+Total Folds: 10
+
+Training Metrics:
+acc: 0.8567 +- 0.0068
+f1: 0.5116 +- 0.0257
+precision: 0.7866 +- 0.0329
+recall: 0.3797 +- 0.0253
+specificity: 0.9745 +- 0.0045
+confusion_matrix: [[565.2000, 154.0000], [924.3000, 5880.5000]]
+mcc: 0.4799 +- 0.0263
+nmcc: 0.7399 +- 0.0131
+auprc: 0.6188 +- 0.0204
+auroc: 0.7786 +- 0.0118
+mean_loss: 1.3882 +- 0.2418
+plr: 15.4166 +- 3.1402
+nlr: 0.6366 +- 0.0259
+learning_rate: 0.0000 +- 0.0000
+confusion_matrix_std: [[34.2105, 27.1735], [49.2606, 47.4431]]
+
+--------------------
+
+Validation Metrics:
+acc: 0.8518 +- 0.0274
+f1: 0.4859 +- 0.1323
+precision: 0.8105 +- 0.1691
+recall: 0.3918 +- 0.1728
+specificity: 0.9612 +- 0.0511
+confusion_matrix: [[67.5000, 26.3000], [98.0000, 644.2000]]
+mcc: 0.4714 +- 0.0894
+nmcc: 0.7357 +- 0.0447
+auprc: 0.6409 +- 0.1160
+auroc: 0.7946 +- 0.0486
+mean_loss: 1.3817 +- 0.2427
+plr: 70689298.5006 +- 113933011.4294
+nlr: 0.6263 +- 0.1571
+learning_rate: 0.0000 +- 0.0000
+confusion_matrix_std: [[32.7880, 35.2677], [26.3287, 49.2297]]
+
+#######################
+
+Run Name: 2024-09-23_09-11-26_2022_fix_beats_knn_finalrun_v5
+Total Epochs: 1
+Total Folds: 10
+
+Training Metrics:
+No data available
+
+--------------------
+
+Validation Metrics:
+acc: 0.8346 +- 0.0362
+f1: 0.2995 +- 0.0779
+precision: 0.9518 +- 0.0541
+recall: 0.1798 +- 0.0550
+specificity: 0.9984 +- 0.0018
+confusion_matrix: [[39.6000, 1.5000], [181.6000, 887.5000]]
+mcc: 0.3698 +- 0.0684
+nmcc: 0.6849 +- 0.0342
+auprc: 0.5196 +- 0.0967
+auroc: 0.7140 +- 0.0572
+mean_loss: 77.7000 +- 0.0000
+plr: 77744851.2579 +- 98849222.6300
+nlr: 0.8216 +- 0.0558
+learning_rate: None
+confusion_matrix_std: [[13.4774, 1.6279], [37.7099, 74.0436]]
