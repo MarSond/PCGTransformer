@@ -1,0 +1,90 @@
+audio_length_norm: length_norm_padding
+augmentation_rate: 0.0
+batch_size: 5
+butterpass_high: 500
+butterpass_low: 25
+butterpass_order: 5
+chunk_duration: 8.0
+chunk_heartcycle_count: 12
+chunk_method: chunk_cycles
+chunk_padding_threshold: 0.6
+cnn_params:
+  activation: silu
+  batchnorm: true
+  drop0: 0.5
+  drop1: 0.2
+  hop_length: 128
+  model_sub_type: 1
+  n_fft: 1024
+  n_mels: 512
+  top_db: 80.0
+data/: data/
+do_fake_updates: 0
+early_stopping_enabled: false
+early_stopping_metric: nmcc
+early_stopping_patience: 8
+early_stopping_threshold: 0.6
+emb_load_from_run: null
+emb_parameters:
+  emb_classifier: knn
+  emb_combine_method: emb_mean
+  emb_reduce_umap_n_components: 2
+  emb_reduce_umap_n_neighbors: 5
+  emb_save_to_file: true
+  emb_use_smote: false
+  emb_use_umap: false
+  hdb_min_cluster_size: 5
+  hdb_min_samples: 5
+  knn_algorithm: auto
+  knn_metric: euclidean
+  knn_n_neighbors: 5
+  knn_weight: uniform
+  use_hdbscan: false
+epochs: 1
+filename_log_output: run_output.log
+filename_run_config: run_config.yaml
+grad_accumulate_steps: 1
+inference_dataset: physionet2016
+inference_model: null
+kfold_splits: 10
+l1_regulation_weight: 0.0
+l2_regulation_weight: 1.0e-06
+label_name: label_1
+learning_rate: 0.001
+load_previous_run_name: ''
+loss_function: FocalLoss
+loss_function_parameter_1: 2.0
+loss_function_parameter_2: null
+metadata_frac: 1.0
+model_method_type: beats
+normalization: norm_minmax
+num_workers: 0
+optimizer: null
+profiler_epochs: 1
+profiler_steps: 100
+run_folder: runs/
+run_name: 2024-09-21_12-19-45_2022_cycles_beats_knn_finalrun_v2
+run_name_suffix: 2022_cycles_beats_knn_finalrun_v2
+run_results_path: runs\2024-09-21_12-19-45_2022_cycles_beats_knn_finalrun_v2
+save_model: true
+save_only_last_model: false
+scheduler_factor: 0.1
+scheduler_patience: 10
+seed: 42
+sheduler: null
+signal_filter: butterpass
+single_batch_mode: false
+task_type: training
+train_dataset: physionet2022
+train_frac: 0.8
+training_checkpoint: null
+transformer_params:
+  activation: silu
+  drop0: 0.5
+  drop1: 0.3
+  extractor_folder: beats_classifier/extractors/
+  extractor_name: BEATs_iter3_plus_AS2M.pt
+  freeze_encoder: true
+  model_sub_type: 50
+use_amp: true
+use_profiler: false

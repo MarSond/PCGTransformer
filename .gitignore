@@ -133,4 +133,4 @@ documents/run1_backup/
 
 email_password.txt
 
-final_runs/
+final_runs/*/models

@@ -56,7 +56,7 @@ class BEATsTrainingKNN(ML_Loop):
 		predictions, probabilities = self.emb_classifier(inputs)
 		if isinstance(probabilities, np.ndarray):
 			probabilities = torch.tensor(probabilities)
-		return torch.tensor(77.7), probabilities, labels
+		return torch.tensor(999999.99), probabilities, labels
 
 	def load_embeddings_from_file(self, fold):
 		if self.load_embeddings_run_name:
