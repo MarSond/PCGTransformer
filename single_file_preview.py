@@ -1,22 +1,35 @@
+from pathlib import Path
+
 import librosa
 import matplotlib.pyplot as plt
 import numpy as np
-from pathlib import Path
-from MLHelper.audio import audioutils, preprocessing
-from MLHelper.dataset import Physionet2022
-from MLHelper.constants import *
-from cnn_classifier.cnn_dataset import CNN_Dataset
+import torch
+
 import project_config
+from cnn_classifier.cnn_dataset import CNN_Dataset
+from MLHelper.audio import audioutils, preprocessing
+from MLHelper.constants import *
+from MLHelper.dataset import Physionet2022
+
+
 def compare_audio_processing(audio_file: Path, config: dict):
 	# Erstelle ein vereinfachtes Run-ähnliches Objekt
 	class SimpleRun:
+
+		class DemoTask:
+			def __init__(self, dataset):
+				self.dataset = dataset
+
 		def __init__(self, config):
 			self.config = config
 			self.logger_dict = {LOGGER_METADATA: self.DummyLogger(),
 			LOGGER_TENSOR: self.DummyLogger(),
 			LOGGER_TRAINING: self.DummyLogger(),
 			LOGGER_PREPROCESSING: self.DummyLogger(),}
+			self.device = torch.device("cuda")
 
+		def set_task(self, dataset):
+			self.task = self.DemoTask(dataset)
 		class DummyLogger:
 			def info(self, *args, **kwargs):
 				pass  # Dummy info-Funktion
@@ -42,50 +55,54 @@ def compare_audio_processing(audio_file: Path, config: dict):
 	dataset = Physionet2022(simple_run)
 	dataset.load_file_list()
 	dataset.prepare_chunks()
+	simple_run.set_task(dataset)
 
 	# Finde die entsprechende Zeile in dataset.chunk_list
 	chunk_data = dataset.chunk_list[dataset.chunk_list[META_AUDIO_PATH].apply(lambda x: Path(x).name) == audio_file.name].iloc[0]
 
 	# Erstelle ein CNN_Dataset-Objekt
 	cnn_dataset = CNN_Dataset(dataset.chunk_list, simple_run)
-	cnn_dataset.target_samplerate = 2000  # Setze manuell für Physionet2022
+	#cnn_dataset.target_samplerate = 2000  # Setze manuell für Physionet2022
 	cnn_dataset.set_mode(TASK_TYPE_DEMO)
 
 	# Hole die Daten im Demo-Modus
-	raw_audio, normalized_audio, sgram_raw, sgram_filtered, sgram_augmented, row_dict, chunk_name = cnn_dataset.handle_instance(chunk_data)
+	raw_audio, normalized_audio, augmented_audio, sgram_raw, sgram_filtered, sgram_augmented, row_dict, chunk_name = cnn_dataset.handle_instance(chunk_data)
 
 	cycle_markers = row_dict[META_HEARTCYCLES]
 
-	fig, axes = plt.subplots(5, 1, figsize=(12, 20))
-	fig.suptitle(f"Audio Processing Comparison - {chunk_name}", fontsize=14)
+	fig, axes = plt.subplots(3, 2, figsize=(20, 16))
+	plt.subplots_adjust(hspace=0.2, wspace=0.5)
+	fig.suptitle(f"Audio Processing Comparison - {chunk_name} class: {row_dict[META_LABEL_1]}", fontsize=16)
 
-	# Original Signal
-	audioutils.AudioUtil.SignalPlotting.show_signal(samples=raw_audio, samplerate=cnn_dataset.target_samplerate, ax=axes[0], cycle_marker=cycle_markers)
-	axes[0].set_title("Original Signal")
+	sr = cnn_dataset.target_samplerate
 
-	# Normalized Signal
-	audioutils.AudioUtil.SignalPlotting.show_signal(samples=normalized_audio, samplerate=cnn_dataset.target_samplerate, ax=axes[1], cycle_marker=cycle_markers)
-	axes[1].set_title(f"Normalized Signal ({config[NORMALIZATION]})")
+	# Linke Spalte: Signale
+	audioutils.AudioUtil.SignalPlotting.show_signal(samples=raw_audio, samplerate=sr, ax=axes[0, 0], cycle_marker=cycle_markers, raw=True)
+	axes[0, 0].set_title("Original Signal")
 
-	# Raw Spectrogram
+	audioutils.AudioUtil.SignalPlotting.show_signal(samples=normalized_audio, samplerate=sr, ax=axes[1, 0], cycle_marker=cycle_markers, raw=True)
+	axes[1, 0].set_title(f"Normalized + Filtered Signal")
+
+	audioutils.AudioUtil.SignalPlotting.show_signal(samples=augmented_audio, samplerate=sr, ax=axes[2, 0], cycle_marker=cycle_markers, raw=True)
+	axes[2, 0].set_title(f"Augmented Signal ")
+
+	# Rechte Spalte: Spektrogramme
 	audioutils.AudioUtil.SignalPlotting.show_mel_spectrogram(
-		sgram_raw, cnn_dataset.target_samplerate, ax=axes[2], top_db=config[CNN_PARAMS][TOP_DB]
+		sgram_raw, cnn_dataset.target_samplerate, ax=axes[0, 1], top_db=config[CNN_PARAMS][TOP_DB], hop_length=config[CNN_PARAMS][HOP_LENGTH]
 	)
-	axes[2].set_title("Raw Mel Spectrogram")
+	axes[0, 1].set_title("Raw Mel Spectrogram")
 
-	# Filtered Spectrogram
 	audioutils.AudioUtil.SignalPlotting.show_mel_spectrogram(
-		sgram_filtered, cnn_dataset.target_samplerate, ax=axes[3], top_db=config[CNN_PARAMS][TOP_DB]
+		sgram_filtered, cnn_dataset.target_samplerate, ax=axes[1, 1], top_db=config[CNN_PARAMS][TOP_DB], hop_length=config[CNN_PARAMS][HOP_LENGTH]
 	)
-	axes[3].set_title("Filtered Mel Spectrogram")
+	axes[1, 1].set_title("Filtered Mel Spectrogram")
 
-	# Augmented Spectrogram
 	audioutils.AudioUtil.SignalPlotting.show_mel_spectrogram(
-		sgram_augmented, cnn_dataset.target_samplerate, ax=axes[4], top_db=config[CNN_PARAMS][TOP_DB]
+		sgram_augmented, cnn_dataset.target_samplerate, ax=axes[2, 1], top_db=config[CNN_PARAMS][TOP_DB], hop_length=config[CNN_PARAMS][HOP_LENGTH]
 	)
-	axes[4].set_title("Augmented Mel Spectrogram")
+	axes[2, 1].set_title("Augmented Mel Spectrogram")
 
-	plt.tight_layout()
+	plt.tight_layout(rect=[0, 0.03, 1, 0.95])
 	plt.show()
 
 	print(f"Audio Chunk Details:")
@@ -94,7 +111,7 @@ def compare_audio_processing(audio_file: Path, config: dict):
 	print(f"Sample Rate: {cnn_dataset.target_samplerate}")
 	print(f"Duration: {config[CHUNK_DURATION]} seconds")
 	print(f"Normalization: {config[NORMALIZATION]}")
-	print(f"Butterworth Filter: Low={config[CNN_PARAMS][BUTTERPASS_LOW]}, High={config[CNN_PARAMS][BUTTERPASS_HIGH]}, Order={config[CNN_PARAMS][BUTTERPASS_ORDER]}")
+	print(f"Butterworth Filter: Low={config[BUTTERPASS_LOW]}, High={config[BUTTERPASS_HIGH]}, Order={config[BUTTERPASS_ORDER]}")
 	print(f"Mel Spectrogram: n_mels={config[CNN_PARAMS][N_MELS]}, n_fft={config[CNN_PARAMS][N_FFT]}, hop_length={config[CNN_PARAMS][HOP_LENGTH]}, top_db={config[CNN_PARAMS][TOP_DB]}")
 
 # Beispielverwendung
@@ -112,19 +129,16 @@ config.update(config_demo)
 
 config_override = {
 	TRAIN_DATASET: PHYSIONET_2022,
-	NORMALIZATION: NORMALIZATION_ZSCORE,
-	CHUNK_DURATION: 5.0,
+	NORMALIZATION: NORMALIZATION_MAX_ABS,
+	CHUNK_DURATION: 25.0,
 	CHUNK_METHOD: CHUNK_METHOD_FIXED,
 	AUDIO_LENGTH_NORM: LENGTH_NORM_PADDING,
-	CNN_PARAMS: {
-		N_MELS: 128,
-		HOP_LENGTH: 512,
-		N_FFT: 1024,
-		TOP_DB: 80,
-		BUTTERPASS_LOW: 25,
-		BUTTERPASS_HIGH: 400,
-		BUTTERPASS_ORDER: 5
-	}
+	# CNN_PARAMS: {
+	# 	N_MELS: 128,
+	# 	HOP_LENGTH: 512,
+	# 	N_FFT: 1024,
+	# 	TOP_DB: 80,
+	# }
 }
 
 config.update(config_override)

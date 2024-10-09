@@ -1,21 +1,29 @@
 File structure:
 /
   * build_dataset.py
-  * output_run_parser.py
+  * metric-temp_modify.py
   * plot_audio_signal.py
   * project_config.py
   * run.py
-  * spectrogram_preview.py
+  * single_file_preview.py
   * start_inference.py
   * start_looptest.py
+  * start_optim.py
+  * start_optim_embedding.py
+  * start_optim_embedding_finetune.py
   * start_training.py
+  * test_umap.py
   * __init__.py
   * audio_example_images
     * merge.py
   * beats_classifier
     * beats_dataset.py
   * beats_classifier
+    * beats_models.py
+  * beats_classifier
     * beats_training.py
+  * beats_classifier
+    * beats_training_knn.py
   * beats_classifier
     * __init__.py
   * beats_classifier
@@ -46,14 +54,14 @@ File structure:
     * cnn_training.py
   * cnn_classifier
     * __init__.py
-  * documents
-    * extract_structure.py
   * MLHelper
     * config.py
   * MLHelper
     * constants.py
   * MLHelper
     * dataset.py
+  * MLHelper
+    * embedding_model.py
   * MLHelper
     * ml_loop.py
   * MLHelper
@@ -101,6 +109,9 @@ File structure:
       * logging_helper.py
   * MLHelper
     * tools
+      * python_module_scan.py
+  * MLHelper
+    * tools
       * utils.py
   * MLHelper
     * tools
@@ -114,21 +125,23 @@ File structure:
   def parse_physionet2016()
   def _get_heartcycle_indicies_2022(file_path: str)
   def get_file_metadata_human_ph2022(path: str, anno: pd.DataFrame, dataset_object: Physionet2022)
+  def _fix_2022_additional_id(metadata: pd.DataFrame)
   def parse_physionet2022()
-  def dataset_statistics(dataset: AudioDataset)
-  def calculate_bpm(data)
-  def plot_statistics(dataset: AudioDataset)
   def start_parse()
-  def start_statistics()
-  def start_plot()
-  def make_plots(plot_data, dataset: AudioDataset, name)
+  def create_output_directories(dataset)
+  def calculate_bpm(data)
+  def save_statistics(dataset: AudioDataset, stats_dir: Path)
+  def plot_statistics(dataset: AudioDataset, stats_dir: Path)
+  def generate_statistics_and_plots(dataset: AudioDataset)
+  def start_statistics_and_plots()
+
+
   Imported modules:
     MLHelper.constants
     MLHelper.dataset
     io
     json
     matplotlib.pyplot
-    mpl_toolkits.axes_grid1
     numpy
     pandas
     pathlib
@@ -137,43 +150,43 @@ File structure:
     torchaudio
     tqdm.auto
 
-/output_run_parser.py:
-  def list_sub_folders(folder_path)
-  def update_stats(sub_folder_path, stats)
-  def delete_folder(folder_path)
-  def folder_date(folder_name)
-  def confirm_and_delete_folders(folders_to_delete)
-  def query_and_delete_folders(sub_folders, base_folder, stats)
+/metric-temp_modify.py:
+  def calculate_fbeta_score(precision, recall, beta)
+  def add_f2_f05_scores_to_metrics(metric_data)
+
+
   Imported modules:
-    MLHelper.constants
-    collections
-    datetime
-    os
-    shutil
+    MLHelper
+    MLHelper.metrics
+    numpy
+    pathlib
+    sklearn.metrics
 
 /plot_audio_signal.py:
-  class RunMetricsParser:
-    def __init__(self)
-    def create_table(self)
-    def load_runs(self)
-    def parse_runs(self)
-    def update_tables(self)
-    def update_single_table(self, table, data, run_type)
-    def delete_selected(self)
-    def show_plots(self, item)
-  def path_constructor(loader, node)
+  class DataAnalysis:
+    def __init__(self, dataset_name: str)
+    def get_dataloaders(self)
+    def make_singlefile_plot(self, raw_audio, filtered_audio, full_audio, sgram_raw, sgram_filtered, sgram_augmented, meta_row, audio_file_name, ax, final_only)
+    def plot_signal_stats(self, num_samples, offset, show, fig_file_name, final_only)
+  def multiple()
+  def single()
+
+
   Imported modules:
+    MLHelper.audio
+    MLHelper.audio.audioutils
     MLHelper.constants
-    PyQt6.QtCore
-    PyQt6.QtGui
-    PyQt6.QtWidgets
-    json
+    cnn_classifier.cnn_dataset
+    matplotlib.gridspec
+    matplotlib.pyplot
     pathlib
-    sys
-    yaml
+    run
+    torch
 
 /project_config.py:
   File has no methods or classes, but is not empty
+
+
   Imported modules:
     MLHelper.constants
 
@@ -217,16 +230,17 @@ File structure:
     def setup_task(self)
     def _get_inference_model_path(self)
     def start_task(self)
+
+
   Imported modules:
     MLHelper
     MLHelper.config
     MLHelper.dataset
-    MLHelper.tools.logging_helper
+    MLHelper.tools
     MLHelper.tools.utils
     abc
     beats_classifier
     cnn_classifier
-    cnn_classifier.cnn_training
     datetime
     logging
     pathlib
@@ -236,12 +250,39 @@ File structure:
     torch
     typing
 
-/spectrogram_preview.py:
-  File has no methods or classes, but is not empty
+/single_file_preview.py:
+  class SimpleRun:
+    def __init__(self, config)
+    def set_task(self, dataset)
+    def log_training(self)
+    def log(self)
+  class DemoTask:
+    def __init__(self, dataset)
+  class DummyLogger:
+    def info(self)
+    def error(self)
+    def warning(self)
+    def debug(self)
+    def warn(self)
+  def compare_audio_processing(audio_file: Path, config: dict)
+
+
   Imported modules:
+    MLHelper.audio
+    MLHelper.constants
+    MLHelper.dataset
+    cnn_classifier.cnn_dataset
+    librosa
+    matplotlib.pyplot
+    numpy
+    pathlib
+    project_config
+    torch
 
 /start_inference.py:
   def do_run(config: dict)
+
+
   Imported modules:
     MLHelper.constants
     matplotlib.pyplot
@@ -249,72 +290,229 @@ File structure:
 
 /start_looptest.py:
   def do_run(config: dict)
+
+
   Imported modules:
     MLHelper.constants
-    matplotlib.pyplot
     run
 
-/start_training.py:
+/start_optim.py:
+  def reset_pytorch_state()
+  def send_result_mail(name: str, results: dict)
   def do_run(config: dict)
+  def get_common_update_dict(trial, model_type, dataset, chunk_method)
+  def get_beats_update_dict(trial, dataset, chunk_method)
+  def get_cnn_update_dict(trial, dataset, chunk_method)
+  def set_chunk_and_scheduler_params(ud, trial, dataset, chunk_method)
+  def objective(trial, get_update_dict, dataset, chunk_method)
+  def trial_callback(study, trial)
+  def start_optimization(model_type, n_trials, dataset, chunk_method)
+  def objective_func(trial)
+
+
   Imported modules:
     MLHelper.constants
-    matplotlib.pyplot
+    MLHelper.tools.utils
+    gc
+    importlib
+    json
+    optuna
+    pathlib
     run
+    sys
+    torch
+
+/start_optim_embedding.py:
+  def reset_pytorch_state()
+  def send_result_mail(name: str, results: dict)
+  def do_run(config: dict)
+  def get_base_config()
+  def get_beats_knn_params(trial)
+  def get_chunk_params(trial, chunk_method)
+  def objective(trial, config)
+  def trial_callback(study, trial)
+  def start_optimization(config, n_trials)
+
+
+  Imported modules:
+    MLHelper.constants
+    MLHelper.tools.utils
+    gc
+    importlib
+    json
+    optuna
+    pathlib
+    run
+    sys
+    time
+    torch
+
+/start_optim_embedding_finetune.py:
+  def reset_pytorch_state()
+  def send_result_mail(name: str, results: dict)
+  def do_run(config: dict)
+  def get_base_config(model_config)
+  def get_beats_knn_params(trial, param_ranges)
+  def get_chunk_params(trial, chunk_method, param_ranges)
+  def objective(trial, config, param_ranges)
+  def trial_callback(study, trial)
+  def start_optimization(config, param_ranges, n_trials)
+
+
+  Imported modules:
+    MLHelper.constants
+    MLHelper.tools.utils
+    gc
+    importlib
+    json
+    optuna
+    pathlib
+    run
+    sys
+    time
+    torch
+
+/start_training.py:
+  def send_result_mail(name: str, results: dict)
+  def do_run(config: dict)
+
+
+  Imported modules:
+    MLHelper.constants
+    MLHelper.tools.utils
+    matplotlib.pyplot
+    pathlib
+    run
+
+/test_umap.py:
+  def create_umap_plot(embeddings, labels, n_neighbors, min_dist, is_3d)
+
+
+  Imported modules:
+    MLHelper.constants
+    MLHelper.tools.utils
+    itertools
+    matplotlib.pyplot
+    numpy
+    pathlib
+    pickle
+    umap
 
 /__init__.py:
   File is empty
+
+
   Imported modules:
 
 /audio_example_images/merge.py:
   File has no methods or classes, but is not empty
+
+
   Imported modules:
     PIL
     os
 
 /beats_classifier/beats_dataset.py:
-  class BeatsDataset:
-    def __init__(self, root_dir, data_frame, num_samples, transform)
+  class BEATsDataset:
+    def __init__(self, datalist, run: Run)
     def __len__(self)
     def __getitem__(self, idx)
-    def pad_audio(self, audio)
-    def crop_audio(self, audio)
-  class BEATsDataset:
-    def __init__(self, root_dir: str, csv_file: str, batch_size: int, split_ratio, transform)
-    def prepare_data(self)
-    def setup(self)
-    def train_dataloader(self)
-    def val_dataloader(self)
+    def handle_instance(self, current_row)
+    def set_mode(self, mode)
+
+
   Imported modules:
-    librosa
-    os
-    pandas
-    pytorch_lightning
+    MLHelper
+    MLHelper.audio
+    MLHelper.audio.audioutils
+    logging
+    run
     torch
-    torch.nn.functional
     torch.utils.data
 
-/beats_classifier/beats_training.py:
-  class BeatsTraining:
-    def __init__(self, run: Run, dataset: AudioDataset)
-    def _build_model(self)
-    def forward(self, x, padding_mask)
-    def loss(self, lprobs, labels)
-    def training_step(self, batch, batch_idx)
-    def validation_step(self, batch, batch_idx)
-    def configure_optimizers(self)
+/beats_classifier/beats_models.py:
+  class BEATsBase:
+    def __init__(self, run: Run)
+    def setup_extractor(self)
+    def initialize(self)
+    def forward(self, x: Tensor, padding_mask)
+  class BEATsModel1:
+    def __init__(self, run: Run)
+    def forward(self, x: Tensor, padding_mask)
+  class BEATsModel2:
+    def __init__(self, run: Run)
+    def forward(self, x: Tensor, padding_mask)
+  class BEATsModel3:
+    def __init__(self, run: Run)
+    def forward(self, x: Tensor, padding_mask)
+  def get_model(run: Run)
+  def get_demo_input()
+
+
   Imported modules:
-    BEATs.BEATs
-    MLHelper.ml_loop
-    numpy
-    pytorch_lightning
+    MLHelper
+    beats_classifier.BEATs.BEATs
+    logging
+    pathlib
+    run
     torch
-    torch.nn
-    torch.optim.lr_scheduler
-    torch.optim.optimizer
-    torchmetrics
+
+/beats_classifier/beats_training.py:
+  class BEATsTraining:
+    def __init__(self, run: Run, dataset: AudioDataset)
+    def set_training_utilities(self, start_model, optimizer, scheduler, scaler)
+    def start_training_task(self, start_epoch: int, start_fold: int)
+
+
+  Imported modules:
+    MLHelper
+    MLHelper.dataset
+    MLHelper.ml_loop
+    MLHelper.tools.utils
+    beats_classifier.beats_dataset
+    logging
+    numpy
+    pathlib
+    pickle
+    run
+    torch
+    typing
+
+/beats_classifier/beats_training_knn.py:
+  class BEATsTrainingKNN:
+    def __init__(self, run: Run, dataset: AudioDataset)
+    def set_training_utilities(self, start_model, optimizer, scheduler, scaler)
+    def start_training_task(self, start_epoch: int, start_fold: int)
+    def training_step(self, inputs: torch.Tensor, labels: torch.Tensor)
+    def validation_step(self, inputs: torch.Tensor, labels: torch.Tensor)
+    def load_embeddings_from_file(self, fold)
+    def epoch_loop(self, epoch: int, fold_idx: int)
+    def fold_loop(self, fold_idx: int, start_epoch: int)
+    def save_embeddings_to_file(self, embeddings, labels, fold)
+    def create_umap_plots(self, embeddings, labels, epoch, fold, n_neighbors, min_dist, name)
+    def create_umap_plots_hook(self, epoch: int, fold: int)
+    def save_model(self, epoch, fold)
+
+
+  Imported modules:
+    MLHelper
+    MLHelper.dataset
+    MLHelper.ml_loop
+    MLHelper.tools.utils
+    beats_classifier.beats_dataset
+    logging
+    numpy
+    pathlib
+    pickle
+    run
+    torch
+    typing
+    umap
 
 /beats_classifier/__init__.py:
   File is empty
+
+
   Imported modules:
 
 /beats_classifier/BEATs/backbone.py:
@@ -337,6 +535,8 @@ File structure:
     def apply_sparse_mask(self, attn_weights, tgt_len: int, src_len: int, bsz: int)
   def init_bert_params(module)
   def normal_(data)
+
+
   Imported modules:
     BEATs.modules
     math
@@ -351,12 +551,15 @@ File structure:
     def __init__(self, cfg)
     def update(self, cfg: dict)
   class BEATs:
-    def __init__(self, cfg: BEATsConfig)
+    def __init__(self, cfg: BEATsConfig, logger: Optional[logging.Logger])
     def forward_padding_mask(self, features: torch.Tensor, padding_mask: torch.Tensor)
     def preprocess(self, source: torch.Tensor, fbank_mean: float, fbank_std: float)
     def extract_features(self, source: torch.Tensor, padding_mask: Optional[torch.Tensor], fbank_mean: float, fbank_std: float)
+
+
   Imported modules:
     BEATs.backbone
+    MLHelper.tools.utils
     logging
     torch
     torch.nn
@@ -381,6 +584,8 @@ File structure:
   def get_activation_fn(activation: str)
   def quant_noise(module, p, block_size)
   def _forward_pre_hook(mod, input)
+
+
   Imported modules:
     math
     torch
@@ -404,6 +609,8 @@ File structure:
   def sample_vectors(samples, num)
   def kmeans(samples, num_clusters, num_iters, use_cosine_sim)
   def norm_ema_inplace(moving_avg, new, decay)
+
+
   Imported modules:
     einops
     torch
@@ -420,6 +627,8 @@ File structure:
     def forward_padding_mask(self, features: torch.Tensor, padding_mask: torch.Tensor)
     def preprocess(self, source: torch.Tensor, fbank_mean: float, fbank_std: float)
     def extract_labels(self, source: torch.Tensor, padding_mask: Optional[torch.Tensor], fbank_mean: float, fbank_std: float)
+
+
   Imported modules:
     BEATs.backbone
     BEATs.quantizer
@@ -431,21 +640,25 @@ File structure:
 
 /beats_classifier/BEATs/__init__.py:
   File is empty
+
+
   Imported modules:
 
 /cnn_classifier/cnn_dataset.py:
   class CNN_Dataset:
     def __init__(self, datalist, run: Run)
     def __len__(self)
+    def handle_instance(self, current_row)
     def __getitem__(self, idx)
     def _get_mel(self, audio, file_sr)
     def set_mode(self, mode)
+
+
   Imported modules:
     MLHelper
     MLHelper.audio
     MLHelper.audio.audioutils
     logging
-    pathlib
     run
     torch
     torch.utils.data
@@ -457,6 +670,8 @@ File structure:
     def plot_batch(self, data, target)
     def validation_epoch_loop(self, epoch: int, fold: int)
     def start_inference_task(self, model: torch.nn.Module)
+
+
   Imported modules:
     MLHelper
     MLHelper.dataset
@@ -465,6 +680,7 @@ File structure:
     matplotlib.pyplot
     run
     torch
+    typing
 
 /cnn_classifier/cnn_models.py:
   class CNN_Base:
@@ -485,7 +701,10 @@ File structure:
   class CNN_Model_4:
     def __init__(self, run_config)
     def forward(self, x)
+  def get_demo_input()
   def get_model(run: Run)
+
+
   Imported modules:
     MLHelper.constants
     MLHelper.tools.utils
@@ -499,8 +718,8 @@ File structure:
     def num_worker_test(self, logger: logging.Logger)
     def set_training_utilities(self, start_model, optimizer, scheduler, scaler)
     def start_training_task(self, start_epoch, start_fold)
-    def prepare_kfold_run(self)
-    def prepare_optimizer_scheduler(config: dict, model)
+
+
   Imported modules:
     MLHelper.constants
     MLHelper.dataset
@@ -510,24 +729,18 @@ File structure:
     multiprocessing
     run
     time
-    torch
-    torch.cuda.amp.grad_scaler
     torch.utils.data
 
 /cnn_classifier/__init__.py:
   File is empty
-  Imported modules:
 
-/documents/extract_structure.py:
-  def load_and_summarize_json(file_path)
+
   Imported modules:
-    json
-    os
-    pprint
 
 /MLHelper/config.py:
   class Config:
     def __init__(self, project_config_path, update_dict)
+    def _clean_update_dict(self, update_dict)
     def _extend_config_keys_from_yaml(self, project_config_path)
     def update_config_kv(self, key, value)
     def update_config_dict(self, update_dict)
@@ -547,8 +760,11 @@ File structure:
     def values(self)
     def items(self)
   def setup_environment(config)
+
+
   Imported modules:
     MLHelper
+    MLHelper.tools
     librosa
     numpy
     os
@@ -560,6 +776,8 @@ File structure:
 
 /MLHelper/constants.py:
   def get_model_filename(type, epoch, fold)
+
+
   Imported modules:
 
 /MLHelper/dataset.py:
@@ -568,6 +786,7 @@ File structure:
     def _self_asserts_for_training(self)
     def _get_kfold_entry(self, fold_number: int, train_list, valid_list)
     def prepare_kfold_splits(self)
+    def _verify_patient_separation(self)
     def get_dataloaders(self, num_split: int, dataset_class: Dataset)
     def prepare_chunks(self)
     def load_file_list(self, mode)
@@ -580,6 +799,8 @@ File structure:
     def __init__(self, run: Run)
     def load_file_list(self, mode)
   def seed_worker(worker_id)
+
+
   Imported modules:
     MLHelper.audio.audioutils
     MLHelper.constants
@@ -595,54 +816,110 @@ File structure:
     torch
     torch.utils.data
 
+/MLHelper/embedding_model.py:
+  class DataBundle:
+    def __init__(self, x, y, is_training)
+  class XyPipeline:
+    def fit(self, x, y)
+    def transform(self, x, is_training)
+    def predict(self, x)
+    def predict_proba(self, x)
+  class XyTransformerMixin:
+    def fit_transform(self, data: DataBundle)
+  class EmbeddingClassifier:
+    def __init__(self, extractor: nn.Module, emb_params: dict, logger: Optional[logging.Logger], device)
+    def build_pipeline(self)
+    def fit_pipeline(self)
+    def load_state_dict(self, state_dict)
+    def save_state_dict(self)
+    def reset_data(self)
+    def append_neighbor_data(self, data, labels)
+    def forward_extractor(self, input)
+    def extract_and_combine_embeddings(self, input: torch.Tensor)
+    def add_training_example(self, inputs: torch.Tensor, labels: torch.Tensor)
+    def combine_embeddings(embeddings: np.ndarray, embedding_mode: str)
+    def forward(self, x: torch.Tensor)
+  class UMAPTransformer:
+    def __init__(self, n_components, n_neighbors, min_dist)
+    def fit(self, data: DataBundle)
+    def transform(self, data: DataBundle)
+  class HDBSCANTransformer:
+    def __init__(self, min_cluster_size, min_samples)
+    def fit(self, data: DataBundle)
+    def transform(self, data: DataBundle)
+  class SMOTETransformer:
+    def __init__(self, random_state)
+    def fit(self, data: DataBundle)
+    def transform(self, data: DataBundle)
+  class KNNClassifierWrapper:
+    def __init__(self, n_neighbors, weights, metric, algorithm, n_jobs)
+    def fit(self, x, y)
+    def transform(self, x)
+    def predict(self, x)
+    def predict_proba(self, x)
+
+
+  Imported modules:
+    MLHelper
+    hdbscan
+    imblearn.over_sampling
+    imblearn.pipeline
+    logging
+    numpy
+    sklearn.base
+    sklearn.neighbors
+    torch
+    typing
+    umap
+
 /MLHelper/ml_loop.py:
+  class HookManager:
+    def __init__(self, logger: logging.Logger)
+    def register_hook(cls, hook_name: str, priority: int)
+    def run_hooks(self, hook_name: str)
+    def hook_wrapper(cls, hook_name: str)
   class ML_Loop:
     def __init__(self, run: Run, dataset: AudioDataset, pytorch_dataset_class: Dataset)
     def predict_step(self, model, inputs: torch.Tensor, labels: torch.Tensor)
-    def prepare_kfold_run(self)
     def _scheduler_step(self, loss, validation)
     def save_model(self, epoch, fold)
     def check_early_stop(self, epoch_metrics, epoch)
     def _optimizer_step(self, loss)
     def _save_metric_plots(self, epoch_metrics, epoch, fold, validation)
     def training_step(self, inputs: torch.Tensor, labels: torch.Tensor)
-    def start_training_step(self, inputs: torch.Tensor, labels: torch.Tensor)
-    def end_training_step(self, loss: torch.Tensor, probabilities: torch.Tensor, labels: torch.Tensor)
+    def save_input_plots(self)
     def validation_step(self, inputs: torch.Tensor, labels: torch.Tensor)
-    def start_validation_step(self, inputs: torch.Tensor, labels: torch.Tensor)
-    def end_validation_step(self, loss: torch.Tensor, probabilities: torch.Tensor, labels: torch.Tensor)
     def training_epoch_loop(self, epoch: int, fold: int)
-    def start_training_epoch(self, epoch: int)
-    def end_training_epoch(self)
     def validation_epoch_loop(self, epoch: int, fold: int)
-    def start_validation_epoch(self, epoch: int)
-    def end_validation_epoch(self)
     def epoch_loop(self, epoch: int, fold_idx: int)
-    def start_epoch(self, epoch: int, fold_idx: int)
-    def end_epoch(self, epoch: int, fold_idx: int)
     def fold_loop(self, fold_idx: int, start_epoch: int)
-    def start_fold(self, fold_idx: int)
-    def end_fold(self, fold_idx: int)
     def prepare_fold(self, fold_idx: int)
     def kfold_loop(self, start_epoch: int, start_fold: int)
     def start_kfold(self)
     def end_kfold(self)
-  def training_step_hook(func)
-  def validation_step_hook(func)
-  def training_epoch_hook(func)
-  def validation_epoch_hook(func)
-  def epoch_hook(func)
-  def fold_hook(func)
-  def kfold_hook(func)
+    def start_training_step(self, inputs: torch.Tensor, labels: torch.Tensor)
+    def end_training_step(self)
+    def start_validation_step(self, inputs: torch.Tensor, labels: torch.Tensor)
+    def end_validation_step(self)
+    def start_training_epoch(self, epoch: int, fold: int)
+    def _get_current_lr(self)
+    def end_training_epoch(self, epoch: int, fold: int)
+    def start_validation_epoch(self, epoch: int, fold: int)
+    def end_validation_epoch(self, epoch: int, fold: int)
+    def start_epoch(self, epoch: int, fold_idx: int)
+    def end_epoch(self, epoch: int, fold_idx: int)
+    def start_fold(self, fold_idx: int)
+    def end_fold(self, fold_idx: int)
+    def log_cuda_memory(self)
+    def clear_cuda_cache(self)
+  def decorator(func: Callable)
+  def decorator(func: Callable)
   def wrapper(self)
-  def wrapper(self)
-  def wrapper(self)
-  def wrapper(self)
-  def wrapper(self)
-  def wrapper(self, fold_idx, start_epoch)
-  def wrapper(self)
+
+
   Imported modules:
     MLHelper
+    MLHelper.audio
     MLHelper.dataset
     MLHelper.metrics
     MLHelper.metrics.loss
@@ -660,40 +937,54 @@ File structure:
   class SafeLoaderIgnoreUnknown:
     def ignore_unknown(self, node)
   class RunDataModel:
-    def __init__(self, data)
-    def data(self, index, role)
-    def rowCount(self, index)
-    def columnCount(self, index)
-    def headerData(self, section, orientation, role)
+    def __init__(self, parent)
+    def _get_model_method_type(self, run_data: dict)
+    def setDataList(self, data_list)
   class RunMetricsParser:
     def __init__(self)
-    def create_table(self)
+    def on_plot_tabs_resize(self, event)
+    def setup_run_tables(self)
+    def create_table(self, allow_delete)
+    def prompt_delete(self)
+    def delete_selected_run(self)
+    def handle_enter_key(self)
     def load_runs(self)
-    def parse_runs(self)
+    def parse_runs(self, run_type, directory)
+    def show_selected_readonly_run_info(self)
     def get_epoch_count(self, metrics)
     def get_last_metric_value(self, metrics, metric_name)
+    def filter_table(self)
     def update_tables(self)
     def update_single_table(self, table, data, run_type)
     def reload_data(self)
-    def delete_selected(self)
     def show_selected_run_info(self)
+    def clear_plots(self)
     def show_config(self, run_data)
     def show_metrics(self, run_data)
+    def adjust_image_sizes(self)
     def show_plots(self, run_data)
+    def load_and_scale_image(self, file_path, label)
   def safe_load_yaml(file_path)
+  def find_run_type(run_name)
+
+
   Imported modules:
     PyQt6.QtCore
     PyQt6.QtGui
     PyQt6.QtWidgets
     constants
     json
+    logging
     pathlib
     shutil
     sys
+    traceback
     yaml
 
 /MLHelper/__init__.py:
   File is empty
+
+
   Imported modules:
 
 /MLHelper/audio/audioutils.py:
@@ -706,11 +997,14 @@ File structure:
   class SignalFeatures:
     def get_mfcc(waveform, sr, n_mfcc, n_fft, hop_length)
     def get_melspectrogram(waveform, sr, n_fft, n_mels, top_db, hop_length)
+    def get_melspectrogram_torchaudio(waveform, sr, n_fft, n_mels, top_db, hop_length, device)
   class SignalPlotting:
     def compute_mel_spectrogram(samples, sample_rate)
-    def show_mel_spectrogram(mel_spectogram, samplerate, raw, ax, top_db)
-    def show_signal(samples: list, samplerate, raw, ax, cycle_marker: Optional[list])
-    def get_mel_spectrogram_image(mel_spectogram, samplerate, top_db, ax)
+    def show_mel_spectrogram(mel_spectogram, samplerate, hop_length, ax, top_db, title_addon)
+    def show_signal(samples: list, samplerate, raw, ax, cycle_marker: Optional[list], title_addon)
+    def get_mel_spectrogram_image(mel_spectogram, samplerate, hop_length, top_db, ax)
+
+
   Imported modules:
     MLHelper.audio.preprocessing
     MLHelper.constants
@@ -722,7 +1016,6 @@ File structure:
     matplotlib.pyplot
     numpy
     pandas
-    pathlib
     torch
     torchaudio
     tqdm.autonotebook
@@ -737,6 +1030,8 @@ File structure:
     def __init__(self, min_mask_fraction: float, max_mask_fraction: float, fill_mode: str, fill_constant: float, p: float)
     def randomize_parameters(self, magnitude_spectrogram)
     def apply(self, magnitude_spectrogram)
+
+
   Imported modules:
     audiomentations
     audiomentations.core.transforms_interface
@@ -751,18 +1046,23 @@ File structure:
   def resample(audio, orig_sr: int, target_sr: int)
   def spec_min_max_normalisation(spec, min_max, new_min_max)
   def trim_audio_seconds(waveform, sr, start_seconds, end_seconds)
-  def max_abs_normalization(data)
+  def max_abs_normalization(data, epsilon)
   def zscore_normalization(data)
   def pad_audio(audio, target_length: int)
   def repeat_audio(audio, target_length: int)
   def stretch_audio(audio, target_length: int)
+
+
   Imported modules:
     librosa
     numpy
     scipy.signal
+    typing
 
 /MLHelper/audio/__init__.py:
   File is empty
+
+
   Imported modules:
 
 /MLHelper/metrics/loss.py:
@@ -770,9 +1070,10 @@ File structure:
     def __init__(self, alpha, gamma, reduction)
     def forward(self, inputs, targets)
   def get_criterion(config, class_weights)
+
+
   Imported modules:
     MLHelper.constants
-    MLHelper.tools.utils
     torch
     torch.nn
     torch.nn.functional
@@ -784,6 +1085,8 @@ File structure:
     def calculate_curve_metrics(self, y_true, y_score, class_index, num_points)
     def calculate_overall_auroc_pr(self, curve_data)
     def _get_fake_update_data(self, num_classes)
+    def _get_multiclass_fake_data(self)
+    def _get_binary_fake_data(self)
     def check_if_use_fake_data(self, probabilities: Union[Tensor, np.ndarray, list], labels: Union[Tensor, np.ndarray, list], loss: float)
     def _verify_type(self, object, target_tensor, on_device)
     def check_data_form(self, probabilities, labels, loss, predictions)
@@ -805,24 +1108,37 @@ File structure:
     def compute(self)
     def reset(self)
   class MetricsTracker:
-    def __init__(self, config: dict, num_classes, metrics_class, device, logger)
+    def __init__(self, config, num_classes, metrics_class: MetricsInterface, device, logger)
     def update_step(self, validation, probabilities, labels, loss)
     def prepare_new_epoch(self, validation: bool)
     def save_epoch_metrics(self, validation: bool, epoch, lr)
     def update_averages(self, mode)
     def finish_fold(self)
-    def _round_floats(self, x, precision)
+    def _calculate_average_confusion_matrix(self, mode, epoch_index)
+    def plot_average_cm(self)
+    def extract_plot_data(self, mode, curve_type, epoch)
+    def plot_average_roc_pr_curves(self)
+    def round_floats(x, precision)
     def _get_value(self, metrics, metric_name)
     def _round_curve_data(self, metrics)
     def _get_dict(self, metrics: dict)
     def get_last_validation_postfix(self)
     def save_metrics(self)
-    def plot_metrics(self)
-    def print_last_epoch(self)
-    def print_epoch(self, epoch: int, validation: bool)
+    def load_metrics_state(self, path: str)
     def _get_metric_data_from_averages(self, mode: str, metric: str)
+    def plot_all_metrics(self)
+    def _reorganize_fold_data(self, fold_epochs, avg_data)
+    def _create_metric_plot(self, val_data, train_data, title, max_epochs)
+    def get_average_dict(self, mode, epoch)
+    def print_last_epoch(self)
+    def print_epoch(self, epoch_data, epoch: int, validation: bool)
     def print_average_metrics_table(self)
+    def create_summary_plot(self)
+    def save_end_results_txt(self)
     def print_end_summary(self)
+  def format_value(value, std)
+
+
   Imported modules:
     MLHelper.constants
     MLHelper.tools.utils
@@ -831,16 +1147,19 @@ File structure:
     logging
     matplotlib.pyplot
     numpy
-    pandas
     pathlib
+    seaborn
     sklearn.metrics
     tabulate
     torch
     torchmetrics
     typing
+    warnings
 
 /MLHelper/metrics/__init__.py:
   File is empty
+
+
   Imported modules:
 
 /MLHelper/tests/audio_test.py:
@@ -850,6 +1169,8 @@ File structure:
     def test_zscore_normalization(self)
     def test_resample(self)
     def test_butter_bandpass_filter(self)
+
+
   Imported modules:
     audio.audioutils
     audio.preprocessing
@@ -864,6 +1185,8 @@ File structure:
     def test_AlwaysWriteFileHandler_handle(self)
     def test_get_logger(self)
     def test_MyLogFormatter_format(self)
+
+
   Imported modules:
     logging
     os
@@ -887,6 +1210,8 @@ File structure:
     def __init__(self, num_classes)
     def single_update(self)
     def perform_batches(self, num_batches)
+
+
   Imported modules:
     MLHelper.metrics.metrics
     numpy
@@ -895,10 +1220,14 @@ File structure:
 
 /MLHelper/tests/__init__.py:
   File is empty
+
+
   Imported modules:
 
 /MLHelper/tools/cudatest.py:
   File has no methods or classes, but is not empty
+
+
   Imported modules:
     sys
     torch
@@ -916,10 +1245,29 @@ File structure:
   def isEnabledFor(logger, level: int)
   def get_logger_dict(logger_map, sub_name, to_console, log_filename)
   def get_logger(base_name, level_console, level_file, child_name, to_console, log_filename)
+
+
   Imported modules:
     logging
     tqdm.autonotebook
     utils
+
+/MLHelper/tools/python_module_scan.py:
+  def get_arg_str(arg: ast.arg)
+  def extract_imports(tree: ast.AST)
+  def extract_classes_and_methods(file_path: str)
+  def find_python_files(root_folder: str)
+  def print_file_structure(root_folder: str, python_files: List[str], file_obj)
+  def print_and_write_to_file(text: str, file_obj)
+  def main(root_folder: str)
+
+
+  Imported modules:
+    ast
+    collections
+    os
+    sys
+    typing
 
 /MLHelper/tools/utils.py:
   class FileUtils:
@@ -928,30 +1276,37 @@ File structure:
     def safe_path_create(path, filename)
     def remove_file(path)
   class MLModelInfo:
+    def print_tensor_info(tensor: torch.Tensor, name: str, logger: logging.Logger, count)
     def extract_epoch_and_fold(filename)
     def find_max_epoch(filenames)
-    def print_model_summary(model, input_size)
-    def model_data_with_hook(model, input_tensor)
+    def get_model_summary(model, input_size)
     def get_model_table(model: torch.nn.Module)
-    def model_summary(model, input_data, logger: Optional[logging.Logger])
+    def print_model_summary(model, input_data, logger: Optional[logging.Logger])
   class DataTools:
   class MLUtil:
+    def send_self_mail_gmail(subject: str, body: str, adress: str, password_location)
+    def send_email(subject: str, body: str, sender: str, receiver: str, password: str)
+    def clear_cuda_cache()
+    def print_versions(logger)
+    def get_sheduler_optimizer_scaler(config: dict, model: nn.Module)
     def debugger_is_active()
     def log(msg: str, logger: Optional[logging.Logger], level, print_fallback)
     def ensure_device(device: torch.device)
-    def load_model(path: Union[Path, str], model: torch.nn.Module, device: torch.device, optimizer: Optional[torch.optim.Optimizer], scheduler: Optional[torch.optim.lr_scheduler.LRScheduler], scaler: Optional[GradScaler], logger: Optional[logging.Logger])
-    def save_model(path: str, model: torch.nn.Module, optimizer: Optional[Optimizer], scheduler: Optional[torch.optim.lr_scheduler.LRScheduler], scaler: Optional[torch.cuda.amp.GradScaler], logger: Optional[logging.Logger])
+    def load_model(path: Union[Path, str], model: torch.nn.Module, device: torch.device, optimizer: Optional[optim.Optimizer], scheduler: Optional[optim.lr_scheduler.LRScheduler], scaler: Optional[GradScaler], logger: Optional[logging.Logger])
+    def save_model(path: str, model: torch.nn.Module, optimizer: Optional[optim.Optimizer], scheduler: Optional[torch.optim.lr_scheduler.LRScheduler], scaler: Optional[torch.cuda.amp.GradScaler], logger: Optional[logging.Logger])
+    def get_class_distribution(label_list)
     def get_class_weights(label_list)
     def convert_classweights(class_weights: np.array)
     def log_class_balance(data, logger, extra_info, level)
     def reset_weights(m, logger)
   class Plotting:
-    def plot_binary_confusion_matrix(conf_matrix: Union[Dict[str, float], None], tp: Optional[float], fp: Optional[float], fn: Optional[float], tn: Optional[float], std_tp: Optional[float], std_fp: Optional[float], std_fn: Optional[float], std_tn: Optional[float], title: str, save_path: Optional[str])
+    def plot_binary_confusion_matrix(conf_matrix: Dict[str, float], std_tp: Optional[float], std_fp: Optional[float], std_fn: Optional[float], std_tn: Optional[float], title: str)
     def create_confusion_matrix(cm: list, title, cmap)
     def show_save(obj, save_path, show)
     def _plot_tensorimage(tensor, index)
     def show_tensor_image(tensor)
     def show_tensor_input_image(tensor, logger: logging.Logger)
+    def show_waveform(waveform)
   class MLPbar:
     def __init__(self)
     def prepare_bar(self, name, total, position, desc)
@@ -967,25 +1322,26 @@ File structure:
     def divide_chunks(data, size)
   class NumpyJsonEncoder:
     def default(self, o)
+  class NumpyJsonDecoder:
+    def decode(self, s)
   class CurvePlotter:
-    def generate_avg_roc_curve(metrics_data: List[Dict[str, Union[int, Dict, List[Dict]]]], target_epoch: int, validation: bool)
+    def plot_curve(x_data, y_data, x_std, y_std, title, xlabel, ylabel, auc_values, curve_type, step)
     def create_all_curve_plots(curve_data, mode, fold, epoch)
-    def create_roc(roc_data: Dict, class_index: int, title: str)
-    def create_pr(pr_data: Dict, class_index: int, title: str)
-    def _plot_curve(ax, x, y, class_index, auc, curve_type)
+    def create_roc(roc_data: Dict, class_label: str, title: str)
+    def create_pr(pr_data: Dict, class_label: str, title: str)
+    def _plot_steps_on_ax(ax, x, y, class_label, auc, curve_type)
     def _finish_plot(ax, xlabel, ylabel, title)
   class DimensionReduction:
-    def show_umap2d(embeddings, label, n_neighbors, min_dist)
-    def show_umap3d(embeddings, label, n_neighbors, min_dist)
-    def show_tsne2d(embeddings, p, label)
-    def show_tsne3d(embeddings, p, label)
-  def hook_fn(module, input_data, output, layers_info)
-  def register_hooks(model)
+    def plot_umap2d(embeddings, label, n_neighbors, min_dist)
+    def plot_umap3d(embeddings, label, n_neighbors, min_dist)
 
 
   Imported modules:
     MLHelper.constants
+    collections
     dill
+    email.mime.multipart
+    email.mime.text
     json
     logging
     matplotlib.axes
@@ -997,25 +1353,24 @@ File structure:
     pickle
     re
     seaborn
-    sklearn.manifold
     sklearn.utils
+    smtplib
     sys
     tabulate
     torch
     torch.cuda.amp
-    torch.optim
-    torch.optim.lr_scheduler
     torchinfo
     tqdm.auto
+    tsnecuda
     typing
 
 /MLHelper/tools/__init__.py:
   File is empty
+
+
   Imported modules:
 
 Super Import List:
-  BEATs.BEATs:
-    /beats_classifier/beats_training.py
   BEATs.backbone:
     /beats_classifier/BEATs/BEATs.py
     /beats_classifier/BEATs/Tokenizers.py
@@ -1025,15 +1380,27 @@ Super Import List:
     /beats_classifier/BEATs/Tokenizers.py
   MLHelper:
     /MLHelper/config.py
+    /MLHelper/embedding_model.py
     /MLHelper/ml_loop.py
+    /beats_classifier/beats_dataset.py
+    /beats_classifier/beats_models.py
+    /beats_classifier/beats_training.py
+    /beats_classifier/beats_training_knn.py
     /cnn_classifier/cnn_dataset.py
     /cnn_classifier/cnn_inference.py
+    /metric-temp_modify.py
     /run.py
   MLHelper.audio:
+    /MLHelper/ml_loop.py
+    /beats_classifier/beats_dataset.py
     /cnn_classifier/cnn_dataset.py
+    /plot_audio_signal.py
+    /single_file_preview.py
   MLHelper.audio.audioutils:
     /MLHelper/dataset.py
+    /beats_classifier/beats_dataset.py
     /cnn_classifier/cnn_dataset.py
+    /plot_audio_signal.py
   MLHelper.audio.preprocessing:
     /MLHelper/audio/audioutils.py
   MLHelper.config:
@@ -1047,53 +1414,69 @@ Super Import List:
     /build_dataset.py
     /cnn_classifier/cnn_models.py
     /cnn_classifier/cnn_training.py
-    /output_run_parser.py
     /plot_audio_signal.py
     /project_config.py
+    /single_file_preview.py
     /start_inference.py
     /start_looptest.py
+    /start_optim.py
+    /start_optim_embedding.py
+    /start_optim_embedding_finetune.py
     /start_training.py
+    /test_umap.py
   MLHelper.dataset:
     /MLHelper/ml_loop.py
+    /beats_classifier/beats_training.py
+    /beats_classifier/beats_training_knn.py
     /build_dataset.py
     /cnn_classifier/cnn_inference.py
     /cnn_classifier/cnn_training.py
     /run.py
+    /single_file_preview.py
   MLHelper.metrics:
     /MLHelper/ml_loop.py
+    /metric-temp_modify.py
   MLHelper.metrics.loss:
     /MLHelper/ml_loop.py
   MLHelper.metrics.metrics:
     /MLHelper/tests/metric_helper_test.py
   MLHelper.ml_loop:
     /beats_classifier/beats_training.py
+    /beats_classifier/beats_training_knn.py
     /cnn_classifier/cnn_inference.py
     /cnn_classifier/cnn_training.py
-  MLHelper.tools.logging_helper:
+  MLHelper.tools:
+    /MLHelper/config.py
     /run.py
   MLHelper.tools.utils:
     /MLHelper/audio/audioutils.py
     /MLHelper/dataset.py
-    /MLHelper/metrics/loss.py
     /MLHelper/metrics/metrics.py
     /MLHelper/ml_loop.py
+    /beats_classifier/BEATs/BEATs.py
+    /beats_classifier/beats_training.py
+    /beats_classifier/beats_training_knn.py
     /cnn_classifier/cnn_models.py
     /run.py
+    /start_optim.py
+    /start_optim_embedding.py
+    /start_optim_embedding_finetune.py
+    /start_training.py
+    /test_umap.py
   PIL:
     /audio_example_images/merge.py
   PyQt6.QtCore:
     /MLHelper/RunMetricsParser.py
-    /plot_audio_signal.py
   PyQt6.QtGui:
     /MLHelper/RunMetricsParser.py
-    /plot_audio_signal.py
   PyQt6.QtWidgets:
     /MLHelper/RunMetricsParser.py
-    /plot_audio_signal.py
   abc:
     /MLHelper/metrics/metrics.py
     /MLHelper/ml_loop.py
     /run.py
+  ast:
+    /MLHelper/tools/python_module_scan.py
   audio.audioutils:
     /MLHelper/tests/audio_test.py
   audio.preprocessing:
@@ -1104,44 +1487,73 @@ Super Import List:
     /MLHelper/audio/augmentation.py
   beats_classifier:
     /run.py
+  beats_classifier.BEATs.BEATs:
+    /beats_classifier/beats_models.py
+  beats_classifier.beats_dataset:
+    /beats_classifier/beats_training.py
+    /beats_classifier/beats_training_knn.py
   cnn_classifier:
     /run.py
-  cnn_classifier.cnn_training:
-    /run.py
+  cnn_classifier.cnn_dataset:
+    /plot_audio_signal.py
+    /single_file_preview.py
   cnn_dataset:
     /cnn_classifier/cnn_inference.py
     /cnn_classifier/cnn_training.py
   collections:
-    /output_run_parser.py
+    /MLHelper/tools/python_module_scan.py
+    /MLHelper/tools/utils.py
   constants:
     /MLHelper/RunMetricsParser.py
   datetime:
-    /output_run_parser.py
     /run.py
   dill:
     /MLHelper/tools/utils.py
   einops:
     /beats_classifier/BEATs/quantizer.py
+  email.mime.multipart:
+    /MLHelper/tools/utils.py
+  email.mime.text:
+    /MLHelper/tools/utils.py
+  gc:
+    /start_optim.py
+    /start_optim_embedding.py
+    /start_optim_embedding_finetune.py
+  hdbscan:
+    /MLHelper/embedding_model.py
+  imblearn.over_sampling:
+    /MLHelper/embedding_model.py
+  imblearn.pipeline:
+    /MLHelper/embedding_model.py
+  importlib:
+    /start_optim.py
+    /start_optim_embedding.py
+    /start_optim_embedding_finetune.py
   io:
     /build_dataset.py
+  itertools:
+    /test_umap.py
   json:
     /MLHelper/RunMetricsParser.py
     /MLHelper/dataset.py
     /MLHelper/metrics/metrics.py
     /MLHelper/tools/utils.py
     /build_dataset.py
-    /documents/extract_structure.py
-    /plot_audio_signal.py
+    /start_optim.py
+    /start_optim_embedding.py
+    /start_optim_embedding_finetune.py
   librosa:
     /MLHelper/audio/audioutils.py
     /MLHelper/audio/preprocessing.py
     /MLHelper/config.py
-    /beats_classifier/beats_dataset.py
+    /single_file_preview.py
   librosa.display:
     /MLHelper/audio/audioutils.py
   logging:
+    /MLHelper/RunMetricsParser.py
     /MLHelper/audio/audioutils.py
     /MLHelper/dataset.py
+    /MLHelper/embedding_model.py
     /MLHelper/metrics/metrics.py
     /MLHelper/ml_loop.py
     /MLHelper/tests/logging_helper_test.py
@@ -1149,6 +1561,10 @@ Super Import List:
     /MLHelper/tools/utils.py
     /beats_classifier/BEATs/BEATs.py
     /beats_classifier/BEATs/Tokenizers.py
+    /beats_classifier/beats_dataset.py
+    /beats_classifier/beats_models.py
+    /beats_classifier/beats_training.py
+    /beats_classifier/beats_training_knn.py
     /cnn_classifier/cnn_dataset.py
     /cnn_classifier/cnn_training.py
     /run.py
@@ -1162,17 +1578,19 @@ Super Import List:
     /MLHelper/tools/utils.py
   matplotlib.figure:
     /MLHelper/tools/utils.py
+  matplotlib.gridspec:
+    /plot_audio_signal.py
   matplotlib.pyplot:
     /MLHelper/audio/audioutils.py
     /MLHelper/metrics/metrics.py
     /MLHelper/tools/utils.py
     /build_dataset.py
     /cnn_classifier/cnn_inference.py
+    /plot_audio_signal.py
+    /single_file_preview.py
     /start_inference.py
-    /start_looptest.py
     /start_training.py
-  mpl_toolkits.axes_grid1:
-    /build_dataset.py
+    /test_umap.py
   multiprocessing:
     /cnn_classifier/cnn_training.py
   numpy:
@@ -1181,48 +1599,60 @@ Super Import List:
     /MLHelper/audio/preprocessing.py
     /MLHelper/config.py
     /MLHelper/dataset.py
+    /MLHelper/embedding_model.py
     /MLHelper/metrics/metrics.py
     /MLHelper/tests/audio_test.py
     /MLHelper/tests/metric_helper_test.py
     /MLHelper/tools/utils.py
     /beats_classifier/BEATs/backbone.py
     /beats_classifier/beats_training.py
+    /beats_classifier/beats_training_knn.py
     /build_dataset.py
+    /metric-temp_modify.py
+    /single_file_preview.py
+    /test_umap.py
+  optuna:
+    /start_optim.py
+    /start_optim_embedding.py
+    /start_optim_embedding_finetune.py
   os:
     /MLHelper/config.py
     /MLHelper/tests/logging_helper_test.py
+    /MLHelper/tools/python_module_scan.py
     /audio_example_images/merge.py
-    /beats_classifier/beats_dataset.py
-    /documents/extract_structure.py
-    /output_run_parser.py
   pandas:
     /MLHelper/audio/audioutils.py
     /MLHelper/dataset.py
-    /MLHelper/metrics/metrics.py
     /MLHelper/tools/utils.py
-    /beats_classifier/beats_dataset.py
     /build_dataset.py
   pathlib:
     /MLHelper/RunMetricsParser.py
-    /MLHelper/audio/audioutils.py
     /MLHelper/config.py
     /MLHelper/dataset.py
     /MLHelper/metrics/metrics.py
     /MLHelper/ml_loop.py
     /MLHelper/tools/utils.py
+    /beats_classifier/beats_models.py
+    /beats_classifier/beats_training.py
+    /beats_classifier/beats_training_knn.py
     /build_dataset.py
-    /cnn_classifier/cnn_dataset.py
+    /metric-temp_modify.py
     /plot_audio_signal.py
     /run.py
+    /single_file_preview.py
+    /start_optim.py
+    /start_optim_embedding.py
+    /start_optim_embedding_finetune.py
+    /start_training.py
+    /test_umap.py
   pickle:
     /MLHelper/tools/utils.py
-  pprint:
-    /documents/extract_structure.py
+    /beats_classifier/beats_training.py
+    /beats_classifier/beats_training_knn.py
+    /test_umap.py
   project_config:
     /run.py
-  pytorch_lightning:
-    /beats_classifier/beats_dataset.py
-    /beats_classifier/beats_training.py
+    /single_file_preview.py
   random:
     /MLHelper/audio/augmentation.py
     /MLHelper/config.py
@@ -1233,51 +1663,70 @@ Super Import List:
   run:
     /MLHelper/dataset.py
     /MLHelper/ml_loop.py
+    /beats_classifier/beats_dataset.py
+    /beats_classifier/beats_models.py
+    /beats_classifier/beats_training.py
+    /beats_classifier/beats_training_knn.py
     /build_dataset.py
     /cnn_classifier/cnn_dataset.py
     /cnn_classifier/cnn_inference.py
     /cnn_classifier/cnn_models.py
     /cnn_classifier/cnn_training.py
+    /plot_audio_signal.py
     /start_inference.py
     /start_looptest.py
+    /start_optim.py
+    /start_optim_embedding.py
+    /start_optim_embedding_finetune.py
     /start_training.py
   scipy.signal:
     /MLHelper/audio/preprocessing.py
   seaborn:
+    /MLHelper/metrics/metrics.py
     /MLHelper/tools/utils.py
     /build_dataset.py
   shutil:
     /MLHelper/RunMetricsParser.py
-    /output_run_parser.py
   sklearn:
     /MLHelper/config.py
-  sklearn.manifold:
-    /MLHelper/tools/utils.py
+  sklearn.base:
+    /MLHelper/embedding_model.py
   sklearn.metrics:
     /MLHelper/metrics/metrics.py
     /MLHelper/tests/metric_helper_test.py
+    /metric-temp_modify.py
   sklearn.model_selection:
     /MLHelper/dataset.py
+  sklearn.neighbors:
+    /MLHelper/embedding_model.py
   sklearn.utils:
+    /MLHelper/tools/utils.py
+  smtplib:
     /MLHelper/tools/utils.py
   string:
     /run.py
   sys:
     /MLHelper/RunMetricsParser.py
     /MLHelper/tools/cudatest.py
+    /MLHelper/tools/python_module_scan.py
     /MLHelper/tools/utils.py
-    /plot_audio_signal.py
+    /start_optim.py
+    /start_optim_embedding.py
+    /start_optim_embedding_finetune.py
   tabulate:
     /MLHelper/metrics/metrics.py
     /MLHelper/tools/utils.py
   time:
     /cnn_classifier/cnn_training.py
+    /start_optim_embedding.py
+    /start_optim_embedding_finetune.py
   tools.logging_helper:
     /MLHelper/tests/logging_helper_test.py
   torch:
     /MLHelper/audio/audioutils.py
     /MLHelper/config.py
     /MLHelper/dataset.py
+    /MLHelper/embedding_model.py
     /MLHelper/metrics/loss.py
     /MLHelper/metrics/metrics.py
     /MLHelper/ml_loop.py
@@ -1289,17 +1738,21 @@ Super Import List:
     /beats_classifier/BEATs/modules.py
     /beats_classifier/BEATs/quantizer.py
     /beats_classifier/beats_dataset.py
+    /beats_classifier/beats_models.py
     /beats_classifier/beats_training.py
+    /beats_classifier/beats_training_knn.py
     /cnn_classifier/cnn_dataset.py
     /cnn_classifier/cnn_inference.py
     /cnn_classifier/cnn_models.py
-    /cnn_classifier/cnn_training.py
+    /plot_audio_signal.py
     /run.py
+    /single_file_preview.py
+    /start_optim.py
+    /start_optim_embedding.py
+    /start_optim_embedding_finetune.py
   torch.cuda.amp:
     /MLHelper/ml_loop.py
     /MLHelper/tools/utils.py
-  torch.cuda.amp.grad_scaler:
-    /cnn_classifier/cnn_training.py
   torch.distributed:
     /beats_classifier/BEATs/quantizer.py
   torch.nn:
@@ -1308,20 +1761,11 @@ Super Import List:
     /beats_classifier/BEATs/Tokenizers.py
     /beats_classifier/BEATs/backbone.py
     /beats_classifier/BEATs/quantizer.py
-    /beats_classifier/beats_training.py
   torch.nn.functional:
     /MLHelper/metrics/loss.py
     /beats_classifier/BEATs/backbone.py
     /beats_classifier/BEATs/modules.py
     /beats_classifier/BEATs/quantizer.py
-    /beats_classifier/beats_dataset.py
-  torch.optim:
-    /MLHelper/tools/utils.py
-  torch.optim.lr_scheduler:
-    /MLHelper/tools/utils.py
-    /beats_classifier/beats_training.py
-  torch.optim.optimizer:
-    /beats_classifier/beats_training.py
   torch.utils.data:
     /MLHelper/dataset.py
     /MLHelper/ml_loop.py
@@ -1338,22 +1782,35 @@ Super Import List:
     /MLHelper/tools/utils.py
   torchmetrics:
     /MLHelper/metrics/metrics.py
-    /beats_classifier/beats_training.py
   tqdm.auto:
     /MLHelper/tools/utils.py
     /build_dataset.py
   tqdm.autonotebook:
     /MLHelper/audio/audioutils.py
     /MLHelper/tools/logging_helper.py
+  traceback:
+    /MLHelper/RunMetricsParser.py
+  tsnecuda:
+    /MLHelper/tools/utils.py
   typing:
     /MLHelper/audio/audioutils.py
+    /MLHelper/audio/preprocessing.py
+    /MLHelper/embedding_model.py
     /MLHelper/metrics/metrics.py
     /MLHelper/ml_loop.py
+    /MLHelper/tools/python_module_scan.py
     /MLHelper/tools/utils.py
     /beats_classifier/BEATs/BEATs.py
     /beats_classifier/BEATs/Tokenizers.py
     /beats_classifier/BEATs/backbone.py
+    /beats_classifier/beats_training.py
+    /beats_classifier/beats_training_knn.py
+    /cnn_classifier/cnn_inference.py
     /run.py
+  umap:
+    /MLHelper/embedding_model.py
+    /beats_classifier/beats_training_knn.py
+    /test_umap.py
   unittest:
     /MLHelper/tests/audio_test.py
     /MLHelper/tests/logging_helper_test.py
@@ -1364,9 +1821,9 @@ Super Import List:
     /MLHelper/tools/logging_helper.py
   warnings:
     /MLHelper/audio/audioutils.py
+    /MLHelper/metrics/metrics.py
     /beats_classifier/BEATs/modules.py
   yaml:
     /MLHelper/RunMetricsParser.py
     /MLHelper/config.py
-    /plot_audio_signal.py
 

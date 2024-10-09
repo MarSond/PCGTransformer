@@ -181,9 +181,11 @@ confusion_matrix_std: [[32.7880, 35.2677], [26.3287, 49.2297]]
 
 #######################
 
-Run Name: 2024-09-23_09-11-26_2022_fix_beats_knn_finalrun_v5
+Run Name: 2024-10-09_21-21-06_2022_fixed_beats_knn_finalrun_v15
 Total Epochs: 1
 Total Folds: 10
+
+--------------------
 
 Training Metrics:
 No data available
@@ -191,18 +193,20 @@ No data available
 --------------------
 
 Validation Metrics:
-acc: 0.8346 +- 0.0362
-f1: 0.2995 +- 0.0779
-precision: 0.9518 +- 0.0541
-recall: 0.1798 +- 0.0550
-specificity: 0.9984 +- 0.0018
-confusion_matrix: [[39.6000, 1.5000], [181.6000, 887.5000]]
-mcc: 0.3698 +- 0.0684
-nmcc: 0.6849 +- 0.0342
-auprc: 0.5196 +- 0.0967
-auroc: 0.7140 +- 0.0572
-mean_loss: 77.7000 +- 0.0000
-plr: 77744851.2579 +- 98849222.6300
-nlr: 0.8216 +- 0.0558
+acc: 0.8278 +- 0.0402
+f1: 0.3123 +- 0.1023
+f2: 0.2353 +- 0.0860
+f05: 0.4697 +- 0.1193
+precision: 0.7309 +- 0.1176
+recall: 0.2024 +- 0.0772
+specificity: 0.9841 +- 0.0028
+confusion_matrix: [[38.7000, 12.1000], [151.5000, 750.2000]]
+mcc: 0.3209 +- 0.0954
+nmcc: 0.6605 +- 0.0477
+auprc: 0.4031 +- 0.0906
+auroc: 0.6565 +- 0.0529
+mean_loss: 1000000.0000 +- 0.0000
+plr: 13.0082 +- 5.2924
+nlr: 0.8105 +- 0.0781
 learning_rate: None
-confusion_matrix_std: [[13.4774, 1.6279], [37.7099, 74.0436]]
+confusion_matrix_std: [[15.6272, 2.3431], [37.4840, 56.0050]]

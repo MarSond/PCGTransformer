@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import numpy as np
+from sklearn.metrics import fbeta_score
 
 from MLHelper import constants as const
 from MLHelper.metrics import metrics
@@ -9,16 +10,16 @@ target_list = [
 	"2024-09-18_23-40-18_2016_fixed_beats_knn_finalrun",
 	"2024-09-19_01-01-49_2016_fixed_cnn_finalrun",
 	"2024-09-21_12-19-45_2022_cycles_beats_knn_finalrun_v2",
-	"2024-09-22_01-01-39_2022_cycles_cnn_finalrun_v2",
-	"2024-09-22_15-36-53_2022_fixed_cnn_finalrun_v2",
-	"2024-09-23_09-11-26_2022_fixed_beats_knn_finalrun_v5"
+	#"2024-09-22_01-01-39_2022_cycles_cnn_finalrun_v2",
+	#"2024-09-22_15-36-53_2022_fixed_cnn_finalrun_v2",
+	#"2024-10-09_21-21-06_2022_fixed_beats_knn_finalrun_v15"
 ]
 
-def calculate_f2_score(precision, recall):
-	return 5 * (precision * recall) / (4 * precision + recall)
-
-def calculate_f05_score(precision, recall):
-	return 1.25 * (precision * recall) / (0.25 * precision + recall)
+def calculate_fbeta_score(precision, recall, beta):
+	if precision + recall == 0:
+		return 0.0
+	beta_squared = beta ** 2
+	return (1 + beta_squared) * (precision * recall) / (beta_squared * precision + recall)
 
 def add_f2_f05_scores_to_metrics(metric_data):
 	for mode in [const.TRAINING, const.VALIDATION]:
@@ -28,9 +29,9 @@ def add_f2_f05_scores_to_metrics(metric_data):
 					precision = epoch_data[const.METRICS_PRECISION]
 					recall = epoch_data[const.METRICS_RECALL]
 					if const.METRICS_F2 not in epoch_data:
-						epoch_data[const.METRICS_F2] = calculate_f2_score(precision, recall)
+						epoch_data[const.METRICS_F2] = calculate_fbeta_score(precision, recall, beta=2)
 					if const.METRICS_F05 not in epoch_data:
-						epoch_data[const.METRICS_F05] = calculate_f05_score(precision, recall)
+						epoch_data[const.METRICS_F05] = calculate_fbeta_score(precision, recall, beta=0.5)
 
 	# Aktualisiere die Durchschnittswerte
 	for mode in [const.TRAINING, const.VALIDATION]:
@@ -41,16 +42,19 @@ def add_f2_f05_scores_to_metrics(metric_data):
 			precision_data = avg_data[const.METRICS_PRECISION]
 			recall_data = avg_data[const.METRICS_RECALL]
 
-			for metric_name, calc_func in [(const.METRICS_F2, calculate_f2_score),
-											(const.METRICS_F05, calculate_f05_score)]:
+			for metric_name, beta  in [(const.METRICS_F2, 2),
+											(const.METRICS_F05, 0.5)]:
 				if metric_name not in avg_data:
 					metric_scores = []
 					for epoch_index, (p, r) in enumerate(zip(precision_data, recall_data)):
-						all_fold_scores = calc_func(
-							np.array([fold[epoch_index][const.METRICS_PRECISION] for fold in metric_data[const.FOLD_DATA][mode]]),
-							np.array([fold[epoch_index][const.METRICS_RECALL] for fold in metric_data[const.FOLD_DATA][mode]])
-						)
-						mean_score = calc_func(p[const.MEAN], r[const.MEAN])
+						all_fold_scores = np.array([
+							calculate_fbeta_score(
+								fold[epoch_index][const.METRICS_PRECISION],
+								fold[epoch_index][const.METRICS_RECALL],
+								beta
+							) for fold in metric_data[const.FOLD_DATA][mode]
+						])
+						mean_score = calculate_fbeta_score(p[const.MEAN], r[const.MEAN], beta)
 						std_score = np.std(all_fold_scores)
 						metric_scores.append({
 							const.MEAN: mean_score,
@@ -85,6 +89,7 @@ for target_name in target_list:
 	metric.save_end_results_txt()
 	metric.save_metrics()
 
+	metric.plot_average_cm()
 	metric.plot_average_roc_pr_curves()
 	metric.create_summary_plot()
 	metric.plot_all_metrics()

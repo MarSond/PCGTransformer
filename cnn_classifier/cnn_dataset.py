@@ -85,6 +85,7 @@ class CNN_Dataset(Dataset):
 			return (
 				raw_audio,
 				normalized_audio,
+				audio_augmented,
 				sgram_raw,
 				sgram_filtered,
 				sgram_augmented,
