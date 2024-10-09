@@ -24,7 +24,7 @@ class DataAnalysis:
 		self.run.config[const.METADATA_FRAC] = 1.0
 		self.run.config[const.BATCH_SIZE] = 1
 		self.run.config[const.AUGMENTATION_RATE] = 0.0
-		
+
 		"""
 		self.run.config[const.AUDIO_LENGTH_NORM] = const.LENGTH_NORM_STRETCH
 		self.run.config[const.CHUNK_METHOD] = const.CHUNK_METHOD_CYCLES

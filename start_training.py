@@ -231,9 +231,9 @@ if __name__ == "__main__":
 		physionet_2022_fixed_beats_linear,	# 	restart with fix
 	]
 	"""
-	2022	Fix	CNN				
+	2022	Fix	CNN
 	2022	Fix	BEATS knn		Seltsam viel KNN
-	2022	Cycles	CNN			
+	2022	Cycles	CNN
 	2022	Cycles	BEATS knn	Seltsam hohe kNN, mit UMAP als einziges
 
 	physionet_2022_fixed_beats_linear fehlte im alten Durchlauf wegen Bug - Nachgeholt
@@ -324,21 +324,43 @@ if __name__ == "__main__":
 	})
 
 	# 2022 fix BEATS kNN
-	physionet_2022_fixed_beats_knn_v5 = knn_config.copy()
-	physionet_2022_fixed_beats_knn_v5.update({
+	physionet_2022_fixed_beats_knn_v6 = knn_config.copy()
+	physionet_2022_fixed_beats_knn_v6.update({
 		TRAIN_DATASET: PHYSIONET_2022,
-		RUN_NAME_SUFFIX: "2022_fixed_beats_knn_finalrun_v5",
+		RUN_NAME_SUFFIX: "2022_fixed_beats_knn_finalrun_v10",
 		CHUNK_METHOD: CHUNK_METHOD_FIXED,
-		CHUNK_DURATION: 6.0,
+		CHUNK_DURATION: 7.0,
 		EMBEDDING_PARAMS: {
-			KNN_N_NEIGHBORS: 21,
-			KNN_WEIGHT: KNN_WEIGHT_DISTANCE,
+			KNN_N_NEIGHBORS: 15,
+			KNN_WEIGHT: KNN_WEIGHT_UNIFORM,
 			KNN_METRIC: KNN_METRIC_EUCLIDEAN,
-			USE_SMOTE: False,
-			USE_HDBSCAN: True,
+			USE_SMOTE: True,
+			USE_HDBSCAN: False,
 			USE_UMAP: False,
-			HDBSCAN_PARAM_MIN_CLUSTER_SIZE: 30,
-			HDBSCAN_PARAM_MIN_SAMPLES: 15,
+			EMBEDDINGS_REDUCE_UMAP_N_NEIGHBORS: 11,
+			EMBEDDINGS_REDUCE_UMAP_N_COMPONENTS: 14,
+			EMBEDDINGS_REDUCE_UMAP_MIN_DIST: 0.1,
+		}
+	})
+
+
+		# 2022 fix BEATS kNN
+	physionet_2022_fixed_beats_knn_v11 = knn_config.copy()
+	physionet_2022_fixed_beats_knn_v11.update({
+		TRAIN_DATASET: PHYSIONET_2022,
+		RUN_NAME_SUFFIX: "2022_fixed_beats_knn_finalrun_v13",
+		CHUNK_METHOD: CHUNK_METHOD_FIXED,
+		CHUNK_DURATION: 7.0,
+		EMBEDDING_PARAMS: {
+			KNN_N_NEIGHBORS: 9,
+			KNN_WEIGHT: KNN_WEIGHT_UNIFORM,
+			KNN_METRIC: KNN_METRIC_EUCLIDEAN,
+			USE_SMOTE: True,
+			USE_HDBSCAN: False,
+			USE_UMAP: True,
+			EMBEDDINGS_REDUCE_UMAP_N_NEIGHBORS: 7,
+			EMBEDDINGS_REDUCE_UMAP_N_COMPONENTS: 10,
+			EMBEDDINGS_REDUCE_UMAP_MIN_DIST: 0.1,
 		}
 	})
 
@@ -373,7 +395,8 @@ if __name__ == "__main__":
 	################ NEU VERSION 2
 	models_to_run_2 = [
 		#physionet_2022_cycles_beats_knn_v5,# schlecht
-		physionet_2022_fixed_beats_knn_v5, # muss noch
+		#physionet_2022_fixed_beats_knn_v6,
+		physionet_2022_fixed_beats_knn_v11,
 		#physionet_2022_cycles_cnn_v2, # mittel
 		#physionet_2022_fixed_cnn_v2,	# läuft gut?
 	]

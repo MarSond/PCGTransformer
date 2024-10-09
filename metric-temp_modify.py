@@ -86,4 +86,5 @@ for target_name in target_list:
 	metric.save_metrics()
 
 	metric.plot_average_roc_pr_curves()
-	metric.create_summary_plo
+	metric.create_summary_plot()
+	metric.plot_all_metrics()
