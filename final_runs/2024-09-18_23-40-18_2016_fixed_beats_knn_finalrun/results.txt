@@ -1,6 +1,6 @@
 Run Name: 2024-09-18_23-40-18_2016_fixed_beats_knn_finalrun
 Total Epochs: 1
-Total Folds: 19
+Total Folds: 10
 
 --------------------
 
@@ -24,6 +24,8 @@ mean_loss: 77.7000 +- 0.0000
 plr: 7.8206 +- 0.6748
 nlr: 0.1265 +- 0.0277
 learning_rate: None
+f2: 0.8407 +- 0.0201
+f05: 0.7251 +- 0.0381
 confusion_matrix_std: [[10.5589, 8.7641], [5.2240, 17.4072]]
 
 --------------------

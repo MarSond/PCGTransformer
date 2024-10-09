@@ -1,0 +1,32 @@
+Run Name: 2024-10-09_21-21-06_2022_fixed_beats_knn_finalrun_v15
+Total Epochs: 1
+Total Folds: 10
+
+--------------------
+
+Training Metrics:
+No data available
+
+--------------------
+
+Validation Metrics:
+acc: 0.8278 +- 0.0402
+f1: 0.3123 +- 0.1023
+f2: 0.2353 +- 0.0860
+f05: 0.4697 +- 0.1193
+precision: 0.7309 +- 0.1176
+recall: 0.2024 +- 0.0772
+specificity: 0.9841 +- 0.0028
+confusion_matrix: [[38.7000, 12.1000], [151.5000, 750.2000]]
+mcc: 0.3209 +- 0.0954
+nmcc: 0.6605 +- 0.0477
+auprc: 0.4031 +- 0.0906
+auroc: 0.6565 +- 0.0529
+mean_loss: 1000000.0000 +- 0.0000
+plr: 13.0082 +- 5.2924
+nlr: 0.8105 +- 0.0781
+learning_rate: None
+confusion_matrix_std: [[15.6272, 2.3431], [37.4840, 56.0050]]
+
+--------------------
+
