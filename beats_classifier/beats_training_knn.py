@@ -106,14 +106,19 @@ class BEATsTrainingKNN(ML_Loop):
 
 		if embeddings.ndim == 1:
 			embeddings = embeddings.reshape(-1, 1)
-		reducer = umap.UMAP(random_state=const.SEED_VALUE, n_neighbors=n_neighbors, min_dist=min_dist, low_memory=False)
-		umap_embeddings = reducer.fit_transform(embeddings, y=labels)
+		reducer = umap.UMAP(random_state=const.SEED_VALUE, n_neighbors=n_neighbors, n_components=2, min_dist=min_dist, low_memory=False)
+		umap_embeddings = reducer.fit_transform(embeddings) # no y=labels here, unsupervised UMAP
+		umap_embeddings_supervised = reducer.fit_transform(embeddings, y=labels)
 
 		fig_2d = Plotting.DimensionReduction.plot_umap2d(umap_embeddings, labels, n_neighbors=n_neighbors, min_dist=min_dist)
+		fig_2d_supervised = Plotting.DimensionReduction.plot_umap2d(umap_embeddings_supervised, labels, n_neighbors=n_neighbors, min_dist=min_dist)
+
 		base_path = Path(self.run.run_results_path) / const.OTHER_FOLDER_NAME
 
 		FileUtils.safe_path_create(base_path)
+
 		Plotting.show_save(fig_2d, base_path / f"umap_2d_{name}_epoch_{epoch}_fold_{fold}.png", show=False)
+		Plotting.show_save(fig_2d_supervised, base_path / f"umap_2d_supervised_{name}_epoch_{epoch}_fold_{fold}.png", show=False)
 
 		self.run.log_training(f"UMAP plots saved for epoch {epoch}, fold {fold}", level=logging.INFO)
 

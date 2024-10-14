@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import numpy as np
-from sklearn.metrics import fbeta_score
 
 from MLHelper import constants as const
 from MLHelper.metrics import metrics
@@ -10,9 +9,9 @@ target_list = [
 	"2024-09-18_23-40-18_2016_fixed_beats_knn_finalrun",
 	"2024-09-19_01-01-49_2016_fixed_cnn_finalrun",
 	"2024-09-21_12-19-45_2022_cycles_beats_knn_finalrun_v2",
-	#"2024-09-22_01-01-39_2022_cycles_cnn_finalrun_v2",
-	#"2024-09-22_15-36-53_2022_fixed_cnn_finalrun_v2",
-	#"2024-10-09_21-21-06_2022_fixed_beats_knn_finalrun_v15"
+	"2024-09-22_01-01-39_2022_cycles_cnn_finalrun_v2",
+	"2024-09-22_15-36-53_2022_fixed_cnn_finalrun_v2",
+	"2024-10-09_21-21-06_2022_fixed_beats_knn_finalrun_v15"
 ]
 
 def calculate_fbeta_score(precision, recall, beta):
