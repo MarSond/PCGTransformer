@@ -157,13 +157,17 @@ class BEATs(nn.Module):
 			waveform = waveform.unsqueeze(0)  # Add channel dimension
 			#waveform = waveform * (2**15)
 			self.logger.debug(f"Waveform min max mean after: {waveform.min()} {waveform.max()} {waveform.mean()}")
-			fbank = ta_kaldi.fbank(
-				waveform,
-				num_mel_bins=128,
-				sample_frequency=16000,
-				frame_length=25,
-				frame_shift=10,
-			)
+			try:
+				fbank = ta_kaldi.fbank(
+					waveform,
+					num_mel_bins=128,
+					sample_frequency=16000,
+					frame_length=25,
+					frame_shift=10,
+				)
+			except Exception as e:
+				self.logger.error(f"Error processing waveform {idx}: {e}")
+				continue
 			# check nan in the fbank
 			if torch.isnan(fbank).any():
 				self.logger.warning(f"fbank values for waveform {idx} contain NaN")

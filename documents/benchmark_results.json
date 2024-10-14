@@ -1,0 +1,104 @@
+[
+  {
+    "run_name": "2024-09-18_23-40-18_2016_fixed_beats_knn_finalrun",
+    "training": {
+      "mean": 26.014928090370308,
+      "std": 0.0
+    },
+    "inference": {
+      "mean": 44.550665691074,
+      "std": 0.0
+    },
+    "model_size": {
+      "param_count": 90311792,
+      "trainable_param_count": 0,
+      "forward_pass_size_mb": 344.51214599609375
+    },
+    "file_size_mb": 372.69
+  },
+  {
+    "run_name": "2024-09-19_01-01-49_2016_fixed_cnn_finalrun",
+    "training": {
+      "mean": 50.12893407358288,
+      "std": 0.0
+    },
+    "inference": {
+      "mean": 4.062717917275294,
+      "std": 0.0
+    },
+    "model_size": {
+      "param_count": 4356082,
+      "trainable_param_count": 4356082,
+      "forward_pass_size_mb": 16.61713409423828
+    },
+    "file_size_mb": 49.9
+  },
+  {
+    "run_name": "2024-09-21_12-19-45_2022_cycles_beats_knn_finalrun_v2",
+    "training": {
+      "mean": 20.89514872607063,
+      "std": 0.0
+    },
+    "inference": {
+      "mean": 36.840476008022534,
+      "std": 0.0
+    },
+    "model_size": {
+      "param_count": 90311792,
+      "trainable_param_count": 0,
+      "forward_pass_size_mb": 344.51214599609375
+    },
+    "file_size_mb": 359.17
+  },
+  {
+    "run_name": "2024-09-22_01-01-39_2022_cycles_cnn_finalrun_v2",
+    "training": {
+      "mean": 49.42613027312539,
+      "std": 0.0
+    },
+    "inference": {
+      "mean": 13.108285521591986,
+      "std": 0.0
+    },
+    "model_size": {
+      "param_count": 5336402,
+      "trainable_param_count": 5336402,
+      "forward_pass_size_mb": 20.35675811767578
+    },
+    "file_size_mb": 61.13
+  },
+  {
+    "run_name": "2024-09-22_15-36-53_2022_fixed_cnn_finalrun_v2",
+    "training": {
+      "mean": 49.61339153578377,
+      "std": 0.0
+    },
+    "inference": {
+      "mean": 4.002515024045398,
+      "std": 0.0
+    },
+    "model_size": {
+      "param_count": 5336402,
+      "trainable_param_count": 5336402,
+      "forward_pass_size_mb": 20.35675811767578
+    },
+    "file_size_mb": 61.13
+  },
+  {
+    "run_name": "2024-10-09_21-21-06_2022_fixed_beats_knn_finalrun_v15",
+    "training": {
+      "mean": 17.954915261068265,
+      "std": 0.0
+    },
+    "inference": {
+      "mean": 36.04705401399534,
+      "std": 0.0
+    },
+    "model_size": {
+      "param_count": 90311792,
+      "trainable_param_count": 0,
+      "forward_pass_size_mb": 344.51214599609375
+    },
+    "file_size_mb": 382.65
+  }
+]

@@ -36,21 +36,21 @@ if __name__ == "__main__":
 	knn_test_dict = knn_base_dict.copy()
 	knn_test_dict.update({
 		TRAIN_DATASET: PHYSIONET_2022, KFOLD_SPLITS: 1,
-		METADATA_FRAC: 0.05,
+		METADATA_FRAC: 0.3,
 		EMBEDDING_PARAMS: {
 			KNN_N_NEIGHBORS: 1,
 			KNN_WEIGHT: KNN_WEIGHT_UNIFORM,
 			KNN_METRIC: KNN_METRIC_EUCLIDEAN,
 			KNN_ALGORITHM: KNN_ALGORITHM_AUTO,
 			USE_SMOTE: True,
-			USE_HDBSCAN: True,
-			REDUCE_DIM_UMAP: True,
+			USE_HDBSCAN: False,
+			REDUCE_DIM_UMAP: False,
 			EMBEDDINGS_REDUCE_UMAP_MIN_DIST: 0.1,
 			EMBEDDINGS_REDUCE_UMAP_N_NEIGHBORS: 15,
 			EMBEDDINGS_REDUCE_UMAP_N_COMPONENTS: 10,
 		},
 	})
-	#do_run(knn_test_dict)
+	do_run(knn_test_dict)
 
 	####
 
@@ -117,7 +117,7 @@ if __name__ == "__main__":
 		MODEL_METHOD_TYPE: BEATS,
 		TRAIN_DATASET: PHYSIONET_2016, KFOLD_SPLITS: 3, EPOCHS: 2,
 	})
-	do_run(fold_test_dict)
+	#do_run(fold_test_dict)
 
 
 	##### To test continue from a saved model checkpoint

@@ -21,12 +21,14 @@ project_config = {
 	TRAIN_DATASET: PHYSIONET_2016,
 	INFERENCE_DATASET: PHYSIONET_2016,
 	INFERENCE_MODEL: None,
-	TRAINING_CHECKPOINT: None,	# load checkpoint for training: {EPOCH: 80, RUN_NAME: "run1", FOLD: 1}
-	AUGMENTATION_RATE: 0.0,		# Percent of data passed to data augmentation pipeline
-	DATALOADER_NUM_WORKERS: 0,				# workers for dataloader
-	KFOLD_SPLITS: 1,			# number of kfold splits. 1 -> use normal splitting
-	SAVE_MODEL: True,			# Save pytorch model
-	SAVE_ONLY_LAST_MODEL: True,	# Save only last model (deletes old models when saving new)
+	TRAINING_CHECKPOINT: None,	#	 load checkpoint for training: {EPOCH: 80, RUN_NAME: "run1", FOLD: 1}
+	AUGMENTATION_RATE: 0.0,			# Percent of data passed to data augmentation pipeline
+	DATALOADER_NUM_WORKERS: 0,		# workers for pytorch dataloader
+	KFOLD_SPLITS: 1,				# number of kfold splits. 1 -> use normal splitting
+	SAVE_MODEL: True,				# Save pytorch model
+	SAVE_ONLY_LAST_MODEL: True,		# Save only last model (deletes old models when saving new)
+	PLOT_METRICS: True,				# Plot metrics during training
+	DELETE_OWN_RUN_FOLDER: False,	# Delete own run folder when finished
 
 	CHUNK_METHOD: CHUNK_METHOD_FIXED,		# Chunking method to split longer files into smaller chunks
 	CHUNK_HEARTCYCLE_COUNT: 5,				# Number of heart cycles per chunk when using CHUNK_METHOD_CYCLES
@@ -41,7 +43,6 @@ project_config = {
 	EARLY_STOPPING_PATIENCE: 8,				# Count of epochs to wait before checking early stopping
 	EARLY_STOPPING_THRESHOLD: 0.60,			# Threshold for early stopping (minimum required)
 	EARLY_STOPPING_METRIC: METRICS_NMCC,	# Metric to use for early stopping
-
 
 	USE_AMP : True,					# Enable Automatic Mixed Precision
 	OPTIMIZER: OPTIMIZER_ADAM,		# OPTIMIZER_ADAM, OPTIMIZER_SGD
@@ -99,6 +100,7 @@ project_config = {
 		HDBSCAN_PARAM_MIN_CLUSTER_SIZE: 5,
 		HDBSCAN_PARAM_MIN_SAMPLES: 5,
 		EMBEDDING_SAVE_TO_FILE: True,
+		EMBEDDING_PLOT_UMAP: True,
 	},
 	LOAD_EMBEDDINGS_FROM_RUN_NAME: None,
 }

@@ -34,8 +34,11 @@ class BEATsTrainingKNN(ML_Loop):
 		# self.scheduler = scheduler
 		# self.scaler = scaler
 		knn_params = self.run.config[const.EMBEDDING_PARAMS]
-		self.emb_classifier = embedding_model.EmbeddingClassifier(self.model, \
-			knn_params, self.run.logger_dict[const.LOGGER_TENSOR], self.run.device)
+		if isinstance(start_model, embedding_model.EmbeddingClassifier):
+			self.emb_classifier = start_model
+		else:
+			self.emb_classifier = embedding_model.EmbeddingClassifier(self.model, \
+				knn_params, self.run.logger_dict[const.LOGGER_TENSOR], self.run.device)
 		self.emb_classifier = self.emb_classifier.to(self.run.device)
 
 	def start_training_task(self, start_epoch: int, start_fold: int):
@@ -102,6 +105,9 @@ class BEATsTrainingKNN(ML_Loop):
 			self.run.log_training(f"Embeddings not saved", level=logging.INFO)
 
 	def create_umap_plots(self, embeddings, labels, epoch, fold, n_neighbors=30, min_dist=0.4, name="all_data"):
+		if not self.config[const.EMBEDDING_PARAMS].get(const.EMBEDDING_PLOT_UMAP, False):
+			return
+		self.run.logger_dict[const.LOGGER_TRAINING].info("Creating UMAP plots")
 		import umap
 
 		if embeddings.ndim == 1:
@@ -124,7 +130,6 @@ class BEATsTrainingKNN(ML_Loop):
 
 # TODO text: methoden wie smote wurden bei CNN statdessen mittels FocalLoss angegangen
 	def create_umap_plots_hook(self, epoch: int, fold: int, **kwargs: Any) -> None:
-		self.run.logger_dict[const.LOGGER_TRAINING].info("Creating UMAP plots")
 		embeddings = self.emb_classifier.embedding_data
 		labels = self.emb_classifier.embedding_labels
 		if not self.load_embeddings_run_name:

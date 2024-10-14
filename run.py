@@ -162,6 +162,12 @@ class Run:
 			run_config_path = \
 				Path(Run._get_run_results_path(self.config, config_update[const.LOAD_PREVIOUS_RUN_NAME])) / \
 				self.config[const.FILENAME_RUN_CONFIG]
+			if not run_config_path.exists():
+				run_config_path = Path("final_runs") / config_update[const.LOAD_PREVIOUS_RUN_NAME] / \
+					self.config[const.FILENAME_RUN_CONFIG]
+				print(f"Could not find run config {run_config_path}. Trying {run_config_path}.")  # noqa: T201
+			if not run_config_path.exists():
+				raise FileNotFoundError(f"Could not find run config {run_config_path} to load.")
 			self.config.update_config_yaml(run_config_path)
 			print(f"Updating config from {self.config[const.LOAD_PREVIOUS_RUN_NAME]}") # noqa: T201
 		if config_update is not None:
@@ -186,7 +192,10 @@ class Run:
 	def start_task(self):
 		"""Starts the configured task."""
 		assert hasattr(self, "task"), "Task not set up"
-		return self.task.start_task()
+		result = self.task.start_task()
+		if self.config.get(const.DELETE_OWN_RUN_FOLDER, False):
+			FileUtils.delete_folder(self.config[const.RUN_FOLDER])
+		return result
 
 
 class TaskBase(ABC):
@@ -225,7 +234,6 @@ class TaskBase(ABC):
 			raise NotImplementedError("BEATS inference not implemented")
 		self.run.log_training(f"Unknown model type {model_type}", level=logging.ERROR)
 		raise ValueError(f"Unknown model type {model_type}")
-
 
 	def get_dataset(self):
 		"""
@@ -271,6 +279,7 @@ class TaskBase(ABC):
 			from beats_classifier import beats_models
 			model = beats_models.get_model(run)
 			demo_inputs = beats_models.get_demo_input()
+
 		else:
 			raise ValueError(f"Unknown model type {model_type}")
 		MLModelInfo.print_model_summary(model, input_data=demo_inputs, \
