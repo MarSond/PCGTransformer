@@ -70,7 +70,6 @@ def run_benchmark(run_path: Path, num_runs: int = 11, warmup: int = 1):
 		end_time = time.time()
 		total_time = (end_time - start_time) * 1000  # in ms
 		time_per_example = total_time / (len(run.task.trainer_class.train_loader) * config[BATCH_SIZE])
-		FileUtils.delete_folder(run.config[RUN_FOLDER])
 		return time_per_example
 
 	# Warmup
