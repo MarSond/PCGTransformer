@@ -69,7 +69,6 @@ project_config = {
 	CNN_PARAMS: {			# Values individual for CNN methods
 		DROP0: 0.5,			# Dropout rate on position 0
 		DROP1: 0.2,			# Dropout rate on position 1
-		BATCHNORM: True,	# Use batchnorm (# TODO not implemented checking for)
 		ACTIVATION: ACTIVATION_SILU, # Activation function
 		N_MELS: 512,
 		HOP_LENGTH: 128,
