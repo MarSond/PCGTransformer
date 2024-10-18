@@ -15,7 +15,7 @@ from run import Run
 
 # ruff: noqa: T201, E501
 
-def save_training_data_to_csv(metadata, dataset):
+def save_training_data_to_csv(metadata, dataset: AudioDataset):
 	metadata_df = pd.DataFrame(metadata)
 	print(metadata_df.head())
 	print(f"Train path: {dataset.meta_file_train}")
@@ -385,75 +385,121 @@ def save_statistics(dataset: AudioDataset, stats_dir: Path):
 	print(f"Statistics saved to {stats_file}")
 	return train_data
 
+def plot_class_distribution(data, ax, colors):
+    class_counts = data[const.META_LABEL_1].value_counts()
+    ax.pie(class_counts, labels=["Normal", "Abnormal"], colors=colors, autopct="%1.1f%%", 
+           textprops={"fontsize": 14, "fontweight": "bold"})
+    ax.set_title("Class Distribution", fontsize=24, fontweight="bold")
+
+def plot_audio_length_distribution(data, seconds, ax, colors):
+    sns.histplot(data=data, x=seconds, hue=data[const.META_LABEL_1].map({0: "Normal", 1: "Abnormal"}),
+                 palette=colors, multiple="stack", kde=False, ax=ax, bins=100)
+    ax.set_title("Audio Length Distribution", fontsize=24, fontweight="bold")
+    ax.set_xlabel("Length (seconds)", fontsize=18)
+    ax.set_ylabel("Count", fontsize=18)
+    ax.tick_params(axis="both", which="major", labelsize=15)
+    ax.legend(title="Class", labels=["Normal", "Abnormal"], fontsize=14, title_fontsize=16)
+
+def plot_bpm_distribution(data, ax, colors):
+    sns.histplot(data=data, x="bpm", hue=data[const.META_LABEL_1].map({0: "Normal", 1: "Abnormal"}),
+                 palette=colors, multiple="stack", kde=False, ax=ax, bins=100)
+    ax.set_title("BPM Distribution", fontsize=24, fontweight="bold")
+    ax.set_xlabel("Beats Per Minute", fontsize=18)
+    ax.set_ylabel("Count", fontsize=18)
+    ax.legend(title="Class", labels=["Normal", "Abnormal"], fontsize=14, title_fontsize=16)
+    ax.tick_params(axis="both", which="major", labelsize=14)
+
+def generate_text_content(data, seconds):
+    class_counts = data[const.META_LABEL_1].value_counts()
+    text_content = f"Total samples: {len(data)}\n"
+    text_content += f"Normal: {class_counts[0]} ({class_counts[0]/len(data)*100:.1f}%)\n"
+    text_content += f"Abnormal: {class_counts[1]} ({class_counts[1]/len(data)*100:.1f}%)\n\n"
+    text_content += f"Audio Length Statistics:\n"
+    text_content += f"  Average (All): {seconds.mean():.2f}s\n"
+    text_content += f"  Average (Normal): {seconds[data[const.META_LABEL_1] == 0].mean():.2f}s\n"
+    text_content += f"  Average (Abnormal): {seconds[data[const.META_LABEL_1] == 1].mean():.2f}s\n"
+    text_content += f"  Median: {seconds.median():.2f}s\n"
+    text_content += f"  Minimum: {seconds.min():.2f}s\n"
+    text_content += f"  Maximum: {seconds.max():.2f}s\n"
+    text_content += f"  Correlation (class vs length): {data[const.META_LABEL_1].corr(seconds):.4f}\n"
+    return text_content
+
+def generate_bpm_text_content(data):
+    text_content = "BPM Statistics:\n"
+    text_content += f"  Average (All): {data['bpm'].mean():.2f}\n"
+    text_content += f"  Average (Normal): {data[data[const.META_LABEL_1] == 0]['bpm'].mean():.2f}\n"
+    text_content += f"  Average (Abnormal): {data[data[const.META_LABEL_1] == 1]['bpm'].mean():.2f}\n"
+    text_content += f"  Median: {data['bpm'].median():.2f}\n"
+    text_content += f"  Minimum: {data['bpm'].min():.2f}\n"
+    text_content += f"  Maximum: {data['bpm'].max():.2f}\n"
+    return text_content
+
 def plot_statistics(dataset: AudioDataset, stats_dir: Path):
-	data = dataset.load_file_list()
-	dataset_name = dataset.__class__.__name__
+    data = dataset.load_file_list()
+    dataset_name = dataset.__class__.__name__
+    seconds = data[const.META_LENGTH] / dataset.target_samplerate
+    colors = ["green", "red"]
+    
+    # Einzelne Plots
+    fig, ax = plt.subplots(figsize=(10, 8))
+    plot_class_distribution(data, ax, colors)
+    plt.savefig(stats_dir / f"{dataset_name}_class_distribution.png", dpi=300, bbox_inches="tight")
+    plt.close(fig)
 
-	# Length distribution
-	plt.figure(figsize=(12, 8))
-	seconds = data[const.META_LENGTH] / dataset.target_samplerate
-	sns.histplot(data=seconds, kde=True)
-	plt.title(f"{dataset_name} - Audio Length Distribution")
-	plt.xlabel("Seconds")
-	plt.ylabel("Count")
-	plt.savefig(stats_dir / f"{dataset_name}_length_distribution.png")
-	plt.close()
+    fig, ax = plt.subplots(figsize=(10, 8))
+    plot_audio_length_distribution(data, seconds, ax, colors)
+    plt.savefig(stats_dir / f"{dataset_name}_audio_length_distribution.png", dpi=300, bbox_inches="tight")
+    plt.close(fig)
 
-	# Class distribution (using the old plot style)
-	p_size = 12
-	font_size = 16
-	fig, axs = plt.subplots(1, 3, figsize=(p_size * 3, p_size))
+    if isinstance(dataset, Physionet2022):
+        data["bpm"] = data[const.META_HEARTCYCLES].apply(calculate_bpm)
+        fig, ax = plt.subplots(figsize=(10, 8))
+        plot_bpm_distribution(data, ax, colors)
+        plt.savefig(stats_dir / f"{dataset_name}_bpm_distribution.png", dpi=300, bbox_inches="tight")
+        plt.close(fig)
 
-	# Pie chart
-	class_counts = data[const.META_LABEL_1].value_counts()
-	axs[0].pie(class_counts, labels=["NORMAL", "ABNORMAL"],
-				autopct="%1.1f%%", colors=["green", "red"])
-	axs[0].set_title("Class Distribution", fontsize=font_size)
+    # Gesamtübersicht
+    sns.set_style("whitegrid")
+    fig = plt.figure(figsize=(20, 16))
+    gs = fig.add_gridspec(3, 2, height_ratios=[2.8, 1.8, 2.8], hspace=0.3)
 
-	# Statistics text
-	text_content = f"Average length (Negative): {seconds[data[const.META_LABEL_1] == 0].mean():.2f}s\n"
-	text_content += f"Average length (Positive): {seconds[data[const.META_LABEL_1] == 1].mean():.2f}s\n"
-	text_content += f"Average length (All): {seconds.mean():.2f}s\n"
-	text_content += f"Standard deviation (Negative): {seconds[data[const.META_LABEL_1] == 0].std():.2f}s\n"
-	text_content += f"Standard deviation (Positive): {seconds[data[const.META_LABEL_1] == 1].std():.2f}s\n"
-	text_content += f"Standard deviation (All): {seconds.std():.2f}s\n"
-	text_content += f"Median length: {seconds.median():.2f}s\n"
-	text_content += f"Minimum length: {seconds.min():.2f}s\n"
-	text_content += f"Maximum length: {seconds.max():.2f}s\n"
-	text_content += f"Correlation class<->length: {data[const.META_LABEL_1].corr(seconds):.4f}\n"
-	text_content += f"Counts: neg.: {class_counts[0]} pos.: {class_counts[1]} total: {len(data)}"
+    fig.suptitle(f"Dataset Statistics for {dataset_name}", fontsize=28, fontweight="bold", y=0.98)
 
-	axs[1].text(0, 0.5, text_content, fontsize=font_size-2, ha="left", va="center")
-	axs[1].axis("off")
+    ax1 = fig.add_subplot(gs[0, 0])
+    ax1.set_position([0.15, 0.68, 0.3, 0.22])
+    plot_class_distribution(data, ax1, colors)
 
-	# Length histogram
-	axs[2].hist(seconds, bins=100, color="blue", alpha=0.7)
-	axs[2].set_title("Length Histogram", fontsize=font_size)
-	axs[2].set_xlabel("Seconds", fontsize=font_size-2)
-	axs[2].set_ylabel("Count", fontsize=font_size-2)
+    ax2 = fig.add_subplot(gs[0, 1])
+    ax2.set_position([0.55, 0.68, 0.4, 0.22])
+    plot_audio_length_distribution(data, seconds, ax2, colors)
 
-	plt.tight_layout()
-	plt.savefig(stats_dir / f"{dataset_name}_class_and_length_distribution.png")
-	plt.close()
+    ax3 = fig.add_subplot(gs[1, 0])
+    ax4 = fig.add_subplot(gs[1, 1])
+    ax3.set_position([0.15, 0.40, 0.3, 0.22])
+    ax4.set_position([0.55, 0.40, 0.4, 0.22])
 
-	if isinstance(dataset, Physionet2022):
-		data["bpm"] = data[const.META_HEARTCYCLES].apply(calculate_bpm)
-		plt.figure(figsize=(12, 8))
-		sns.histplot(data=data["bpm"].dropna(), kde=True)
-		plt.title(f"{dataset_name} - BPM Distribution")
-		plt.xlabel("Beats Per Minute")
-		plt.ylabel("Count")
-		plt.savefig(stats_dir / f"{dataset_name}_bpm_distribution.png")
-		plt.close()
+    text_content1 = generate_text_content(data, seconds)
+    ax3.text(0.15, 1.0, text_content1, fontsize=19, ha="left", va="top", transform=ax3.transAxes)
+    ax3.axis("off")
 
-	plt.figure(figsize=(10, 8))
-	corr_data = data[[const.META_LABEL_1, const.META_LENGTH, const.META_SAMPLERATE, const.META_CHANNELS]]
-	sns.heatmap(corr_data.corr(), annot=True, cmap="coolwarm")
-	plt.title(f"{dataset_name} - Correlation Heatmap")
-	plt.savefig(stats_dir / f"{dataset_name}_correlation_heatmap.png")
-	plt.close()
+    text_content2 = ""
+    if isinstance(dataset, Physionet2022):
+        text_content2 = generate_bpm_text_content(data)
 
-	print(f"Plots saved in {stats_dir}")
+    ax4.text(0.15, 1.0, text_content2, fontsize=19, ha="left", va="top", transform=ax4.transAxes)
+    ax4.axis("off")
+
+    ax5 = fig.add_subplot(gs[2, :])
+    if isinstance(dataset, Physionet2022):
+        ax5.set_position([0.15, 0.1, 0.8, 0.24])
+        plot_bpm_distribution(data, ax5, colors)
+    else:
+        ax5.axis("off")
+
+    plt.savefig(stats_dir / f"{dataset_name}_overall_statistics.png", dpi=300, bbox_inches="tight")
+    plt.close(fig)
+
+    print(f"Plots saved in {stats_dir}")
 
 def generate_statistics_and_plots(dataset: AudioDataset):
 	stats_dir = create_output_directories(dataset)
