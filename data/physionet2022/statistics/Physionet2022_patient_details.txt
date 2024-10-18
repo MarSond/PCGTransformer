@@ -1,0 +1,597 @@
+Patients with more than 4 data entries:
+
+Patients with 10 entries:
+  Patient 50115:
+    Entry ID: 50115_PV_1.wav
+    Entry ID: 50115_PV_2.wav
+    Entry ID: 50115_TV_2.wav
+    Entry ID: 50115_TV_1.wav
+    Entry ID: 68377_AV.wav
+    Entry ID: 50115_MV.wav
+    Entry ID: 68377_MV.wav
+    Entry ID: 50115_AV.wav
+    Entry ID: 68377_TV.wav
+    Entry ID: 68377_PV.wav
+
+
+Patients with 9 entries:
+  Patient 50216:
+    Entry ID: 68465_PV.wav
+    Entry ID: 50216_Phc_2.wav
+    Entry ID: 50216_PV.wav
+    Entry ID: 50216_AV.wav
+    Entry ID: 68465_MV.wav
+    Entry ID: 50216_MV.wav
+    Entry ID: 68465_AV.wav
+    Entry ID: 68465_TV.wav
+    Entry ID: 50216_Phc_1.wav
+
+
+Patients with 8 entries:
+  Patient 50619:
+    Entry ID: 50619_PV.wav
+    Entry ID: 68849_PV.wav
+    Entry ID: 50619_MV.wav
+    Entry ID: 50619_AV.wav
+    Entry ID: 68849_MV.wav
+    Entry ID: 50619_TV.wav
+    Entry ID: 68849_TV.wav
+    Entry ID: 68849_AV.wav
+
+  Patient 50218:
+    Entry ID: 68460_PV.wav
+    Entry ID: 50218_PV.wav
+    Entry ID: 50218_MV.wav
+    Entry ID: 68460_MV.wav
+    Entry ID: 68460_TV.wav
+    Entry ID: 50218_AV.wav
+    Entry ID: 50218_TV.wav
+    Entry ID: 68460_AV.wav
+
+  Patient 49712:
+    Entry ID: 49712_MV.wav
+    Entry ID: 49712_AV.wav
+    Entry ID: 69120_AV.wav
+    Entry ID: 69120_TV.wav
+    Entry ID: 49712_PV.wav
+    Entry ID: 49712_TV.wav
+    Entry ID: 69120_PV.wav
+    Entry ID: 69120_MV.wav
+
+  Patient 49963:
+    Entry ID: 49963_TV.wav
+    Entry ID: 49963_AV.wav
+    Entry ID: 68204_MV.wav
+    Entry ID: 49963_PV.wav
+    Entry ID: 68204_AV.wav
+    Entry ID: 68204_TV.wav
+    Entry ID: 49963_MV.wav
+    Entry ID: 68204_PV.wav
+
+  Patient 50326:
+    Entry ID: 50326_TV.wav
+    Entry ID: 50326_MV.wav
+    Entry ID: 68582_AV.wav
+    Entry ID: 50326_AV.wav
+    Entry ID: 50326_PV.wav
+    Entry ID: 68582_PV.wav
+    Entry ID: 68582_MV.wav
+    Entry ID: 68582_TV.wav
+
+  Patient 50150:
+    Entry ID: 68425_MV.wav
+    Entry ID: 50150_TV.wav
+    Entry ID: 68425_TV.wav
+    Entry ID: 68425_AV.wav
+    Entry ID: 50150_PV.wav
+    Entry ID: 68425_PV.wav
+    Entry ID: 50150_AV.wav
+    Entry ID: 50150_MV.wav
+
+  Patient 50209:
+    Entry ID: 50209_PV.wav
+    Entry ID: 50209_AV.wav
+    Entry ID: 50209_TV.wav
+    Entry ID: 68560_PV.wav
+    Entry ID: 68560_MV.wav
+    Entry ID: 68560_AV.wav
+    Entry ID: 68560_TV.wav
+    Entry ID: 50209_MV.wav
+
+  Patient 50054:
+    Entry ID: 50054_PV.wav
+    Entry ID: 50054_MV.wav
+    Entry ID: 50054_AV.wav
+    Entry ID: 50054_TV.wav
+    Entry ID: 68303_MV.wav
+    Entry ID: 68303_AV.wav
+    Entry ID: 68303_TV.wav
+    Entry ID: 68303_PV.wav
+
+  Patient 36327:
+    Entry ID: 49630_TV.wav
+    Entry ID: 49630_MV.wav
+    Entry ID: 36327_MV.wav
+    Entry ID: 36327_TV.wav
+    Entry ID: 49630_AV.wav
+    Entry ID: 49630_PV.wav
+    Entry ID: 36327_PV.wav
+    Entry ID: 36327_AV.wav
+
+  Patient 50023:
+    Entry ID: 68260_AV.wav
+    Entry ID: 68260_PV.wav
+    Entry ID: 50023_TV.wav
+    Entry ID: 50023_AV.wav
+    Entry ID: 50023_PV.wav
+    Entry ID: 50023_MV.wav
+    Entry ID: 68260_MV.wav
+    Entry ID: 68260_TV.wav
+
+  Patient 50096:
+    Entry ID: 50096_AV.wav
+    Entry ID: 68368_TV.wav
+    Entry ID: 68368_AV.wav
+    Entry ID: 50096_MV.wav
+    Entry ID: 50096_TV.wav
+    Entry ID: 68368_PV.wav
+    Entry ID: 68368_MV.wav
+    Entry ID: 50096_PV.wav
+
+  Patient 23625:
+    Entry ID: 23625_PV.wav
+    Entry ID: 23625_AV.wav
+    Entry ID: 23625_MV.wav
+    Entry ID: 50379_AV.wav
+    Entry ID: 50379_TV.wav
+    Entry ID: 50379_PV.wav
+    Entry ID: 23625_TV.wav
+    Entry ID: 50379_MV.wav
+
+  Patient 50261:
+    Entry ID: 50261_TV.wav
+    Entry ID: 68498_TV.wav
+    Entry ID: 68498_PV.wav
+    Entry ID: 50261_AV.wav
+    Entry ID: 68498_MV.wav
+    Entry ID: 50261_PV.wav
+    Entry ID: 50261_MV.wav
+    Entry ID: 68498_AV.wav
+
+  Patient 50127:
+    Entry ID: 50127_TV.wav
+    Entry ID: 68337_MV.wav
+    Entry ID: 68337_PV.wav
+    Entry ID: 50127_MV.wav
+    Entry ID: 68337_AV.wav
+    Entry ID: 50127_AV.wav
+    Entry ID: 50127_PV.wav
+    Entry ID: 68337_TV.wav
+
+  Patient 50233:
+    Entry ID: 50233_MV.wav
+    Entry ID: 68487_MV.wav
+    Entry ID: 50233_AV.wav
+    Entry ID: 68487_AV.wav
+    Entry ID: 68487_PV.wav
+    Entry ID: 68487_TV.wav
+    Entry ID: 50233_TV.wav
+    Entry ID: 50233_PV.wav
+
+  Patient 50688:
+    Entry ID: 50688_PV.wav
+    Entry ID: 85234_AV.wav
+    Entry ID: 85234_PV.wav
+    Entry ID: 50688_MV.wav
+    Entry ID: 50688_TV.wav
+    Entry ID: 85234_MV.wav
+    Entry ID: 85234_TV.wav
+    Entry ID: 50688_AV.wav
+
+  Patient 49574:
+    Entry ID: 49574_MV.wav
+    Entry ID: 49574_TV.wav
+    Entry ID: 49574_AV.wav
+    Entry ID: 69068_AV.wav
+    Entry ID: 69068_MV.wav
+    Entry ID: 69068_TV.wav
+    Entry ID: 69068_PV.wav
+    Entry ID: 49574_PV.wav
+
+  Patient 49896:
+    Entry ID: 49896_TV.wav
+    Entry ID: 68219_AV.wav
+    Entry ID: 68219_TV.wav
+    Entry ID: 49896_PV.wav
+    Entry ID: 49896_AV.wav
+    Entry ID: 49896_MV.wav
+    Entry ID: 68219_MV.wav
+    Entry ID: 68219_PV.wav
+
+  Patient 45843:
+    Entry ID: 45843_TV.wav
+    Entry ID: 45843_AV.wav
+    Entry ID: 49821_TV.wav
+    Entry ID: 49821_MV.wav
+    Entry ID: 45843_MV.wav
+    Entry ID: 49821_AV.wav
+    Entry ID: 49821_PV.wav
+    Entry ID: 45843_PV.wav
+
+  Patient 49897:
+    Entry ID: 49897_PV.wav
+    Entry ID: 49897_AV.wav
+    Entry ID: 68194_AV.wav
+    Entry ID: 68194_TV.wav
+    Entry ID: 68194_MV.wav
+    Entry ID: 68194_PV.wav
+    Entry ID: 49897_TV.wav
+    Entry ID: 49897_MV.wav
+
+  Patient 50312:
+    Entry ID: 50312_PV.wav
+    Entry ID: 50312_AV.wav
+    Entry ID: 50312_TV.wav
+    Entry ID: 68545_TV.wav
+    Entry ID: 50312_MV.wav
+    Entry ID: 68545_AV.wav
+    Entry ID: 68545_PV.wav
+    Entry ID: 68545_MV.wav
+
+  Patient 50624:
+    Entry ID: 63581_MV.wav
+    Entry ID: 63581_AV.wav
+    Entry ID: 50624_AV.wav
+    Entry ID: 63581_TV.wav
+    Entry ID: 50624_PV.wav
+    Entry ID: 50624_MV.wav
+    Entry ID: 63581_PV.wav
+    Entry ID: 50624_TV.wav
+
+  Patient 50056:
+    Entry ID: 50056_MV.wav
+    Entry ID: 50056_AV.wav
+    Entry ID: 68306_AV.wav
+    Entry ID: 50056_TV.wav
+    Entry ID: 68306_MV.wav
+    Entry ID: 68306_PV.wav
+    Entry ID: 68306_TV.wav
+    Entry ID: 50056_PV.wav
+
+  Patient 50659:
+    Entry ID: 50659_PV.wav
+    Entry ID: 50659_AV.wav
+    Entry ID: 68886_AV.wav
+    Entry ID: 68886_MV.wav
+    Entry ID: 50659_TV.wav
+    Entry ID: 68886_TV.wav
+    Entry ID: 68886_PV.wav
+    Entry ID: 50659_MV.wav
+
+  Patient 50230:
+    Entry ID: 50230_PV.wav
+    Entry ID: 50230_AV.wav
+    Entry ID: 50230_MV.wav
+    Entry ID: 68477_PV.wav
+    Entry ID: 68477_TV.wav
+    Entry ID: 50230_TV.wav
+    Entry ID: 68477_MV.wav
+    Entry ID: 68477_AV.wav
+
+  Patient 49641:
+    Entry ID: 49641_PV.wav
+    Entry ID: 49641_TV.wav
+    Entry ID: 69095_TV.wav
+    Entry ID: 49641_MV.wav
+    Entry ID: 49641_AV.wav
+    Entry ID: 69095_PV.wav
+    Entry ID: 69095_MV.wav
+    Entry ID: 69095_AV.wav
+
+  Patient 49729:
+    Entry ID: 49729_MV.wav
+    Entry ID: 49729_AV.wav
+    Entry ID: 49729_PV.wav
+    Entry ID: 69125_PV.wav
+    Entry ID: 69125_TV.wav
+    Entry ID: 69125_MV.wav
+    Entry ID: 49729_TV.wav
+    Entry ID: 69125_AV.wav
+
+  Patient 49876:
+    Entry ID: 49876_PV.wav
+    Entry ID: 69176_TV.wav
+    Entry ID: 69176_MV.wav
+    Entry ID: 49876_TV.wav
+    Entry ID: 69176_AV.wav
+    Entry ID: 69176_PV.wav
+    Entry ID: 49876_AV.wav
+    Entry ID: 49876_MV.wav
+
+
+Patients with 7 entries:
+  Patient 50384:
+    Entry ID: 50384_PV.wav
+    Entry ID: 68632_AV.wav
+    Entry ID: 50384_TV.wav
+    Entry ID: 50384_MV.wav
+    Entry ID: 50384_AV.wav
+    Entry ID: 68632_TV.wav
+    Entry ID: 68632_PV.wav
+
+  Patient 50303:
+    Entry ID: 68532_PV.wav
+    Entry ID: 50303_MV.wav
+    Entry ID: 68532_AV.wav
+    Entry ID: 68532_MV.wav
+    Entry ID: 68532_TV.wav
+    Entry ID: 50303_AV.wav
+    Entry ID: 50303_PV.wav
+
+  Patient 50099:
+    Entry ID: 50099_TV.wav
+    Entry ID: 68379_PV.wav
+    Entry ID: 68379_AV.wav
+    Entry ID: 68379_MV.wav
+    Entry ID: 50099_MV.wav
+    Entry ID: 68379_TV.wav
+    Entry ID: 50099_PV.wav
+
+  Patient 50291:
+    Entry ID: 68567_PV.wav
+    Entry ID: 68567_MV.wav
+    Entry ID: 68567_TV.wav
+    Entry ID: 50291_AV.wav
+    Entry ID: 50291_MV.wav
+    Entry ID: 68567_AV.wav
+    Entry ID: 50291_PV.wav
+
+  Patient 50067:
+    Entry ID: 50067_MV.wav
+    Entry ID: 50067_PV.wav
+    Entry ID: 68318_PV.wav
+    Entry ID: 68318_TV.wav
+    Entry ID: 50067_TV.wav
+    Entry ID: 68318_AV.wav
+    Entry ID: 68318_MV.wav
+
+  Patient 50125:
+    Entry ID: 68359_MV.wav
+    Entry ID: 50125_MV.wav
+    Entry ID: 68359_TV.wav
+    Entry ID: 68359_PV.wav
+    Entry ID: 68359_AV.wav
+    Entry ID: 50125_PV.wav
+    Entry ID: 50125_TV.wav
+
+  Patient 49823:
+    Entry ID: 49823_MV.wav
+    Entry ID: 69147_TV.wav
+    Entry ID: 69147_PV.wav
+    Entry ID: 49823_PV.wav
+    Entry ID: 49823_TV.wav
+    Entry ID: 69147_AV.wav
+    Entry ID: 69147_MV.wav
+
+
+Patients with 6 entries:
+  Patient 50213:
+    Entry ID: 50213_PV.wav
+    Entry ID: 68470_TV.wav
+    Entry ID: 50213_TV.wav
+    Entry ID: 50213_MV.wav
+    Entry ID: 68470_MV.wav
+    Entry ID: 50213_AV.wav
+
+  Patient 50782:
+    Entry ID: 50782_MV_1.wav
+    Entry ID: 50782_AV_2.wav
+    Entry ID: 50782_TV.wav
+    Entry ID: 50782_PV.wav
+    Entry ID: 50782_AV_1.wav
+    Entry ID: 50782_MV_2.wav
+
+  Patient 50643:
+    Entry ID: 68874_AV.wav
+    Entry ID: 50643_MV.wav
+    Entry ID: 50643_AV.wav
+    Entry ID: 68874_MV.wav
+    Entry ID: 68874_PV.wav
+    Entry ID: 68874_TV.wav
+
+  Patient 50664:
+    Entry ID: 68895_MV.wav
+    Entry ID: 50664_PV.wav
+    Entry ID: 68895_PV.wav
+    Entry ID: 68895_TV.wav
+    Entry ID: 50664_AV.wav
+    Entry ID: 68895_AV.wav
+
+  Patient 50220:
+    Entry ID: 50220_AV.wav
+    Entry ID: 68456_AV.wav
+    Entry ID: 68456_PV.wav
+    Entry ID: 50220_MV.wav
+    Entry ID: 68456_TV.wav
+    Entry ID: 68456_MV.wav
+
+  Patient 49595:
+    Entry ID: 69079_PV.wav
+    Entry ID: 69079_AV.wav
+    Entry ID: 69079_MV.wav
+    Entry ID: 49595_AV.wav
+    Entry ID: 69079_TV.wav
+    Entry ID: 49595_MV.wav
+
+  Patient 49748:
+    Entry ID: 49748_PV_2.wav
+    Entry ID: 49748_AV_1.wav
+    Entry ID: 49748_PV_1.wav
+    Entry ID: 49748_TV.wav
+    Entry ID: 49748_MV.wav
+    Entry ID: 49748_AV_2.wav
+
+  Patient 50214:
+    Entry ID: 68484_PV.wav
+    Entry ID: 50214_AV.wav
+    Entry ID: 50214_MV.wav
+    Entry ID: 68484_TV.wav
+    Entry ID: 68484_AV.wav
+    Entry ID: 68484_MV.wav
+
+  Patient 50677:
+    Entry ID: 68909_TV.wav
+    Entry ID: 50677_AV.wav
+    Entry ID: 68909_PV.wav
+    Entry ID: 68909_MV.wav
+    Entry ID: 50677_PV.wav
+    Entry ID: 68909_AV.wav
+
+  Patient 50678:
+    Entry ID: 68908_MV.wav
+    Entry ID: 68908_PV.wav
+    Entry ID: 50678_TV.wav
+    Entry ID: 68908_TV.wav
+    Entry ID: 50678_MV.wav
+    Entry ID: 50678_PV.wav
+
+  Patient 50165:
+    Entry ID: 50165_MV.wav
+    Entry ID: 68404_TV.wav
+    Entry ID: 68404_MV.wav
+    Entry ID: 68404_PV.wav
+    Entry ID: 50165_PV.wav
+    Entry ID: 50165_AV.wav
+
+  Patient 50652:
+    Entry ID: 68888_TV.wav
+    Entry ID: 68888_PV.wav
+    Entry ID: 68888_MV.wav
+    Entry ID: 68888_AV.wav
+    Entry ID: 50652_AV.wav
+    Entry ID: 50652_MV.wav
+
+  Patient 49986:
+    Entry ID: 68213_PV.wav
+    Entry ID: 49986_AV.wav
+    Entry ID: 68213_TV.wav
+    Entry ID: 49986_MV.wav
+    Entry ID: 68213_MV.wav
+    Entry ID: 68213_AV.wav
+
+  Patient 50727:
+    Entry ID: 68952_PV.wav
+    Entry ID: 50727_AV.wav
+    Entry ID: 68952_MV.wav
+    Entry ID: 68952_AV.wav
+    Entry ID: 50727_MV.wav
+    Entry ID: 68952_TV.wav
+
+  Patient 49776:
+    Entry ID: 49776_MV.wav
+    Entry ID: 68182_PV.wav
+    Entry ID: 68182_MV.wav
+    Entry ID: 68182_AV.wav
+    Entry ID: 68182_TV.wav
+    Entry ID: 49776_AV.wav
+
+
+Patients with 5 entries:
+  Patient 50166:
+    Entry ID: 68406_MV.wav
+    Entry ID: 50166_MV.wav
+    Entry ID: 68406_TV.wav
+    Entry ID: 68406_PV.wav
+    Entry ID: 68406_AV.wav
+
+  Patient 50210:
+    Entry ID: 50210_MV_2.wav
+    Entry ID: 50210_MV_1.wav
+    Entry ID: 50210_TV.wav
+    Entry ID: 50210_AV.wav
+    Entry ID: 50210_PV.wav
+
+  Patient 46778:
+    Entry ID: 49754_MV.wav
+    Entry ID: 49754_AV.wav
+    Entry ID: 46778_MV.wav
+    Entry ID: 49754_PV.wav
+    Entry ID: 49754_TV.wav
+
+  Patient 50263:
+    Entry ID: 50263_TV_2.wav
+    Entry ID: 50263_TV_1.wav
+    Entry ID: 50263_AV.wav
+    Entry ID: 50263_PV.wav
+    Entry ID: 50263_MV.wav
+
+  Patient 50348:
+    Entry ID: 50348_AV_1.wav
+    Entry ID: 50348_MV.wav
+    Entry ID: 50348_AV_2.wav
+    Entry ID: 50348_TV.wav
+    Entry ID: 50348_PV.wav
+
+  Patient 50656:
+    Entry ID: 50656_MV.wav
+    Entry ID: 50656_TV_2.wav
+    Entry ID: 50656_TV_1.wav
+    Entry ID: 50656_AV.wav
+    Entry ID: 50656_PV.wav
+
+  Patient 50671:
+    Entry ID: 68901_TV.wav
+    Entry ID: 68901_AV.wav
+    Entry ID: 68901_PV.wav
+    Entry ID: 50671_MV.wav
+    Entry ID: 68901_MV.wav
+
+  Patient 49952:
+    Entry ID: 49952_MV_2.wav
+    Entry ID: 49952_TV.wav
+    Entry ID: 49952_MV_1.wav
+    Entry ID: 49952_PV.wav
+    Entry ID: 49952_AV.wav
+
+  Patient 50734:
+    Entry ID: 50734_PV.wav
+    Entry ID: 50734_AV.wav
+    Entry ID: 50734_Phc.wav
+    Entry ID: 50734_MV.wav
+    Entry ID: 50734_TV.wav
+
+  Patient 50155:
+    Entry ID: 50155_TV.wav
+    Entry ID: 50155_AV.wav
+    Entry ID: 68394_PV.wav
+    Entry ID: 68394_MV.wav
+    Entry ID: 50155_PV.wav
+
+  Patient 50250:
+    Entry ID: 50250_TV_1.wav
+    Entry ID: 50250_TV_2.wav
+    Entry ID: 50250_MV.wav
+    Entry ID: 50250_AV.wav
+    Entry ID: 50250_PV.wav
+
+  Patient 49979:
+    Entry ID: 68222_TV.wav
+    Entry ID: 68222_MV.wav
+    Entry ID: 68222_AV.wav
+    Entry ID: 49979_MV.wav
+    Entry ID: 68222_PV.wav
+
+  Patient 50690:
+    Entry ID: 50690_AV.wav
+    Entry ID: 50690_PV.wav
+    Entry ID: 50690_TV.wav
+    Entry ID: 50690_MV_1.wav
+    Entry ID: 50690_MV_2.wav
+
+  Patient 50802:
+    Entry ID: 50802_PV.wav
+    Entry ID: 50802_TV_2.wav
+    Entry ID: 50802_AV.wav
+    Entry ID: 50802_TV_1.wav
+    Entry ID: 50802_MV.wav
+

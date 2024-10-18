@@ -273,233 +273,265 @@ def calculate_bpm(data):
 		return len(data) / duration_in_minutes if duration_in_minutes > 0 else None
 	return None
 
+import numpy as np
+import pandas as pd
+
+def safe_numeric_conversion(series):
+	try:
+		return pd.to_numeric(series, errors='coerce')
+	except:
+		return pd.Series([np.nan] * len(series))
+
+def safe_correlation(s1, s2):
+	try:
+		s1_numeric = safe_numeric_conversion(s1)
+		s2_numeric = safe_numeric_conversion(s2)
+		return s1_numeric.corr(s2_numeric)
+	except:
+		return "N/A (correlation calculation failed)"
+
 def save_statistics(dataset: AudioDataset, stats_dir: Path):
 	train_data = dataset.load_file_list()
 	dataset_name = dataset.__class__.__name__
 	stats_file = stats_dir / f"{dataset_name}_statistics.txt"
 
-	with open(stats_file, "w") as f:
-		f.write(f"Statistics for {dataset_name}\n")
-		f.write(f"Total count: {len(train_data)}\n\n")
+	def write_section(f, title):
+		f.write(f"\n{'-'*80}\n{title}\n{'-'*80}\n")
 
-		# Class distribution
+	with open(stats_file, "w") as f:
+		write_section(f, f"Statistics for {dataset_name}")
+		f.write(f"Total count: {len(train_data)}\n")
+
+		write_section(f, "Class Distribution")
 		class_counts = train_data[const.META_LABEL_1].value_counts()
-		f.write("Class distribution:\n")
-		f.write(class_counts.to_string())
+		f.write(class_counts.to_string() + "\n\n")
+		for label, count in class_counts.items():
+			f.write(f"Class {label} percentage: {count/len(train_data)*100:.2f}%\n")
+
+		write_section(f, "Patient Audio File Count")
+		patient_file_counts = train_data[const.META_PATIENT_ID].value_counts()
+		f.write(f"Unique patients: {len(patient_file_counts)}\n")
+		f.write(f"Average files per patient: {patient_file_counts.mean():.2f}\n")
+		f.write(f"Median files per patient: {patient_file_counts.median():.2f}\n")
+		f.write(f"Min files per patient: {patient_file_counts.min()}\n")
+		f.write(f"Max files per patient: {patient_file_counts.max()}\n\n")
+		f.write("Distribution of file counts:\n")
+		f.write(patient_file_counts.value_counts().sort_index().to_string())
 		f.write("\n\n")
 
-		# Length statistics
-		seconds = train_data[const.META_LENGTH] / train_data[const.META_SAMPLERATE]
+		def write_patient_details(dataset: AudioDataset, stats_dir: Path):
+			train_data = dataset.load_file_list()
+			dataset_name = dataset.__class__.__name__
+			details_file = stats_dir / f"{dataset_name}_patient_details.txt"
+
+			patient_file_counts = train_data[const.META_PATIENT_ID].value_counts()
+
+			with open(details_file, "w") as f:
+				f.write("Patients with more than 4 data entries:\n")
+				for count in sorted(patient_file_counts[patient_file_counts > 4].unique(), reverse=True):
+					patients = patient_file_counts[patient_file_counts == count].index
+					f.write(f"\nPatients with {count} entries:\n")
+					for patient in patients:
+						patient_data = train_data[train_data[const.META_PATIENT_ID] == patient]
+						f.write(f"  Patient {patient}:\n")
+						for idx, row in patient_data.iterrows():
+							if const.META_FILENAME in row:
+								f.write(f"    {row[const.META_FILENAME]}\n")
+							else:
+								f.write(f"    Entry ID: {idx}\n")
+						f.write("\n")  # Add a blank line between patients
+
+			print(f"Patient details saved to {details_file}")
+
+		# Fügen Sie diese Zeile am Ende Ihrer save_statistics Funktion hinzu:
+		write_patient_details(dataset, stats_dir)
+
+		write_section(f, "Audio Length Statistics")
+		seconds = safe_numeric_conversion(train_data[const.META_LENGTH] / dataset.target_samplerate)
 		total_duration = seconds.sum()
 		f.write(f"Total duration: {total_duration:.2f} seconds ({total_duration/3600:.2f} hours)\n")
-		f.write(f"Average length (All): {seconds.mean():.2f} seconds\n")
-		f.write(f"Average length (Negative): {seconds[train_data[const.META_LABEL_1] == 0].mean():.2f} seconds\n")
-		f.write(f"Average length (Positive): {seconds[train_data[const.META_LABEL_1] == 1].mean():.2f} seconds\n")
-		f.write(f"Standard deviation (All): {seconds.std():.2f} seconds\n")
-		f.write(f"Standard deviation (Negative): {seconds[train_data[const.META_LABEL_1] == 0].std():.2f} seconds\n")
-		f.write(f"Standard deviation (Positive): {seconds[train_data[const.META_LABEL_1] == 1].std():.2f} seconds\n")
-		f.write(f"Median length: {seconds.median():.2f} seconds\n")
-		f.write(f"Minimum length: {seconds.min():.2f} seconds\n")
-		f.write(f"Maximum length: {seconds.max():.2f} seconds\n")
-		f.write(f"Correlation class<->length: {train_data[const.META_LABEL_1].corr(seconds):.4f}\n\n")
 
-		# Class percentages
-		f.write(f"Negative class percentage: {class_counts.get(0, 0)/len(train_data)*100:.2f}%\n")
-		f.write(f"Positive class percentage: {class_counts.get(1, 0)/len(train_data)*100:.2f}%\n\n")
+		for stat in ["mean", "std", "median", "min", "max"]:
+			f.write(f"{stat.capitalize()} length (All): {getattr(seconds, stat)():.2f} seconds\n")
+			for label in [0, 1]:
+				class_seconds = seconds[train_data[const.META_LABEL_1] == label]
+				f.write(f"{stat.capitalize()} length (Class {label}): {getattr(class_seconds, stat)():.2f} seconds\n")
 
-		# 15 longest and shortest files
-		f.write("15 longest files:\n")
-		for idx, row in train_data.nlargest(15, const.META_LENGTH).iterrows():
-			filename = row.get(const.META_FILENAME, idx)
-			f.write(f"{filename}: {row[const.META_LENGTH]/dataset.target_samplerate:.2f} seconds\n")
-		f.write("\n")
+		f.write(f"Correlation class<->length: {safe_correlation(train_data[const.META_LABEL_1], seconds)}\n")
 
-		f.write("15 shortest files:\n")
-		for idx, row in train_data.nsmallest(15, const.META_LENGTH).iterrows():
-			filename = row.get(const.META_FILENAME, idx)
-			f.write(f"{filename}: {row[const.META_LENGTH]/dataset.target_samplerate:.2f} seconds\n")
-		f.write("\n")
+		write_section(f, "Extreme Cases")
+		for extreme, func in [("longest", "nlargest"), ("shortest", "nsmallest")]:
+			f.write(f"15 {extreme} files:\n")
+			for idx, row in getattr(train_data, func)(15, const.META_LENGTH).iterrows():
+				filename = row.get(const.META_FILENAME, idx)
+				f.write(f"{filename}: {row[const.META_LENGTH]/dataset.target_samplerate:.2f} seconds\n")
+			f.write("\n")
 
-		# Additional statistics for demographic and clinical data
-		for column in [const.META_AGE, const.META_SEX, const.META_HEIGHT,const.META_WEIGHT, const.META_PREGNANT]:
+		write_section(f, "Demographic and Clinical Data")
+		for column in [const.META_AGE, const.META_SEX, const.META_HEIGHT, const.META_WEIGHT, const.META_PREGNANT, const.META_DIAGNOSIS]:
 			if column in train_data.columns:
 				f.write(f"{column} statistics:\n")
-				f.write("count unique top freq\n")
-				f.write(train_data[column].value_counts().to_string())
-				f.write("\n\n")
+				value_counts = train_data[column].value_counts()
+				f.write(f"Unique values: {value_counts.count()}\n")
+				f.write(f"Top 10 most common:\n{value_counts.head(n=10).to_string()}\n")
+				f.write(f"Percentage of rows with these missing values: {train_data[column].isnull().mean()*100:.2f}%\n")
 
-				if train_data[column].dtype in ["int6", "float64"]:
-					f.write(f"Correlation {column}<->class: {train_data[const.META_LABEL_1].corr(train_data[column]):.4f}\n\n")
-		# TODO implement stats
-		# # Murmur-related statistics
-		# if const.MURMU in train_data.columns:
-		# 	f.write("Murmur distribution:\n")
-		# 	f.write(train_data[const.META_MURMUR].value_counts().to_string())
-		# 	f.write("\n\n")
-
-		# # Recording locations statistics
-		# if const.META_RECORDING_LOCATIONS in train_data.columns:
-		# 	f.write("Recording locations distribution:\n")
-		# 	f.write(train_data[const.META_RECORDING_LOCATIONS].value_counts().to_string())
-		# 	f.write("\n\n")
-
-		# # Outcome statistics
-		# if const.META_OUTCOME in train_data.columns:
-		# 	f.write("Outcome distribution:\n")
-		# 	f.write(train_data[const.META_OUTCOME].value_counts().to_string())
-		# 	f.write("\n\n")
-
-		# # Campaign statistics
-		# if const.META_CAMPAIGN in train_data.columns:
-		# 	f.write("Campaign distribution:\n")
-		# 	f.write(train_data[const.META_CAMPAIGN].value_counts().to_string())
-		# 	f.write("\n\n")
+				numeric_data = safe_numeric_conversion(train_data[column])
+				if not numeric_data.isnull().all():
+					f.write(f"Mean: {numeric_data.mean():.2f}\n")
+					f.write(f"Std: {numeric_data.std():.2f}\n")
+					f.write(f"Correlation with class: {safe_correlation(train_data[const.META_LABEL_1], numeric_data)}\n")
+				else:
+					f.write("Non-numeric data, skipping mean, std, and correlation.\n")
+				f.write("\n")
 
 		if isinstance(dataset, Physionet2022):
+			write_section(f, "Heartcycles Statistics")
 			heartcycles = train_data[const.META_HEARTCYCLES]
 			heartcycles_counts = heartcycles.apply(len)
-			f.write("Heartcycles statistics:\n")
-			f.write(f"Min: {heartcycles_counts.min()}\n")
-			f.write(f"Max: {heartcycles_counts.max()}\n")
-			f.write(f"Mean: {heartcycles_counts.mean():.2f}\n")
-			f.write(f"Std: {heartcycles_counts.std():.2f}\n")
-			f.write(f"Median: {heartcycles_counts.median()}\n\n")
+			f.write(heartcycles_counts.describe().to_string() + "\n\n")
 
-			train_data["bpm"] = train_data[const.META_HEARTCYCLES].apply(calculate_bpm)
-			f.write("BPM statistics:\n")
-			f.write(train_data["bpm"].describe().to_string())
-			f.write("\n\n")
+			f.write("Correlation with audio length: ")
+			f.write(f"{safe_correlation(heartcycles_counts, seconds)}\n\n")
 
-			f.write("10 slowest BPM files:\n")
-			for idx, row in train_data.nsmallest(10, "bpm").iterrows():
-				filename = row.get(const.META_FILENAME, idx)
-				f.write(f"{filename}: {row['bpm']:.2f} BPM\n")
-			f.write("\n")
+			write_section(f, "BPM Statistics")
+			try:
+				train_data["bpm"] = train_data[const.META_HEARTCYCLES].apply(calculate_bpm)
+				bpm_numeric = safe_numeric_conversion(train_data["bpm"])
+				f.write(bpm_numeric.describe().to_string() + "\n\n")
 
-			f.write("10 fastest BPM files:\n")
-			for idx, row in train_data.nlargest(10, "bpm").iterrows():
-				filename = row.get(const.META_FILENAME, idx)
-				f.write(f"{filename}: {row['bpm']:.2f} BPM\n")
-			f.write("\n")
+				f.write("Correlation BPM with:\n")
+				for col in [const.META_LABEL_1, const.META_AGE, "bpm"]:
+					if col in train_data.columns:
+						f.write(f"- {col}: {safe_correlation(bpm_numeric, train_data[col])}\n")
+
+				for extreme, func in [("slowest", "nsmallest"), ("fastest", "nlargest")]:
+					f.write(f"\n10 {extreme} BPM files:\n")
+					extreme_bpm = getattr(bpm_numeric, func)(10)
+					for idx, bpm in extreme_bpm.items():
+						filename = train_data.loc[idx, const.META_FILENAME] if const.META_FILENAME in train_data.columns else f"Index: {idx}"
+						f.write(f"{filename}: {bpm:.2f} BPM\n")
+			except Exception as e:
+				f.write(f"Error calculating BPM statistics: {str(e)}\n")
 
 	print(f"Statistics saved to {stats_file}")
 	return train_data
 
 def plot_class_distribution(data, ax, colors):
-    class_counts = data[const.META_LABEL_1].value_counts()
-    ax.pie(class_counts, labels=["Normal", "Abnormal"], colors=colors, autopct="%1.1f%%", 
-           textprops={"fontsize": 14, "fontweight": "bold"})
-    ax.set_title("Class Distribution", fontsize=24, fontweight="bold")
+	class_counts = data[const.META_LABEL_1].value_counts()
+	ax.pie(class_counts, labels=["Normal", "Abnormal"], colors=colors, autopct="%1.1f%%", 
+		   textprops={"fontsize": 14, "fontweight": "bold"})
+	ax.set_title("Class Distribution", fontsize=24, fontweight="bold")
 
 def plot_audio_length_distribution(data, seconds, ax, colors):
-    sns.histplot(data=data, x=seconds, hue=data[const.META_LABEL_1].map({0: "Normal", 1: "Abnormal"}),
-                 palette=colors, multiple="stack", kde=False, ax=ax, bins=100)
-    ax.set_title("Audio Length Distribution", fontsize=24, fontweight="bold")
-    ax.set_xlabel("Length (seconds)", fontsize=18)
-    ax.set_ylabel("Count", fontsize=18)
-    ax.tick_params(axis="both", which="major", labelsize=15)
-    ax.legend(title="Class", labels=["Normal", "Abnormal"], fontsize=14, title_fontsize=16)
+	sns.histplot(data=data, x=seconds, hue=data[const.META_LABEL_1].map({0: "Normal", 1: "Abnormal"}),
+				 palette=colors, multiple="stack", kde=False, ax=ax, bins=100)
+	ax.set_title("Audio Length Distribution", fontsize=24, fontweight="bold")
+	ax.set_xlabel("Length (seconds)", fontsize=18)
+	ax.set_ylabel("Count", fontsize=18)
+	ax.tick_params(axis="both", which="major", labelsize=15)
+	ax.legend(title="Class", labels=["Normal", "Abnormal"], fontsize=14, title_fontsize=16)
 
 def plot_bpm_distribution(data, ax, colors):
-    sns.histplot(data=data, x="bpm", hue=data[const.META_LABEL_1].map({0: "Normal", 1: "Abnormal"}),
-                 palette=colors, multiple="stack", kde=False, ax=ax, bins=100)
-    ax.set_title("BPM Distribution", fontsize=24, fontweight="bold")
-    ax.set_xlabel("Beats Per Minute", fontsize=18)
-    ax.set_ylabel("Count", fontsize=18)
-    ax.legend(title="Class", labels=["Normal", "Abnormal"], fontsize=14, title_fontsize=16)
-    ax.tick_params(axis="both", which="major", labelsize=14)
+	sns.histplot(data=data, x="bpm", hue=data[const.META_LABEL_1].map({0: "Normal", 1: "Abnormal"}),
+				 palette=colors, multiple="stack", kde=False, ax=ax, bins=100)
+	ax.set_title("BPM Distribution", fontsize=24, fontweight="bold")
+	ax.set_xlabel("Beats Per Minute", fontsize=18)
+	ax.set_ylabel("Count", fontsize=18)
+	ax.legend(title="Class", labels=["Normal", "Abnormal"], fontsize=14, title_fontsize=16)
+	ax.tick_params(axis="both", which="major", labelsize=14)
 
 def generate_text_content(data, seconds):
-    class_counts = data[const.META_LABEL_1].value_counts()
-    text_content = f"Total samples: {len(data)}\n"
-    text_content += f"Normal: {class_counts[0]} ({class_counts[0]/len(data)*100:.1f}%)\n"
-    text_content += f"Abnormal: {class_counts[1]} ({class_counts[1]/len(data)*100:.1f}%)\n\n"
-    text_content += f"Audio Length Statistics:\n"
-    text_content += f"  Average (All): {seconds.mean():.2f}s\n"
-    text_content += f"  Average (Normal): {seconds[data[const.META_LABEL_1] == 0].mean():.2f}s\n"
-    text_content += f"  Average (Abnormal): {seconds[data[const.META_LABEL_1] == 1].mean():.2f}s\n"
-    text_content += f"  Median: {seconds.median():.2f}s\n"
-    text_content += f"  Minimum: {seconds.min():.2f}s\n"
-    text_content += f"  Maximum: {seconds.max():.2f}s\n"
-    text_content += f"  Correlation (class vs length): {data[const.META_LABEL_1].corr(seconds):.4f}\n"
-    return text_content
+	class_counts = data[const.META_LABEL_1].value_counts()
+	text_content = f"Total samples: {len(data)}\n"
+	text_content += f"Normal: {class_counts[0]} ({class_counts[0]/len(data)*100:.1f}%)\n"
+	text_content += f"Abnormal: {class_counts[1]} ({class_counts[1]/len(data)*100:.1f}%)\n\n"
+	text_content += f"Audio Length Statistics:\n"
+	text_content += f"  Average (All): {seconds.mean():.2f}s\n"
+	text_content += f"  Average (Normal): {seconds[data[const.META_LABEL_1] == 0].mean():.2f}s\n"
+	text_content += f"  Average (Abnormal): {seconds[data[const.META_LABEL_1] == 1].mean():.2f}s\n"
+	text_content += f"  Median: {seconds.median():.2f}s\n"
+	text_content += f"  Minimum: {seconds.min():.2f}s\n"
+	text_content += f"  Maximum: {seconds.max():.2f}s\n"
+	text_content += f"  Correlation (class vs length): {data[const.META_LABEL_1].corr(seconds):.4f}\n"
+	return text_content
 
 def generate_bpm_text_content(data):
-    text_content = "BPM Statistics:\n"
-    text_content += f"  Average (All): {data['bpm'].mean():.2f}\n"
-    text_content += f"  Average (Normal): {data[data[const.META_LABEL_1] == 0]['bpm'].mean():.2f}\n"
-    text_content += f"  Average (Abnormal): {data[data[const.META_LABEL_1] == 1]['bpm'].mean():.2f}\n"
-    text_content += f"  Median: {data['bpm'].median():.2f}\n"
-    text_content += f"  Minimum: {data['bpm'].min():.2f}\n"
-    text_content += f"  Maximum: {data['bpm'].max():.2f}\n"
-    return text_content
+	text_content = "BPM Statistics:\n"
+	text_content += f"  Average (All): {data['bpm'].mean():.2f}\n"
+	text_content += f"  Average (Normal): {data[data[const.META_LABEL_1] == 0]['bpm'].mean():.2f}\n"
+	text_content += f"  Average (Abnormal): {data[data[const.META_LABEL_1] == 1]['bpm'].mean():.2f}\n"
+	text_content += f"  Median: {data['bpm'].median():.2f}\n"
+	text_content += f"  Minimum: {data['bpm'].min():.2f}\n"
+	text_content += f"  Maximum: {data['bpm'].max():.2f}\n"
+	return text_content
 
 def plot_statistics(dataset: AudioDataset, stats_dir: Path):
-    data = dataset.load_file_list()
-    dataset_name = dataset.__class__.__name__
-    seconds = data[const.META_LENGTH] / dataset.target_samplerate
-    colors = ["green", "red"]
-    
-    # Einzelne Plots
-    fig, ax = plt.subplots(figsize=(10, 8))
-    plot_class_distribution(data, ax, colors)
-    plt.savefig(stats_dir / f"{dataset_name}_class_distribution.png", dpi=300, bbox_inches="tight")
-    plt.close(fig)
+	data = dataset.load_file_list()
+	dataset_name = dataset.__class__.__name__
+	seconds = data[const.META_LENGTH] / dataset.target_samplerate
+	colors = ["green", "red"]
+	
+	# Einzelne Plots
+	fig, ax = plt.subplots(figsize=(10, 8))
+	plot_class_distribution(data, ax, colors)
+	plt.savefig(stats_dir / f"{dataset_name}_class_distribution.png", dpi=300, bbox_inches="tight")
+	plt.close(fig)
 
-    fig, ax = plt.subplots(figsize=(10, 8))
-    plot_audio_length_distribution(data, seconds, ax, colors)
-    plt.savefig(stats_dir / f"{dataset_name}_audio_length_distribution.png", dpi=300, bbox_inches="tight")
-    plt.close(fig)
+	fig, ax = plt.subplots(figsize=(10, 8))
+	plot_audio_length_distribution(data, seconds, ax, colors)
+	plt.savefig(stats_dir / f"{dataset_name}_audio_length_distribution.png", dpi=300, bbox_inches="tight")
+	plt.close(fig)
 
-    if isinstance(dataset, Physionet2022):
-        data["bpm"] = data[const.META_HEARTCYCLES].apply(calculate_bpm)
-        fig, ax = plt.subplots(figsize=(10, 8))
-        plot_bpm_distribution(data, ax, colors)
-        plt.savefig(stats_dir / f"{dataset_name}_bpm_distribution.png", dpi=300, bbox_inches="tight")
-        plt.close(fig)
+	if isinstance(dataset, Physionet2022):
+		data["bpm"] = data[const.META_HEARTCYCLES].apply(calculate_bpm)
+		fig, ax = plt.subplots(figsize=(10, 8))
+		plot_bpm_distribution(data, ax, colors)
+		plt.savefig(stats_dir / f"{dataset_name}_bpm_distribution.png", dpi=300, bbox_inches="tight")
+		plt.close(fig)
 
-    # Gesamtübersicht
-    sns.set_style("whitegrid")
-    fig = plt.figure(figsize=(20, 16))
-    gs = fig.add_gridspec(3, 2, height_ratios=[2.8, 1.8, 2.8], hspace=0.3)
+	# Gesamtübersicht
+	sns.set_style("whitegrid")
+	fig = plt.figure(figsize=(20, 16))
+	gs = fig.add_gridspec(3, 2, height_ratios=[2.8, 1.8, 2.8], hspace=0.3)
 
-    fig.suptitle(f"Dataset Statistics for {dataset_name}", fontsize=28, fontweight="bold", y=0.98)
+	fig.suptitle(f"Dataset Statistics for {dataset_name}", fontsize=28, fontweight="bold", y=0.98)
 
-    ax1 = fig.add_subplot(gs[0, 0])
-    ax1.set_position([0.15, 0.68, 0.3, 0.22])
-    plot_class_distribution(data, ax1, colors)
+	ax1 = fig.add_subplot(gs[0, 0])
+	ax1.set_position([0.15, 0.68, 0.3, 0.22])
+	plot_class_distribution(data, ax1, colors)
 
-    ax2 = fig.add_subplot(gs[0, 1])
-    ax2.set_position([0.55, 0.68, 0.4, 0.22])
-    plot_audio_length_distribution(data, seconds, ax2, colors)
+	ax2 = fig.add_subplot(gs[0, 1])
+	ax2.set_position([0.55, 0.68, 0.4, 0.22])
+	plot_audio_length_distribution(data, seconds, ax2, colors)
 
-    ax3 = fig.add_subplot(gs[1, 0])
-    ax4 = fig.add_subplot(gs[1, 1])
-    ax3.set_position([0.15, 0.40, 0.3, 0.22])
-    ax4.set_position([0.55, 0.40, 0.4, 0.22])
+	ax3 = fig.add_subplot(gs[1, 0])
+	ax4 = fig.add_subplot(gs[1, 1])
+	ax3.set_position([0.15, 0.40, 0.3, 0.22])
+	ax4.set_position([0.55, 0.40, 0.4, 0.22])
 
-    text_content1 = generate_text_content(data, seconds)
-    ax3.text(0.15, 1.0, text_content1, fontsize=19, ha="left", va="top", transform=ax3.transAxes)
-    ax3.axis("off")
+	text_content1 = generate_text_content(data, seconds)
+	ax3.text(0.15, 1.0, text_content1, fontsize=19, ha="left", va="top", transform=ax3.transAxes)
+	ax3.axis("off")
 
-    text_content2 = ""
-    if isinstance(dataset, Physionet2022):
-        text_content2 = generate_bpm_text_content(data)
+	text_content2 = ""
+	if isinstance(dataset, Physionet2022):
+		text_content2 = generate_bpm_text_content(data)
 
-    ax4.text(0.15, 1.0, text_content2, fontsize=19, ha="left", va="top", transform=ax4.transAxes)
-    ax4.axis("off")
+	ax4.text(0.15, 1.0, text_content2, fontsize=19, ha="left", va="top", transform=ax4.transAxes)
+	ax4.axis("off")
 
-    ax5 = fig.add_subplot(gs[2, :])
-    if isinstance(dataset, Physionet2022):
-        ax5.set_position([0.15, 0.1, 0.8, 0.24])
-        plot_bpm_distribution(data, ax5, colors)
-    else:
-        ax5.axis("off")
+	ax5 = fig.add_subplot(gs[2, :])
+	if isinstance(dataset, Physionet2022):
+		ax5.set_position([0.15, 0.1, 0.8, 0.24])
+		plot_bpm_distribution(data, ax5, colors)
+	else:
+		ax5.axis("off")
 
-    plt.savefig(stats_dir / f"{dataset_name}_overall_statistics.png", dpi=300, bbox_inches="tight")
-    plt.close(fig)
+	plt.savefig(stats_dir / f"{dataset_name}_overall_statistics.png", dpi=300, bbox_inches="tight")
+	plt.close(fig)
 
-    print(f"Plots saved in {stats_dir}")
+	print(f"Plots saved in {stats_dir}")
 
 def generate_statistics_and_plots(dataset: AudioDataset):
 	stats_dir = create_output_directories(dataset)

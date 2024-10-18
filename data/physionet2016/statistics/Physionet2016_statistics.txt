@@ -1,26 +1,57 @@
+
+--------------------------------------------------------------------------------
 Statistics for Physionet2016
+--------------------------------------------------------------------------------
 Total count: 3240
 
-Class distribution:
+--------------------------------------------------------------------------------
+Class Distribution
+--------------------------------------------------------------------------------
 label_1
 0    2575
 1     665
 
+Class 0 percentage: 79.48%
+Class 1 percentage: 20.52%
+
+--------------------------------------------------------------------------------
+Patient Audio File Count
+--------------------------------------------------------------------------------
+Unique patients: 3240
+Average files per patient: 1.00
+Median files per patient: 1.00
+Min files per patient: 1
+Max files per patient: 1
+
+Distribution of file counts:
+count
+1    3240
+
+
+--------------------------------------------------------------------------------
+Audio Length Statistics
+--------------------------------------------------------------------------------
 Total duration: 72776.08 seconds (20.22 hours)
-Average length (All): 22.46 seconds
-Average length (Negative): 21.66 seconds
-Average length (Positive): 25.57 seconds
-Standard deviation (All): 12.39 seconds
-Standard deviation (Negative): 11.91 seconds
-Standard deviation (Positive): 13.67 seconds
-Median length: 20.83 seconds
-Minimum length: 5.31 seconds
-Maximum length: 122.00 seconds
-Correlation class<->length: 0.1275
+Mean length (All): 22.46 seconds
+Mean length (Class 0): 21.66 seconds
+Mean length (Class 1): 25.57 seconds
+Std length (All): 12.39 seconds
+Std length (Class 0): 11.91 seconds
+Std length (Class 1): 13.67 seconds
+Median length (All): 20.83 seconds
+Median length (Class 0): 20.03 seconds
+Median length (Class 1): 23.78 seconds
+Min length (All): 5.31 seconds
+Min length (Class 0): 6.61 seconds
+Min length (Class 1): 5.31 seconds
+Max length (All): 122.00 seconds
+Max length (Class 0): 101.67 seconds
+Max length (Class 1): 122.00 seconds
+Correlation class<->length: 0.12750629855168377
 
-Negative class percentage: 79.48%
-Positive class percentage: 20.52%
-
+--------------------------------------------------------------------------------
+Extreme Cases
+--------------------------------------------------------------------------------
 15 longest files:
 c0031.wav: 122.00 seconds
 c0024.wav: 106.05 seconds
@@ -55,33 +86,59 @@ b0455.wav: 7.73 seconds
 b0292.wav: 7.73 seconds
 b0128.wav: 7.76 seconds
 
-age statistics:
-count unique top freq
-Series([], )
 
-Correlation age<->class: nan
+--------------------------------------------------------------------------------
+Demographic and Clinical Data
+--------------------------------------------------------------------------------
+age statistics:
+Unique values: 0
+Top 10 most common:
+Series([], )
+Percentage of rows with these missing values: 100.00%
+Non-numeric data, skipping mean, std, and correlation.
 
 sex statistics:
-count unique top freq
+Unique values: 0
+Top 10 most common:
 Series([], )
-
-Correlation sex<->class: nan
+Percentage of rows with these missing values: 100.00%
+Non-numeric data, skipping mean, std, and correlation.
 
 height statistics:
-count unique top freq
+Unique values: 0
+Top 10 most common:
 Series([], )
-
-Correlation height<->class: nan
+Percentage of rows with these missing values: 100.00%
+Non-numeric data, skipping mean, std, and correlation.
 
 weight statistics:
-count unique top freq
+Unique values: 0
+Top 10 most common:
 Series([], )
-
-Correlation weight<->class: nan
+Percentage of rows with these missing values: 100.00%
+Non-numeric data, skipping mean, std, and correlation.
 
 pregnant statistics:
-count unique top freq
+Unique values: 0
+Top 10 most common:
 Series([], )
+Percentage of rows with these missing values: 100.00%
+Non-numeric data, skipping mean, std, and correlation.
 
-Correlation pregnant<->class: nan
+diagnosis statistics:
+Unique values: 14
+Top 10 most common:
+diagnosis
+Normal             2408
+CAD                 287
+MVP                 134
+Benign              118
+Normal              117
+Pathologic           62
+MPC                  23
+AD                   17
+Unknown              16
+Normal: MARS500      14
+Percentage of rows with these missing values: 0.00%
+Non-numeric data, skipping mean, std, and correlation.
 
