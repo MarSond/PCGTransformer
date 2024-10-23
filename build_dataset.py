@@ -419,34 +419,72 @@ def save_statistics(dataset: AudioDataset, stats_dir: Path):
 
 def plot_class_distribution(data, ax, colors):
 	class_counts = data[const.META_LABEL_1].value_counts()
-	ax.pie(class_counts, labels=["Normal", "Abnormal"], colors=colors, autopct="%1.1f%%", 
-		   textprops={"fontsize": 14, "fontweight": "bold"})
-	ax.set_title("Class Distribution", fontsize=24, fontweight="bold")
+	total = class_counts.sum()
+
+	def make_autopct(values):
+		def my_autopct(pct):
+			count = int(round(pct/100.*total))
+			return f"{count}\n{pct:.1f}%"
+		return my_autopct
+
+	ax.pie(class_counts, labels=["Normal", "Abnormal"], colors=colors,
+		autopct=make_autopct(class_counts),
+		textprops={"fontsize": 14, "fontweight": "bold"})
+
+	ax.set_title(f"Class Distribution ({total} Samples)", fontsize=24, fontweight="bold")
 
 def plot_audio_length_distribution(data, seconds, ax, colors):
-	sns.histplot(data=data, x=seconds, hue=data[const.META_LABEL_1].map({0: "Normal", 1: "Abnormal"}),
-				 palette=colors, multiple="stack", kde=False, ax=ax, bins=100)
-	ax.set_title("Audio Length Distribution", fontsize=24, fontweight="bold")
-	ax.set_xlabel("Length (seconds)", fontsize=18)
-	ax.set_ylabel("Count", fontsize=18)
-	ax.tick_params(axis="both", which="major", labelsize=15)
-	ax.legend(title="Class", labels=["Normal", "Abnormal"], fontsize=14, title_fontsize=16)
+	with plt.style.context('default'):
+		ax.grid(False)
+
+		sns.histplot(data=data, x=seconds, hue=data[const.META_LABEL_1].map({0: "Normal", 1: "Abnormal"}),
+					palette=colors, multiple="stack", kde=False, ax=ax, bins=150)
+
+		ax.set_title("Audio Length Distribution", fontsize=24, fontweight="bold")
+		ax.set_xlabel("Length (seconds)", fontsize=18)
+		ax.set_ylabel("Count", fontsize=18)
+
+		ax.grid(True)
+		# X-Achsen Ticks
+		ax.xaxis.set_major_locator(plt.MultipleLocator(10))
+		ax.xaxis.set_minor_locator(plt.MultipleLocator(5))
+
+		# Tick Größen und Sichtbarkeit explizit setzen
+		ax.tick_params(axis='x', which='both', bottom=True)
+		ax.tick_params(axis='x', which='major', length=8, width=1, labelsize=15)
+		ax.tick_params(axis='x', which='minor', length=4, width=1, labelsize=12)
+		ax.tick_params(axis='y', which='major', labelsize=15)
+
+		# Minor ticks für beide Achsen aktivieren
+		for axis in [ax.xaxis, ax.yaxis]:
+			axis.set_tick_params(which='minor', bottom=True, top=False)
+
+		ax.legend(title="Class", labels=["Normal", "Abnormal"], fontsize=14, title_fontsize=16)
 
 def plot_bpm_distribution(data, ax, colors):
 	sns.histplot(data=data, x="bpm", hue=data[const.META_LABEL_1].map({0: "Normal", 1: "Abnormal"}),
-				 palette=colors, multiple="stack", kde=False, ax=ax, bins=100)
+				 palette=colors, multiple="stack", kde=False, ax=ax, bins=150)
 	ax.set_title("BPM Distribution", fontsize=24, fontweight="bold")
 	ax.set_xlabel("Beats Per Minute", fontsize=18)
 	ax.set_ylabel("Count", fontsize=18)
+	ax.grid(True)
+	# X-Achsen Ticks
+	ax.xaxis.set_major_locator(plt.MultipleLocator(25))
+	#ax.xaxis.set_minor_locator(plt.MultipleLocator(25))
+
+	# Tick Größen und Sichtbarkeit explizit setzen
+	ax.tick_params(axis='x', which='both', bottom=True)
+	ax.tick_params(axis='x', which='major', length=8, width=1, labelsize=15)
+	#ax.tick_params(axis='x', which='minor', length=4, width=1, labelsize=12)
+	ax.tick_params(axis='y', which='major', labelsize=15)
+
+	# Minor ticks für beide Achsen aktivieren
+	#for axis in [ax.xaxis, ax.yaxis]:
+	#	axis.set_tick_params(which='minor', bottom=True, top=False)
 	ax.legend(title="Class", labels=["Normal", "Abnormal"], fontsize=14, title_fontsize=16)
-	ax.tick_params(axis="both", which="major", labelsize=14)
 
 def generate_text_content(data, seconds):
-	class_counts = data[const.META_LABEL_1].value_counts()
-	text_content = f"Total samples: {len(data)}\n"
-	text_content += f"Normal: {class_counts[0]} ({class_counts[0]/len(data)*100:.1f}%)\n"
-	text_content += f"Abnormal: {class_counts[1]} ({class_counts[1]/len(data)*100:.1f}%)\n\n"
-	text_content += f"Audio Length Statistics:\n"
+	text_content = 	f"Audio Length Statistics:\n"
 	text_content += f"  Average (All): {seconds.mean():.2f}s\n"
 	text_content += f"  Average (Normal): {seconds[data[const.META_LABEL_1] == 0].mean():.2f}s\n"
 	text_content += f"  Average (Abnormal): {seconds[data[const.META_LABEL_1] == 1].mean():.2f}s\n"
@@ -471,7 +509,7 @@ def plot_statistics(dataset: AudioDataset, stats_dir: Path):
 	dataset_name = dataset.__class__.__name__
 	seconds = data[const.META_LENGTH] / dataset.target_samplerate
 	colors = ["green", "red"]
-	
+
 	# Einzelne Plots
 	fig, ax = plt.subplots(figsize=(10, 8))
 	plot_class_distribution(data, ax, colors)
@@ -492,8 +530,8 @@ def plot_statistics(dataset: AudioDataset, stats_dir: Path):
 
 	# Gesamtübersicht
 	sns.set_style("whitegrid")
-	fig = plt.figure(figsize=(20, 16))
-	gs = fig.add_gridspec(3, 2, height_ratios=[2.8, 1.8, 2.8], hspace=0.3)
+	fig = plt.figure(figsize=(18, 16))
+	gs = fig.add_gridspec(3, 2, height_ratios=[2.8, 1.6, 2.8], hspace=0.3)
 
 	fig.suptitle(f"Dataset Statistics for {dataset_name}", fontsize=28, fontweight="bold", y=0.98)
 

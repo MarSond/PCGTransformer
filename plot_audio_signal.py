@@ -36,13 +36,13 @@ class DataAnalysis:
 		self.run.config[const.AUDIO_LENGTH_NORM] = const.LENGTH_NORM_PADDING
 		self.run.config[const.CHUNK_METHOD] = const.CHUNK_METHOD_CYCLES
 		self.run.config[const.CHUNK_PADDING_THRESHOLD] = 0.65
-		self.run.config[const.CHUNK_DURATION] = 15
-		self.run.config[const.CHUNK_HEARTCYCLE_COUNT] = 6
+		self.run.config[const.CHUNK_DURATION] = 7
+		self.run.config[const.CHUNK_HEARTCYCLE_COUNT] = 7
 
-		if self.demo_task == const.TASK_TYPE_TRAINING:
-			self.run.config[const.TRAIN_FRAC] = 0.99
-		else:
-			self.run.config[const.TRAIN_FRAC] = 0.0
+		# if self.demo_task == const.TASK_TYPE_TRAINING:
+		# 	self.run.config[const.TRAIN_FRAC] = 1.0
+		# else:
+		# 	self.run.config[const.TRAIN_FRAC] = 0.0
 
 		self.run.setup_task()
 		self.run.task.dataset.load_file_list()
@@ -169,9 +169,9 @@ class DataAnalysis:
 		if num_samples + offset > len(self.demo_loader):
 			num_samples = len(self.demo_loader) - offset
 		num_gs = 3 if final_only else 7
-		fig = plt.figure(figsize=(5*num_gs, 4*num_samples))
+		fig = plt.figure(figsize=(5*num_gs, 3*num_samples))
 		gs = gridspec.GridSpec(num_samples, num_gs)  # 10 Reihen für die Samples, 5 Spalten für die Subplots
-		for raw_audio, filtered_audio, sgram_raw, sgram_filtered, sgram_augmented, metadata_row, audio_file_name in self.demo_loader:
+		for raw_audio, filtered_audio, augmented_audio, sgram_raw, sgram_filtered, sgram_augmented, metadata_row, audio_file_name in self.demo_loader:
 			audio_file_name = str(audio_file_name[0])
 			audio_path = Path(self.run.task.dataset.dataset_path) / metadata_row[const.META_AUDIO_PATH][0]
 			full_audio, full_sr, padding = AudioUtil.Loading.load_audiofile(audio_path)
@@ -227,12 +227,13 @@ class DataAnalysis:
 				ax3 = plt.subplot(gs[row_index, 0])
 				ax6 = plt.subplot(gs[row_index, 1])
 				ax_text = plt.subplot(gs[row_index, 2])
+				# make right ax field smaller
 				ax3, ax6, ax_text = self.make_singlefile_plot(raw_audio, filtered_audio, full_audio, \
 					sgram_raw, sgram_filtered, sgram_augmented, metadata_row, audio_file_name, \
 					ax=(ax3,ax6,ax_text),final_only=final_only)
 
 			#########
-		#plt.tight_layout()
+		plt.tight_layout()
 
 		if fig_file_name:
 			fig_file_name = f"audio_example_images/{fig_file_name}_{num_samples}_samples_{offset}_offset.png"
@@ -258,8 +259,8 @@ def multiple():
 
 
 def single():
-	analysis = DataAnalysis(const.PHYSIONET_2016)
-	analysis.plot_signal_stats(num_samples=5, offset=19, show=True, fig_file_name=None, final_only=True)
+	analysis = DataAnalysis(const.PHYSIONET_2022)
+	analysis.plot_signal_stats(num_samples=4, offset=25, show=True, fig_file_name=None, final_only=True)
 
 
 if __name__ == "__main__":

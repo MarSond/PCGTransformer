@@ -71,7 +71,7 @@ def compare_audio_processing(audio_file: Path, config: dict):
 	cycle_markers = row_dict[META_HEARTCYCLES]
 
 	fig, axes = plt.subplots(3, 2, figsize=(20, 16))
-	plt.subplots_adjust(hspace=0.2, wspace=0.5)
+	plt.subplots_adjust(hspace=0.2, wspace=0.4)
 	fig.suptitle(f"Audio Processing Comparison - {chunk_name} class: {row_dict[META_LABEL_1]}", fontsize=16)
 
 	sr = cnn_dataset.target_samplerate
@@ -130,7 +130,7 @@ config.update(config_demo)
 config_override = {
 	TRAIN_DATASET: PHYSIONET_2022,
 	NORMALIZATION: NORMALIZATION_MAX_ABS,
-	CHUNK_DURATION: 25.0,
+	CHUNK_DURATION: 27.0,
 	CHUNK_METHOD: CHUNK_METHOD_FIXED,
 	AUDIO_LENGTH_NORM: LENGTH_NORM_PADDING,
 	# CNN_PARAMS: {
@@ -143,6 +143,6 @@ config_override = {
 
 config.update(config_override)
 
-audio_file = Path("data/physionet2022/training_data/50734_AV.wav")
+audio_file = Path("data/physionet2022/training_data/49824_MV.wav")
 
 compare_audio_processing(audio_file, config)

@@ -11,7 +11,7 @@ project_config = {
 	CHUNK_DURATION: 7.0,		# Duration in seconds of each chunked audio split
 	TASK_TYPE: TASK_TYPE_TRAINING,
 	RUN_NAME: "blank_name",
-	EPOCHS: 30,				# Number of epochs to train
+	EPOCHS: 30,					# Number of epochs to train
 
 	BATCH_SIZE: 32,				# Batch size
 	METADATA_FRAC: 1.0,			# Percentage of data to use in the run
@@ -21,7 +21,7 @@ project_config = {
 	TRAIN_DATASET: PHYSIONET_2016,
 	INFERENCE_DATASET: PHYSIONET_2016,
 	INFERENCE_MODEL: None,
-	TRAINING_CHECKPOINT: None,	#	 load checkpoint for training: {EPOCH: 80, RUN_NAME: "run1", FOLD: 1}
+	TRAINING_CHECKPOINT: None,		# load checkpoint for training: {EPOCH: 80, RUN_NAME: "run1", FOLD: 1}
 	AUGMENTATION_RATE: 0.0,			# Percent of data passed to data augmentation pipeline
 	DATALOADER_NUM_WORKERS: 0,		# workers for pytorch dataloader
 	KFOLD_SPLITS: 1,				# number of kfold splits. 1 -> use normal splitting
@@ -51,7 +51,7 @@ project_config = {
 	LEARNING_RATE: 0.001,			# initial learning rate
 	SCHEDULER_FACTOR: 0.1,
 
-	L1_REGULATION_WEIGHT: 0.0,	# L1 weight decay, used with raw loss in step function # TODO test 0 or NOne as default
+	L1_REGULATION_WEIGHT: 0.0,		# L1 weight decay, used with raw loss in step function # TODO test 0 or NOne as default
 	L2_REGULATION_WEIGHT: 0.000001,	# L2 weight decay, passed to optimizer
 	LOSS_FUNCTION: LOSS_FOCAL_LOSS,	# LOSS_CROSS_ENTROPY, LOSS_FOCAL_LOSS
 	LOSS_FUNCTION_PARAMETER_1: 2.0,	# Focal Loss: gamma,
