@@ -33,7 +33,7 @@ emb_parameters:
   emb_reduce_umap_n_neighbors: 13
   emb_save_to_file: true
   emb_use_smote: false
-  emb_use_umap: true
+  emb_use_umap: false
   hdb_min_cluster_size: 5
   hdb_min_samples: 5
   knn_algorithm: auto

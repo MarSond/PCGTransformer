@@ -4,9 +4,9 @@ project_config = {
 	DATA_BASE_PATH: "data/",
 	LABEL_NAME: "label_1",
 	RUN_FOLDER: "runs/",
-	RUN_RESULTS_PATH: "",			# Path to save run results
 	FILENAME_RUN_CONFIG: FILENAME_RUN_CONFIG_VALUE,
 	FILENAME_LOG_OUTPUT: FILENAME_LOG_OUTPUT_VALUE,
+	RUN_RESULTS_PATH: "",		# Path to save run results
 	LOAD_PREVIOUS_RUN_NAME: "",	# if not empty, load config from named run inside runs folder
 	CHUNK_DURATION: 7.0,		# Duration in seconds of each chunked audio split
 	TASK_TYPE: TASK_TYPE_TRAINING,
@@ -37,7 +37,7 @@ project_config = {
 	AUDIO_LENGTH_NORM: LENGTH_NORM_PADDING,	# Audio length normalisation method
 
 	GRAD_ACCUMULATE_STEPS: 1,				# Number of gradient accumulation steps
-	DO_FAKE_UPDATES: 0,				# Enable fake updates values in metric manager (for testing purposes)
+	DO_FAKE_UPDATES: 0,						# Enable fake updates values in metric manager (for testing purposes)
 
 	EARLY_STOPPING_ENABLED: True,			# Enable early stopping after validation metrics
 	EARLY_STOPPING_PATIENCE: 8,				# Count of epochs to wait before checking early stopping
@@ -51,7 +51,7 @@ project_config = {
 	LEARNING_RATE: 0.001,			# initial learning rate
 	SCHEDULER_FACTOR: 0.1,
 
-	L1_REGULATION_WEIGHT: 0.0,		# L1 weight decay, used with raw loss in step function # TODO test 0 or NOne as default
+	L1_REGULATION_WEIGHT: 0.0,		# L1 weight decay, used with raw loss in step function # TODO test 0 or None as default
 	L2_REGULATION_WEIGHT: 0.000001,	# L2 weight decay, passed to optimizer
 	LOSS_FUNCTION: LOSS_FOCAL_LOSS,	# LOSS_CROSS_ENTROPY, LOSS_FOCAL_LOSS
 	LOSS_FUNCTION_PARAMETER_1: 2.0,	# Focal Loss: gamma,
@@ -81,25 +81,26 @@ project_config = {
 		FREEZE_EXTRACTOR: True,	# Freeze the beats model
 		DROP0: 0.5,				# Dropout rate on position 0
 		DROP1: 0.3,				# Dropout rate on position 1
+		MODEL_SUB_TYPE: 1, 		# Specific model impementation for BEATs type
 		EXTRACTOR_FOLDER: f"beats_classifier/{EXTRACTOR_FOLDER_NAME}/",
 		EXTRACTOR_NAME: "BEATs_iter3_plus_AS2M.pt",	# Name of the model for extracting
-		MODEL_SUB_TYPE: 1, # Specific model impementation for BEATs type
 	},
 	EMBEDDING_PARAMS: {
-		EMBEDDING_CLASSIFIER: CLASSIFIER_KNN,
-		USE_SMOTE: False,
-		EMBEDDINGS_REDUCE_UMAP_N_COMPONENTS: 2,
-		EMBEDDINGS_REDUCE_UMAP_N_NEIGHBORS: 5,
-		KNN_N_NEIGHBORS: 5,
-		KNN_METRIC: KNN_METRIC_EUCLIDEAN,
-		KNN_WEIGHT: KNN_WEIGHT_UNIFORM,
-		EMBEDDING_COMBINE_METHOD: EMBEDDING_COMBINE_METHOD_MEAN,
-		KNN_ALGORITHM: KNN_ALGORITHM_AUTO,
-		USE_HDBSCAN: False,
-		HDBSCAN_PARAM_MIN_CLUSTER_SIZE: 5,
-		HDBSCAN_PARAM_MIN_SAMPLES: 5,
-		EMBEDDING_SAVE_TO_FILE: True,
-		EMBEDDING_PLOT_UMAP: True,
+		EMBEDDING_CLASSIFIER: CLASSIFIER_KNN,	# CLASSIFIER_KNN, CLASSIFIER_SVM (not implemented yet), ...
+		USE_SMOTE: False,						# Enable SMOTE on the fly
+		EMBEDDINGS_REDUCE_UMAP_N_COMPONENTS: 2,	# Number of components for UMAP, if enabled
+		EMBEDDINGS_REDUCE_UMAP_N_NEIGHBORS: 5,	# Number of neighbors for UMAP, if enabled
+		KNN_N_NEIGHBORS: 5,						# Number of neighbors for KNN
+		KNN_METRIC: KNN_METRIC_EUCLIDEAN,		# KNN_METRIC_EUCLIDEAN, KNN_METRIC_MANHATTAN
+		KNN_WEIGHT: KNN_WEIGHT_UNIFORM,			# KNN_WEIGHT_UNIFORM, KNN_WEIGHT_DISTANCE
+		EMBEDDING_COMBINE_METHOD: EMBEDDING_COMBINE_METHOD_MEAN, # method to combine, if more than 1 Set per input
+		KNN_ALGORITHM: KNN_ALGORITHM_AUTO,		# KNN_ALGORITHM_AUTO, KNN_ALGORITHM_KD_TREE
+		USE_UMAP: False,					# Reduce dimensionality with UMAP
+		USE_HDBSCAN: False,						# Enable HDBSCAN
+		HDBSCAN_PARAM_MIN_CLUSTER_SIZE: 5,		# Minimum cluster size for HDBSCAN, if enabled
+		HDBSCAN_PARAM_MIN_SAMPLES: 5,			# Minimum samples for HDBSCAN, if enabled
+		EMBEDDING_SAVE_TO_FILE: True,			# Save embeddings to file
+		EMBEDDING_PLOT_UMAP: True,				# Plot UMAP before and after fitting
 	},
-	LOAD_EMBEDDINGS_FROM_RUN_NAME: None,
+	LOAD_EMBEDDINGS_FROM_RUN_NAME: None,		# Run name to load embeddings from, skips extraction
 }

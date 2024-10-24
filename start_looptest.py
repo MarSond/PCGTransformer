@@ -44,13 +44,22 @@ if __name__ == "__main__":
 			KNN_ALGORITHM: KNN_ALGORITHM_AUTO,
 			USE_SMOTE: True,
 			USE_HDBSCAN: False,
-			REDUCE_DIM_UMAP: False,
+			USE_UMAP: False,
 			EMBEDDINGS_REDUCE_UMAP_MIN_DIST: 0.1,
 			EMBEDDINGS_REDUCE_UMAP_N_NEIGHBORS: 15,
 			EMBEDDINGS_REDUCE_UMAP_N_COMPONENTS: 10,
 		},
 	})
-	do_run(knn_test_dict)
+	#do_run(knn_test_dict)
+
+	# General test for KNN embeddings mode
+	knn_umap_test = knn_base_dict.copy()
+	knn_umap_test.update({
+		TRAIN_DATASET: PHYSIONET_2022, KFOLD_SPLITS: 1,
+		METADATA_FRAC: 0.3,
+		LOAD_PREVIOUS_RUN_NAME: "2024-10-09_21-21-06_2022_fixed_beats_knn_finalrun_v15",
+	})
+	do_run(knn_umap_test)
 
 	####
 
