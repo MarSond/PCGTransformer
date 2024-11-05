@@ -23,10 +23,32 @@ Median files per patient: 1.00
 Min files per patient: 1
 Max files per patient: 1
 
+Most file count: 1
+Distribution of patient counts:
+count
+1    3240
+
 Distribution of file counts:
 count
 1    3240
 
+
+--------------------------------------------------------------------------------
+Auscultation Location Statistics
+--------------------------------------------------------------------------------
+Average unique locations per patient: 0.00
+
+Total recordings per location:
+AV: 0
+MV: 0
+PV: 0
+TV: 0
+
+Percentage distribution of locations:
+AV: nan%
+MV: nan%
+PV: nan%
+TV: nan%
 
 --------------------------------------------------------------------------------
 Audio Length Statistics

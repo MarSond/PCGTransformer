@@ -23,6 +23,20 @@ Median files per patient: 4.00
 Min files per patient: 1
 Max files per patient: 10
 
+Most file count: 10
+Distribution of patient counts:
+count
+1      40
+2     112
+3     101
+4     497
+5      14
+6      15
+7       7
+8      28
+9       1
+10      1
+
 Distribution of file counts:
 count
 1      40
@@ -36,6 +50,23 @@ count
 9       1
 10      1
 
+
+--------------------------------------------------------------------------------
+Auscultation Location Statistics
+--------------------------------------------------------------------------------
+Average unique locations per patient: 3.44
+
+Total recordings per location:
+AV: 755
+MV: 809
+PV: 733
+TV: 706
+
+Percentage distribution of locations:
+AV: 25.1%
+MV: 26.9%
+PV: 24.4%
+TV: 23.5%
 
 --------------------------------------------------------------------------------
 Audio Length Statistics
@@ -179,6 +210,15 @@ Non-numeric data, skipping mean, std, and correlation.
 --------------------------------------------------------------------------------
 Heartcycles Statistics
 --------------------------------------------------------------------------------
+Percentage of entries with heartcycle information: 99.97%
+Entries with heartcycle information: 3006/3007
+
+Total audio duration: 68843.6s
+Total annotated duration: 35599.3s
+Count of heartcycles: 62636
+Temporal coverage: 51.7%
+
+Heartcycle annotations per file:
 count    3007.000000
 mean       20.830063
 std        12.992297
@@ -187,6 +227,16 @@ min         0.000000
 50%        17.000000
 75%        27.000000
 max        94.000000
+
+Heartcycle durations per file:
+count    3007.000000
+mean       11.838826
+std         7.793955
+min         0.000000
+25%         5.760440
+50%         9.742500
+75%        16.120000
+max        63.900000
 
 Correlation with audio length: 0.3221679711140949
 

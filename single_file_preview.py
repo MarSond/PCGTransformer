@@ -71,19 +71,19 @@ def compare_audio_processing(audio_file: Path, config: dict):
 	cycle_markers = row_dict[META_HEARTCYCLES]
 
 	fig, axes = plt.subplots(3, 2, figsize=(20, 16))
-	plt.subplots_adjust(hspace=0.2, wspace=0.4)
+	plt.subplots_adjust(hspace=0.2, wspace=0.3)
 	fig.suptitle(f"Audio Processing Comparison - {chunk_name} class: {row_dict[META_LABEL_1]}", fontsize=16)
 
 	sr = cnn_dataset.target_samplerate
 
 	# Linke Spalte: Signale
-	audioutils.AudioUtil.SignalPlotting.show_signal(samples=raw_audio, samplerate=sr, ax=axes[0, 0], cycle_marker=cycle_markers, raw=True)
+	audioutils.AudioUtil.SignalPlotting.show_signal(samples=raw_audio, samplerate=sr, ax=axes[0, 0], cycle_marker=cycle_markers, raw=True, cycle_lines=True)
 	axes[0, 0].set_title("Original Signal")
 
-	audioutils.AudioUtil.SignalPlotting.show_signal(samples=normalized_audio, samplerate=sr, ax=axes[1, 0], cycle_marker=cycle_markers, raw=True)
+	audioutils.AudioUtil.SignalPlotting.show_signal(samples=normalized_audio, samplerate=sr, ax=axes[1, 0], cycle_marker=cycle_markers, raw=True, cycle_lines=True)
 	axes[1, 0].set_title(f"Normalized + Filtered Signal")
 
-	audioutils.AudioUtil.SignalPlotting.show_signal(samples=augmented_audio, samplerate=sr, ax=axes[2, 0], cycle_marker=cycle_markers, raw=True)
+	audioutils.AudioUtil.SignalPlotting.show_signal(samples=augmented_audio, samplerate=sr, ax=axes[2, 0], cycle_marker=cycle_markers, raw=True, cycle_lines=True)
 	axes[2, 0].set_title(f"Augmented Signal ")
 
 	# Rechte Spalte: Spektrogramme
@@ -102,7 +102,7 @@ def compare_audio_processing(audio_file: Path, config: dict):
 	)
 	axes[2, 1].set_title("Augmented Mel Spectrogram")
 
-	plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+	plt.tight_layout()
 	plt.show()
 
 	print(f"Audio Chunk Details:")
@@ -130,7 +130,7 @@ config.update(config_demo)
 config_override = {
 	TRAIN_DATASET: PHYSIONET_2022,
 	NORMALIZATION: NORMALIZATION_MAX_ABS,
-	CHUNK_DURATION: 27.0,
+	CHUNK_DURATION: -1,
 	CHUNK_METHOD: CHUNK_METHOD_FIXED,
 	AUDIO_LENGTH_NORM: LENGTH_NORM_PADDING,
 	# CNN_PARAMS: {
@@ -143,6 +143,6 @@ config_override = {
 
 config.update(config_override)
 
-audio_file = Path("data/physionet2022/training_data/49824_MV.wav")
+audio_file = Path("data/physionet2022/training_data/84839_AV.wav")
 
 compare_audio_processing(audio_file, config)

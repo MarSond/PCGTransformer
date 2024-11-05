@@ -273,9 +273,6 @@ def calculate_bpm(data):
 		return len(data) / duration_in_minutes if duration_in_minutes > 0 else None
 	return None
 
-import numpy as np
-import pandas as pd
-
 def safe_numeric_conversion(series):
 	try:
 		return pd.to_numeric(series, errors='coerce')
@@ -289,6 +286,56 @@ def safe_correlation(s1, s2):
 		return s1_numeric.corr(s2_numeric)
 	except:
 		return "N/A (correlation calculation failed)"
+
+def get_auscultation_location_stats(filenames) -> dict:
+	"""
+	Returns total count for each location type.
+	Both unique counts per patient and total counts across dataset.
+	"""
+	locations = {
+		'AV': ['AV', 'AV1', 'AV2', 'AVR', 'AVL'],
+		'MV': ['MV', 'MV1', 'MV2', 'MVR', 'MVL'], 
+		'PV': ['PV', 'PV1', 'PV2', 'PVR', 'PVL'],
+		'TV': ['TV', 'TV1', 'TV2', 'TVR', 'TVL']
+	}
+	
+	if isinstance(filenames, str):
+		filenames = [filenames]
+		
+	# Count total occurrences
+	location_counts = {loc: 0 for loc in locations.keys()}
+	
+	for filename in filenames:
+		parts = Path(filename).stem.split('_')
+		if len(parts) < 2:
+			continue
+			
+		location_part = parts[1].upper()
+		
+		for std_loc, variations in locations.items():
+			if any(var in location_part for var in variations):
+				location_counts[std_loc] += 1
+				break
+	
+	# Also get unique count
+	unique_count = sum(1 for loc in location_counts.values() if loc > 0)
+	location_counts['unique_count'] = unique_count
+				
+	return location_counts
+
+def aggregate_location_stats(data: pd.DataFrame) -> pd.DataFrame:
+	"""
+	Aggregates auscultation location statistics per patient.
+	Returns DataFrame with patient stats.
+	"""
+	# Group by patient ID and aggregate filenames
+	patient_files = data.groupby(const.META_PATIENT_ID)[const.META_AUDIO_PATH].agg(list)
+
+	# Get location counts per patient
+	location_counts = patient_files.apply(get_different_auscultation_location_counts)
+
+	return pd.DataFrame.from_records(location_counts.values,
+									index=location_counts.index)
 
 def save_statistics(dataset: AudioDataset, stats_dir: Path):
 	train_data = dataset.load_file_list()
@@ -315,9 +362,35 @@ def save_statistics(dataset: AudioDataset, stats_dir: Path):
 		f.write(f"Median files per patient: {patient_file_counts.median():.2f}\n")
 		f.write(f"Min files per patient: {patient_file_counts.min()}\n")
 		f.write(f"Max files per patient: {patient_file_counts.max()}\n\n")
+		f.write(f"Most file count: {patient_file_counts.value_counts().sort_index().index[-1]}\n")
+
+		f.write("Distribution of patient counts:\n")
+		f.write(patient_file_counts.value_counts().sort_index().to_string())
+		f.write("\n\n")
+
 		f.write("Distribution of file counts:\n")
 		f.write(patient_file_counts.value_counts().sort_index().to_string())
 		f.write("\n\n")
+
+		write_section(f, "Auscultation Location Statistics")
+
+		# Per patient averages
+		location_stats = train_data.groupby(const.META_PATIENT_ID)[const.META_AUDIO_PATH].agg(list).apply(get_auscultation_location_stats)
+		location_df = pd.DataFrame.from_records(location_stats.values, index=location_stats.index)
+
+		f.write(f"Average unique locations per patient: {location_df['unique_count'].mean():.2f}\n")
+
+		# Total counts for each location
+		total_counts = location_df.drop('unique_count', axis=1).sum()
+		f.write("\nTotal recordings per location:\n")
+		for loc, count in total_counts.items():
+			f.write(f"{loc}: {int(count)}\n")
+
+		# Calculate percentages
+		percentages = total_counts / total_counts.sum() * 100
+		f.write("\nPercentage distribution of locations:\n")
+		for loc, pct in percentages.items():
+			f.write(f"{loc}: {pct:.1f}%\n")
 
 		def write_patient_details(dataset: AudioDataset, stats_dir: Path):
 			train_data = dataset.load_file_list()
@@ -386,10 +459,50 @@ def save_statistics(dataset: AudioDataset, stats_dir: Path):
 				f.write("\n")
 
 		if isinstance(dataset, Physionet2022):
+			def _get_heartcycle_coverage(heartcycles, audio_length, sample_rate):
+				total_duration = audio_length / sample_rate
+				covered_duration = 0
+				if len(heartcycles) > 0:
+					covered_duration += heartcycles[-1] - heartcycles[0]
+				else:
+					print(f"No heartcycles for file with length {total_duration:.1f}s")
+				return covered_duration, total_duration
+
 			write_section(f, "Heartcycles Statistics")
-			heartcycles = train_data[const.META_HEARTCYCLES]
+			heartcycles  = train_data[const.META_HEARTCYCLES]
+			total_entries = len(heartcycles)
+			entries_with_heartcycles = heartcycles.apply(lambda x: len(x) > 0).sum()
+			percentage = (entries_with_heartcycles / total_entries) * 100
+			f.write(f"Percentage of entries with heartcycle information: {percentage:.2f}%\n")
+			f.write(f"Entries with heartcycle information: {entries_with_heartcycles}/{total_entries}\n\n")
+
+			total_covered = 0
+			total_audio = 0
+			for idx, cycles in heartcycles.items():
+				covered, duration = _get_heartcycle_coverage(
+					cycles,
+					train_data.loc[idx, const.META_LENGTH],
+					dataset.target_samplerate
+				)
+				total_covered += covered
+				total_audio += duration
+
+			# Basis-Statistiken
 			heartcycles_counts = heartcycles.apply(len)
+			f.write(f"Total audio duration: {total_audio:.1f}s\n")
+			f.write(f"Total annotated duration: {total_covered:.1f}s\n")
+			f.write(f"Count of heartcycles: {heartcycles_counts.sum()}\n")
+			f.write(f"Temporal coverage: {(total_covered/total_audio)*100:.1f}%\n\n")
+
+			# Heartcycle counts pro File
+			f.write("Heartcycle annotations per file:\n")
 			f.write(heartcycles_counts.describe().to_string() + "\n\n")
+
+			# heartcycle duration per file
+			heartcycle_durations = heartcycles.apply(lambda x: x[-1] - x[0] if len(x) > 0 else 0)
+			f.write("Heartcycle durations per file:\n")
+			f.write(heartcycle_durations.describe().to_string() + "\n\n")
+
 
 			f.write("Correlation with audio length: ")
 			f.write(f"{safe_correlation(heartcycles_counts, seconds)}\n\n")
@@ -450,20 +563,20 @@ def plot_audio_length_distribution(data, seconds, ax, colors):
 		ax.xaxis.set_minor_locator(plt.MultipleLocator(5))
 
 		# Tick Größen und Sichtbarkeit explizit setzen
-		ax.tick_params(axis='x', which='both', bottom=True)
-		ax.tick_params(axis='x', which='major', length=8, width=1, labelsize=15)
-		ax.tick_params(axis='x', which='minor', length=4, width=1, labelsize=12)
-		ax.tick_params(axis='y', which='major', labelsize=15)
+		ax.tick_params(axis="x", which="both", bottom=True)
+		ax.tick_params(axis="x", which="major", length=8, width=1, labelsize=15)
+		ax.tick_params(axis="x", which="minor", length=4, width=1, labelsize=12)
+		ax.tick_params(axis="y", which="major", labelsize=15)
 
 		# Minor ticks für beide Achsen aktivieren
 		for axis in [ax.xaxis, ax.yaxis]:
-			axis.set_tick_params(which='minor', bottom=True, top=False)
+			axis.set_tick_params(which="minor", bottom=True, top=False)
 
-		ax.legend(title="Class", labels=["Normal", "Abnormal"], fontsize=14, title_fontsize=16)
+		ax.legend(title="Class", labels=["Abnormal", "Normal"], fontsize=14, title_fontsize=16)
 
 def plot_bpm_distribution(data, ax, colors):
 	sns.histplot(data=data, x="bpm", hue=data[const.META_LABEL_1].map({0: "Normal", 1: "Abnormal"}),
-				 palette=colors, multiple="stack", kde=False, ax=ax, bins=150)
+					palette=colors, multiple="stack", kde=False, ax=ax, bins=150)
 	ax.set_title("BPM Distribution", fontsize=24, fontweight="bold")
 	ax.set_xlabel("Beats Per Minute", fontsize=18)
 	ax.set_ylabel("Count", fontsize=18)
@@ -473,15 +586,15 @@ def plot_bpm_distribution(data, ax, colors):
 	#ax.xaxis.set_minor_locator(plt.MultipleLocator(25))
 
 	# Tick Größen und Sichtbarkeit explizit setzen
-	ax.tick_params(axis='x', which='both', bottom=True)
-	ax.tick_params(axis='x', which='major', length=8, width=1, labelsize=15)
+	ax.tick_params(axis="x", which="both", bottom=True)
+	ax.tick_params(axis="x", which="major", length=8, width=1, labelsize=15)
 	#ax.tick_params(axis='x', which='minor', length=4, width=1, labelsize=12)
-	ax.tick_params(axis='y', which='major', labelsize=15)
+	ax.tick_params(axis="y", which="major", labelsize=15)
 
 	# Minor ticks für beide Achsen aktivieren
 	#for axis in [ax.xaxis, ax.yaxis]:
 	#	axis.set_tick_params(which='minor', bottom=True, top=False)
-	ax.legend(title="Class", labels=["Normal", "Abnormal"], fontsize=14, title_fontsize=16)
+	ax.legend(title="Class", labels=["Abnormal", "Normal"], fontsize=14, title_fontsize=16)
 
 def generate_text_content(data, seconds):
 	text_content = 	f"Audio Length Statistics:\n"
@@ -582,5 +695,5 @@ def start_statistics_and_plots():
 	print("Done generating statistics and plots")
 
 if __name__ == "__main__":
-	start_parse()
+	#start_parse()
 	start_statistics_and_plots()
