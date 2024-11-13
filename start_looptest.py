@@ -37,6 +37,9 @@ if __name__ == "__main__":
 	knn_test_dict.update({
 		TRAIN_DATASET: PHYSIONET_2022, KFOLD_SPLITS: 1,
 		METADATA_FRAC: 0.3,
+		CHUNK_METHOD: CHUNK_METHOD_CYCLES,
+		CHUNK_HEARTCYCLE_COUNT: 5,
+		AUDIO_LENGTH_NORM: LENGTH_NORM_STRETCH,
 		EMBEDDING_PARAMS: {
 			KNN_N_NEIGHBORS: 1,
 			KNN_WEIGHT: KNN_WEIGHT_UNIFORM,
@@ -50,7 +53,7 @@ if __name__ == "__main__":
 			EMBEDDINGS_REDUCE_UMAP_N_COMPONENTS: 10,
 		},
 	})
-	#do_run(knn_test_dict)
+	do_run(knn_test_dict)
 
 	# General test for KNN embeddings mode
 	knn_umap_test = knn_base_dict.copy()
@@ -59,7 +62,7 @@ if __name__ == "__main__":
 		METADATA_FRAC: 0.3,
 		LOAD_PREVIOUS_RUN_NAME: "2024-10-09_21-21-06_2022_fixed_beats_knn_finalrun_v15",
 	})
-	do_run(knn_umap_test)
+	#do_run(knn_umap_test)
 
 	####
 

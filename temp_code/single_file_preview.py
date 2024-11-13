@@ -66,43 +66,49 @@ def compare_audio_processing(audio_file: Path, config: dict):
 	cnn_dataset.set_mode(TASK_TYPE_DEMO)
 
 	# Hole die Daten im Demo-Modus
-	raw_audio, normalized_audio, augmented_audio, sgram_raw, sgram_filtered, sgram_augmented, row_dict, chunk_name = cnn_dataset.handle_instance(chunk_data)
+	raw_audio, normalized_audio, augmented_audio, sgram_raw, sgram_filtered, sgram_augmented, row_dict, chunk_name\
+		= cnn_dataset.handle_instance(chunk_data)
 
 	cycle_markers = row_dict[META_HEARTCYCLES]
-
-	fig, axes = plt.subplots(3, 2, figsize=(20, 16))
-	plt.subplots_adjust(hspace=0.2, wspace=0.3)
+	#cycle_markers = None
+	fig, axes = plt.subplots(3, 2, figsize=(14, 14))
+	plt.subplots_adjust(hspace=0.2, wspace=0.4)
 	fig.suptitle(f"Audio Processing Comparison - {chunk_name} class: {row_dict[META_LABEL_1]}", fontsize=16)
 
 	sr = cnn_dataset.target_samplerate
-
+	class_text = "normal" if row_dict[config[LABEL_NAME]] == 0 else "abnormal"
 	# Linke Spalte: Signale
-	audioutils.AudioUtil.SignalPlotting.show_signal(samples=raw_audio, samplerate=sr, ax=axes[0, 0], cycle_marker=cycle_markers, raw=True, cycle_lines=True)
+	audioutils.AudioUtil.SignalPlotting.show_signal(samples=raw_audio, samplerate=sr, ax=axes[0, 0], \
+		cycle_marker=cycle_markers, raw=True, cycle_lines=True)
 	axes[0, 0].set_title("Original Signal")
 
-	audioutils.AudioUtil.SignalPlotting.show_signal(samples=normalized_audio, samplerate=sr, ax=axes[1, 0], cycle_marker=cycle_markers, raw=True, cycle_lines=True)
+	audioutils.AudioUtil.SignalPlotting.show_signal(samples=normalized_audio, samplerate=sr, ax=axes[1, 0], \
+		cycle_marker=cycle_markers, raw=True, cycle_lines=True)
 	axes[1, 0].set_title(f"Normalized + Filtered Signal")
 
-	audioutils.AudioUtil.SignalPlotting.show_signal(samples=augmented_audio, samplerate=sr, ax=axes[2, 0], cycle_marker=cycle_markers, raw=True, cycle_lines=True)
+	audioutils.AudioUtil.SignalPlotting.show_signal(samples=augmented_audio, samplerate=sr, ax=axes[2, 0], \
+		cycle_marker=cycle_markers, raw=True, cycle_lines=True)
 	axes[2, 0].set_title(f"Augmented Signal ")
 
 	# Rechte Spalte: Spektrogramme
 	audioutils.AudioUtil.SignalPlotting.show_mel_spectrogram(
-		sgram_raw, cnn_dataset.target_samplerate, ax=axes[0, 1], top_db=config[CNN_PARAMS][TOP_DB], hop_length=config[CNN_PARAMS][HOP_LENGTH]
+		sgram_raw, cnn_dataset.target_samplerate, ax=axes[0, 1], top_db=config[CNN_PARAMS][TOP_DB], \
+			hop_length=config[CNN_PARAMS][HOP_LENGTH]
 	)
-	axes[0, 1].set_title("Raw Mel Spectrogram")
+	axes[0, 1].set_title(f"Raw {class_text} classified Mel-Spectrogram\n n_mels={config[CNN_PARAMS][N_MELS]}, n_fft={config[CNN_PARAMS][N_FFT]}, hop_length={config[CNN_PARAMS][HOP_LENGTH]}")
 
 	audioutils.AudioUtil.SignalPlotting.show_mel_spectrogram(
-		sgram_filtered, cnn_dataset.target_samplerate, ax=axes[1, 1], top_db=config[CNN_PARAMS][TOP_DB], hop_length=config[CNN_PARAMS][HOP_LENGTH]
+		sgram_filtered, cnn_dataset.target_samplerate, ax=axes[1, 1], top_db=config[CNN_PARAMS][TOP_DB], \
+			hop_length=config[CNN_PARAMS][HOP_LENGTH]
 	)
-	axes[1, 1].set_title("Filtered Mel Spectrogram")
+	axes[1, 1].set_title(f"Filtered {class_text} classified Mel-Spectrogram\n n_mels={config[CNN_PARAMS][N_MELS]}, n_fft={config[CNN_PARAMS][N_FFT]}, hop_length={config[CNN_PARAMS][HOP_LENGTH]}")
 
 	audioutils.AudioUtil.SignalPlotting.show_mel_spectrogram(
 		sgram_augmented, cnn_dataset.target_samplerate, ax=axes[2, 1], top_db=config[CNN_PARAMS][TOP_DB], hop_length=config[CNN_PARAMS][HOP_LENGTH]
 	)
-	axes[2, 1].set_title("Augmented Mel Spectrogram")
+	axes[2, 1].set_title(f"Augmented {class_text} classified Mel-Spectrogram\n n_mels={config[CNN_PARAMS][N_MELS]}, n_fft={config[CNN_PARAMS][N_FFT]}, hop_length={config[CNN_PARAMS][HOP_LENGTH]}")
 
-	plt.tight_layout()
+	plt.tight_layout(rect=[0, 0.01, 1, 0.97])
 	plt.show()
 
 	print(f"Audio Chunk Details:")
@@ -130,19 +136,24 @@ config.update(config_demo)
 config_override = {
 	TRAIN_DATASET: PHYSIONET_2022,
 	NORMALIZATION: NORMALIZATION_MAX_ABS,
-	CHUNK_DURATION: -1,
-	CHUNK_METHOD: CHUNK_METHOD_FIXED,
-	AUDIO_LENGTH_NORM: LENGTH_NORM_PADDING,
-	# CNN_PARAMS: {
-	# 	N_MELS: 128,
-	# 	HOP_LENGTH: 512,
-	# 	N_FFT: 1024,
-	# 	TOP_DB: 80,
-	# }
+	CHUNK_DURATION: 5,
+	CHUNK_HEARTCYCLE_COUNT: 6,
+	CHUNK_METHOD: CHUNK_METHOD_CYCLES,
+	AUDIO_LENGTH_NORM: LENGTH_NORM_STRETCH,
+	CNN_PARAMS: {
+		N_MELS: 128,
+		HOP_LENGTH: 128,
+		N_FFT: 512,
+		TOP_DB: 80.0,
+	}
 }
 
 config.update(config_override)
 
-audio_file = Path("data/physionet2022/training_data/84839_AV.wav")
+# audio_file = Path("data/physionet2022/training_data/84839_AV.wav") # missing beats
+#audio_file = Path("data/physionet2022/training_data/44514_MV.wav") # random positive
+#audio_file = Path("data/physionet2022/training_data/44514_AV.wav") # random positive
+#audio_file = Path("data/physionet2022/training_data/85286_MV.wav") # random negative
+audio_file = Path("data/physionet2022/training_data/68316_MV.wav") 
 
 compare_audio_processing(audio_file, config)
