@@ -621,7 +621,8 @@ def plot_statistics(dataset: AudioDataset, stats_dir: Path):
 	data = dataset.load_file_list()
 	dataset_name = dataset.__class__.__name__
 	seconds = data[const.META_LENGTH] / dataset.target_samplerate
-	colors = ["green", "red"]
+	colors = ["#0077BB", "#EE7733"]
+
 
 	# Einzelne Plots
 	fig, ax = plt.subplots(figsize=(10, 8))
