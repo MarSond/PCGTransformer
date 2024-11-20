@@ -1,6 +1,6 @@
 Run Name: 2024-09-18_23-40-18_2016_fixed_beats_knn_finalrun
 Total Epochs: 1
-Total Folds: 19
+Total Folds: 10
 
 
 Training Metrics:
