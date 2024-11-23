@@ -1,5 +1,23 @@
-from pathlib import Path
+"""
+This script is used to start the training of various machine learning models for PCG classification. 
+It defines configurations for different models and datasets, sets up the training tasks, and sends 
+email notifications upon completion.
+Functions:
+	- send_result_mail(name: str, results: dict): Sends an email notification with the results of the training.
+	- do_run(config: dict): Sets up and starts the training task based on the provided configuration.
+Configurations:
+	- base_config: Base configuration for training tasks.
+	- knn_config: Configuration for k-Nearest Neighbors (kNN) models.
+	- physionet_2016_fixed_cnn: Configuration for training a fixed CNN model on the PhysioNet 2016 dataset.
+	- physionet_2016_fixed_beats_knn: Configuration for training a fixed BEATS kNN model on the PhysioNet 2016 dataset.
+	...
+Execution:
+	- models_to_run: List of model configurations to be executed.
 
+The script executes the training tasks for each model configuration in the `models_to_run` list and displays the results using matplotlib.
+"""
+
+from pathlib import Path
 import matplotlib.pyplot as plt
 
 from MLHelper.constants import *

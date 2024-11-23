@@ -57,10 +57,10 @@ project_config = {
 	LOSS_FUNCTION_PARAMETER_1: 2.0,	# Focal Loss: gamma,
 	LOSS_FUNCTION_PARAMETER_2: None,
 
-	SIGNAL_FILTER: BUTTERPASS,
-	BUTTERPASS_LOW: 25,
-	BUTTERPASS_HIGH: 500,
-	BUTTERPASS_ORDER: 5,
+	SIGNAL_FILTER: BUTTERPASS,		# BUTTERPASS, NONE
+	BUTTERPASS_LOW: 25,				# Low pass filter for audio signal
+	BUTTERPASS_HIGH: 500,			# High pass filter for audio signal
+	BUTTERPASS_ORDER: 5,			# Order of the butterworth filter
 
 	USE_PROFILER: False,	# Schalter für das Profiling
 	PROFILER_EPOCHS: 1,		# Anzahl der Epochen, die profiliert werden sollen

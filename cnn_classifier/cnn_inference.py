@@ -1,12 +1,14 @@
-import torch
 from typing import Any
+
+import torch
 
 from MLHelper import constants as const
 from MLHelper.dataset import AudioDataset
-from MLHelper.ml_loop import ML_Loop, HookManager
+from MLHelper.ml_loop import HookManager, ML_Loop
 from run import Run
 
 from .cnn_dataset import CNN_Dataset
+
 
 class CNN_Inference(ML_Loop):
 
